@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Qwik City App ⚡️
 
 - [Qwik Docs](https://qwik.dev/)
@@ -63,3 +64,6 @@ The production build will generate client and server modules by running both cli
 ```shell
 pnpm build # or `pnpm build`
 ```
+=======
+README
+>>>>>>> 2d622b0ee38c3f68aaa5faf8e32355ccb3e281dc
