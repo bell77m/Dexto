@@ -32,6 +32,7 @@ export default component$(() => {
       <body lang="en">
         <RouterOutlet />
         {!isDev && <ServiceWorkerRegister />}
+
       </body>
     </QwikCityProvider>
   );
