@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Qwik City App ⚡️
 
 - [Qwik Docs](https://qwik.dev/)
@@ -64,22 +63,3 @@ The production build will generate client and server modules by running both cli
 ```shell
 pnpm build # or `pnpm build`
 ```
-=======
-README
->>>>>>> 2d622b0ee38c3f68aaa5faf8e32355ccb3e281dc
-
-## Builder.io + Qwik
-
-An example of using [Builder.io's](https://www.builder.io/) visual editor with Qwik.
-
-See the catchall route at [src/routes/[...index]/index.tsx](src/routes/[...index]/index.tsx) for the integration code.
-
-Registered components can be found in [src/components/builder-registry.ts](src/components/builder-registry.ts)
-
-### Docs
-
-See our full integration guides [here](https://www.builder.io/c/docs/developers)
-
-Also, when you push your integration to production, go back and update your preview URL to your production URL so now anyone on your team can visuall create content in your Qwik app!
-
-Also, to integrate structured data, see [this guide](https://www.builder.io/c/docs/integrate-cms-data)
