@@ -5,7 +5,6 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  ignorePatterns: ["temp.js", "config/*"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -40,4 +39,5 @@ module.exports = {
     "@typescript-eslint/consistent-type-imports": "warn",
     "@typescript-eslint/no-unnecessary-condition": "warn",
   },
+
 };
