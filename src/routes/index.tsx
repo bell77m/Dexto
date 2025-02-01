@@ -1,12 +1,12 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { Collaboration } from "~/components/collaboration/Collaboration";
+import { Collaboration } from "~/components/LandingPage/collaboration/Collaboration";
 import { CollaborationHero } from "~/components/CollaborationHeroProps/collaborationSection/CollaborationHero";
 import { Navigation } from "~/components/navigation/Navigation";
-import { TeamCoding } from "~/components/Teamcoding/teamCoding/TeamCoding";
 import { Footer } from "~/components/footer/Footer";
-import { TestimonialsSection } from "~/components/testimonials/TestimonialsSection";
-
+import { TestimonialsSection } from "~/components/LandingPage/testimonials/TestimonialsSection";
+import { MarketingPage } from "~/components/LandingPage/marketing/MarketingPage";
+import { TeamCoding } from "~/components/LandingPage/teamCoding/TeamCoding";
 
 export default component$(() => {
   return (
@@ -21,6 +21,7 @@ export default component$(() => {
       <Collaboration/>
       <TeamCoding/>
       <TestimonialsSection/>
+      <MarketingPage/>
       <Footer/>
     </>
   );

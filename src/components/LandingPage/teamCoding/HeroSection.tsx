@@ -18,12 +18,12 @@ export const HeroSection = component$((props: HeroSectionProps) => {
           <div class="flex flex-col ml-5 w-6/12 max-md:ml-0 max-md:w-full">
             <div class="flex flex-col grow text-2xl font-medium text-white max-md:mt-10 max-md:max-w-full">
               <div class="text-6xl font-bold max-md:mr-2.5 max-md:max-w-full max-md:text-4xl">
-              {props.title?.map((line, index) => (
-                <span key={index}>
-                  {line}
-                  <br />
-                </span>
-              ))}
+                {props.title.map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
               </div>
               <div class="mt-5 max-md:max-w-full">
                 {props.description}
@@ -33,7 +33,7 @@ export const HeroSection = component$((props: HeroSectionProps) => {
           </div>
         </div>
       </div>
-      <div class="flex mt-72 w-full min-h-0 bg-stone-900 max-md:mt-10 max-md:max-w-full"></div>
+      <div class="flex shrink-0 mt-72 h-0 bg-stone-900 max-md:mt-10 max-md:max-w-full" />
     </div>
   );
 });

@@ -5,10 +5,10 @@ import { Link } from '@builder.io/qwik-city';
 
 export const Navigation = component$(() => {
   const navItems = [
-    { label: "Home", padding: "px-8 py-3" },
-    { label: "About", padding: "px-8 py-2.5" },
-    { label: "Guides", padding: "px-7 py-2.5" },
-    { label: "Forum", padding: "px-8 py-3" },
+    { label: "Home", padding: "px-8 py-3", href: "/" },
+    { label: "About", padding: "px-8 py-2.5", href: "/about"},
+    { label: "Guides", padding: "px-7 py-2.5", href: "/"},
+    { label: "Forum", padding: "px-8 py-3", href: "/"},
   ];
 
   return (
