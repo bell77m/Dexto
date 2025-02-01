@@ -7,16 +7,16 @@ export const Footer = component$(() => {
     {
       title: "Dexto",
       links: [
-        { text: "About", href: "#" },
-        { text: "Guides", href: "#" },
-        { text: "Forum", href: "#" }
+        { text: "About", href: "/about" },
+        { text: "Guides", href: "/guides" },
+        { text: "Forum", href: "/forum" }
       ]
     },
     {
       title: "Legal",
       links: [
-        { text: "Terms of Service", href: "#" },
-        { text: "Privacy", href: "#" }
+        { text: "Terms of Service", href: "/termsOfservice" },
+        { text: "Privacy", href: "/privacy" }
       ]
     }
   ];
