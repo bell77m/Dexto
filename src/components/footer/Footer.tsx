@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
 import { NavigationSection } from "./NavigationSection";
 import { SocialLink } from "./SocialLink";
 
@@ -8,7 +9,7 @@ export const Footer = component$(() => {
       title: "Dexto",
       links: [
         { text: "About", href: "/about" },
-        { text: "Guides", href: "/guides" },
+        { text: "Guides", href: "/guide" },
         { text: "Forum", href: "/forum" }
       ]
     },
@@ -39,25 +40,29 @@ export const Footer = component$(() => {
             <NavigationSection
               key={section.title}
               title={section.title}
-              links={section.links}
+              links={section.links.map(link => ({
+                ...link,
+                // เปลี่ยน href ให้ใช้ Link แทน
+                element: <Link href={link.href}>{link.text}</Link>
+              }))}
             />
           ))}
 
           <div class="flex flex-col">
             <div class="text-2xl font-semibold">WANT TO BE A PART OF US?</div>
             <form class="flex gap-2.5 self-start mt-10">
-              <button class= "underline">
-                SIGN UP FOR OUR COMMUNITY
-              </button>
-              <button type="submit" aria-label="Submit signup">
-                <img
-                  loading="lazy"
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/e40fa9753d102fbfeefed538adc4a5272b86425388f55303e79ccebd2de0020d?placeholderIfAbsent=true&apiKey=83086b8ef5ae4f9392edc247fd20d152"
-                  alt=""
-                  class="object-contain shrink-0 w-6 aspect-square"
-                />
-              </button>
-            </form>
+                <Link href="/signUp" class="underline">
+                  SIGN UP FOR OUR COMMUNITY
+                </Link>
+                <Link href="/signUp" aria-label="Submit signup">
+                  <img
+                    loading="lazy"
+                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/e40fa9753d102fbfeefed538adc4a5272b86425388f55303e79ccebd2de0020d?placeholderIfAbsent=true&apiKey=83086b8ef5ae4f9392edc247fd20d152"
+                    alt="Sign up"
+                    class="object-contain shrink-0 w-6 aspect-square"
+                  />
+                </Link>
+          </form>
           </div>
         </div>
 
