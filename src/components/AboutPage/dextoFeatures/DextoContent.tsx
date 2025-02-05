@@ -3,7 +3,7 @@ import { DextoContentProps } from "./types";
 
 export const DextoContent = component$((props: DextoContentProps) => {
   return (
-    <div class="flex gap-5 max-md:flex-col bg-black">
+    <div class="flex gap-5 max-md:flex-col">
       <div class="flex flex-col w-[36%] max-md:ml-0 max-md:w-full ">
         <img
           loading="lazy"
