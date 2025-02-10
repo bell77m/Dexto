@@ -9,7 +9,7 @@ export default component$(() => {
     <>
       <Navigation/>
       <ProjectCreation/>
-      <GettingStartedPage quickstartGuides={["How to use IDE", "How to use chat", "How to add friend", "How to use forum", "Notification"]} />
+      <GettingStartedPage quickstartGuides={["How to create your Project", "How to use IDE", "How to use chat", "How to add friend", "How to use forum", "Notification"]} />
       <Footer/>
     </>
   );
