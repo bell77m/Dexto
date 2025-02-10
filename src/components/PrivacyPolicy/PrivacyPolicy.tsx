@@ -12,17 +12,17 @@ export const PrivacyPolicy = component$((props: PrivacyPolicyProps) => {
       items: [
         {
           subtitle: "a. Personal Information",
-          list: ["Name", "Email address", "Profile information", "Contact details"]
+          list: ["Name", "Email address", "Profile information", "Contact details"],
         },
         {
           subtitle: "b. Usage Data",
-          list: ["IP address", "Browser type and version", "Pages visited", "Time spent on pages", "Other diagnostic data"]
+          list: ["IP address", "Browser type and version", "Pages visited", "Time spent on pages", "Other diagnostic data"],
         },
         {
           subtitle: "c. Cookies and Tracking Technologies",
-          content: "We use cookies and similar tracking technologies to enhance your experience. You can manage your cookie preferences in your browser settings."
-        }
-      ]
+          content: "We use cookies and similar tracking technologies to enhance your experience. You can manage your cookie preferences in your browser settings.",
+        },
+      ],
     },
     {
       title: "1. How We Use Your Information",
@@ -32,8 +32,8 @@ export const PrivacyPolicy = component$((props: PrivacyPolicyProps) => {
         "To communicate with you regarding updates or support",
         "To personalize your experience",
         "To detect and prevent fraudulent activities",
-        "To comply with legal obligations"
-      ]
+        "To comply with legal obligations",
+      ],
     },
     {
       title: "2. How We Share Your Information",
@@ -41,12 +41,12 @@ export const PrivacyPolicy = component$((props: PrivacyPolicyProps) => {
       list: [
         "Service Providers: Trusted third parties who help us operate our website",
         "Legal Authorities: If required by law or to protect our rights",
-        "Collaborators: If necessary for team collaboration features on our platform"
-      ]
+        "Collaborators: If necessary for team collaboration features on our platform",
+      ],
     },
     {
       title: "3. Data Security",
-      content: "We implement security measures to protect your personal data. However, no method of transmission over the internet is 100% secure. Please use our services with caution."
+      content: "We implement security measures to protect your personal data. However, no method of transmission over the internet is 100% secure. Please use our services with caution.",
     },
     {
       title: "4. Your Rights and Choices",
@@ -54,35 +54,34 @@ export const PrivacyPolicy = component$((props: PrivacyPolicyProps) => {
       list: [
         "Accessing, updating, or deleting your personal data",
         "Opting out of marketing communications",
-        "Requesting data portability"
-      ]
+        "Requesting data portability",
+      ],
     },
     {
       title: "5. Third-Party Links",
-      content: "Our website may contain links to third-party websites. We are not responsible for their privacy practices, so please review their policies separately."
+      content: "Our website may contain links to third-party websites. We are not responsible for their privacy practices, so please review their policies separately.",
     },
     {
       title: "6. Changes to This Privacy Policy",
-      content: "We may update this policy from time to time. Any changes will be posted on this page, and we encourage you to review it periodically."
-    }
+      content: "We may update this policy from time to time. Any changes will be posted on this page, and we encourage you to review it periodically.",
+    },
   ];
 
   return (
-    <div class="flex overflow-hidden flex-col bg-gray-900">
-      <div class="self-start mt-9 ml-40 text-6xl font-bold text-white max-md:max-w-full max-md:text-4xl">
-        Privacy Policy
-      </div>
-      <div class="mt-8 w-full border-2 border-solid border-white border-opacity-30 min-h-[2px] max-md:max-w-full"></div>
-      <div class="self-start mt-14 ml-36 text-3xl text-white max-md:mt-10 max-md:max-w-full">
+    <div class="flex flex-col bg-gray-900 text-white px-8 py-12 md:px-16 lg:px-32">
+      <h1 class="text-4xl font-bold mb-6">Privacy Policy</h1>
+      <div class="border-b border-white border-opacity-30 mb-8"></div>
+
+      <div class="space-y-6 text-lg leading-relaxed">
         {policySections.map((section, index) => (
           <PolicySection key={index} {...section} />
         ))}
-        By using our website, you agree to this Privacy Policy.
-        <br />
-        This Privacy Policy is designed to comply with GDPR, CCPA, and other relevant data protection laws where applicable.
-        <br />
-        <br />
-        Last Updated: {props.lastUpdated}
+
+        <p>
+          By using our website, you agree to this Privacy Policy. This Privacy Policy is designed to comply with GDPR, CCPA, and other relevant data protection laws where applicable.
+        </p>
+
+        <p class="text-sm text-gray-400 mt-6">Last Updated: {props.lastUpdated}</p>
       </div>
     </div>
   );
