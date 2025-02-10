@@ -43,6 +43,7 @@ const cardData = [
 
 export const QuickStartGuides = component$(() => {
   return (
+    
     <div class="flex overflow-hidden flex-col px-12 pt-16 pb-28 w-full text-white bg-gray-900 max-md:px-5 max-md:pb-24 max-md:max-w-full">
       <div class="self-start ml-28 text-2xl font-semibold max-md:ml-2.5">
         Quickstart guides
