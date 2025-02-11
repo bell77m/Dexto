@@ -8,9 +8,9 @@ export default component$(() => {
   const agree = useSignal(false);
 
   return (
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen overflow-hidden">
       {/* Left Side - Signup Form */}
-      <div class="w-1/2 flex flex-col justify-center items-center bg-white p-10">
+      <div class="w-1/2 flex flex-col justify-center items-center bg-white p-6 max-h-screen overflow-auto">
         <Link href="/" class="flex shrink-0 items-center cursor-pointer mb-7">
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
         </Link>
@@ -57,7 +57,7 @@ export default component$(() => {
       </div>
 
       {/* Right Side - Image Background */}
-      <div class="w-1/2 h-screen bg-cover bg-center" style="background-image: url('/image/World.svg')"></div>
+      <div class="w-1/2 min-h-screen bg-cover bg-center" style="background-image: url('/image/World.svg')"></div>
     </div>
   );
 });
