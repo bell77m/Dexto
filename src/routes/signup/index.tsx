@@ -37,6 +37,14 @@ export default component$(() => {
             placeholder="Enter your password"
             bind:value={password}
           />
+          <label class="block mb-2">Confirm Password</label>
+          <input 
+            type="password" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your password"
+            bind:value={password}
+          />
+          
           <div class="flex items-center mb-4">
             <input 
               type="checkbox" 
