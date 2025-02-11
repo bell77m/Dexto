@@ -41,7 +41,7 @@ export default component$(() => {
             />
             <span>Remember me</span>
           </div>
-          <button class="w-full bg-black text-white py-2 rounded">Sign up</button>
+          <button class="w-full bg-black text-white py-2 rounded">Log in</button>
         </form>
         <div class="flex items-center w-full max-w-sm my-4">
           <hr class="flex-grow border-gray-300" />
