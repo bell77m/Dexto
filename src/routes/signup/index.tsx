@@ -65,7 +65,7 @@ export default component$(() => {
             <img src="/image/GoogleLogo.svg" class="w-5 h-5 mr-2" /> Sign in with Google
           </button>
         </div>
-        <p class="mt-4">Have an account? <a href="#" class="text-blue-600">Log In</a></p>
+        <p class="mt-4">Have an account? <a href="/login" class="text-blue-600">Log In</a></p>
       </div>
 
       {/* Right Side - Image Background */}
