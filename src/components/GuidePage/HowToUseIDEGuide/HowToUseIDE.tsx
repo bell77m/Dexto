@@ -17,9 +17,9 @@ export const HowToUseIDE = component$<HowToUseIDEProps>(
               <div class="flex flex-col text-white max-md:mr-2.5">
                 <div class="flex overflow-hidden flex-col px-2.5 pt-3 pb-5 max-w-full w-[500px] max-md:w-full">
                   <div class="overflow-hidden px-6 pt-4 pb-20 text-5xl tracking-tighter rounded-xl leading-[55px] max-md:px-5 max-md:pb-28 max-md:text-4xl max-md:leading-[51px]">
-                    <img src="/image/howToIDE.png" class="h-auto w-full max-w-none object-contain" />
+                    <img src="/image/howToIDE.png" width="492" height="291" />
                   </div>
-                  <div class="self-start mt-0 text-2xl text-center w-56 tracking-tight leading-none">
+                  <div class="self-start mt-0 py-0 text-2xl text-center w-56 tracking-tight leading-none">
                     How to use IDE
                   </div>
                 </div>
@@ -38,7 +38,7 @@ export const HowToUseIDE = component$<HowToUseIDEProps>(
                 Getting Started
               </h1>
               <div class="flex shrink-0 mt-12 max-md:mt-10 max-md:max-w-full bg-black">
-              <img src="/image/IDE2.png" class="h-auto w-auto" />
+              <img src="/image/IDE2.png" width="1236" height="925" />
               </div>
               {stepInstructions.map((instruction, index) => (
                 <StepInstruction
