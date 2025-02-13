@@ -202,7 +202,7 @@
 //   );
 // });
 import { component$, useSignal, $ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, useNavigate } from '@builder.io/qwik-city';
 
 export default component$(() => {
   const name = useSignal('');
@@ -212,6 +212,7 @@ export default component$(() => {
   const agree = useSignal(false);
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
+  const navigate = useNavigate();
 
   const handleSubmit$ = $(async () => {
     errorMessage.value = ''; // เคลียร์ error ก่อนเริ่ม
@@ -266,11 +267,15 @@ export default component$(() => {
       }
 
       alert("Signup successful!");
+
       name.value = '';
       email.value = '';
       password.value = '';
       confirmPassword.value = '';
       agree.value = false;
+
+      navigate('/home');
+      
     } catch (error) {
       errorMessage.value = "Network error. Please try again!";
     } finally {

@@ -108,7 +108,7 @@ export default component$(() => {
       }
 
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate("/dashboard"); // ✅ Redirect หลังจาก login สำเร็จ
+      navigate("/home"); // ✅ Redirect หลังจาก login สำเร็จ
     } catch (error) {
       errorMessage.value = "Network error. Please try again!";
     } finally {
