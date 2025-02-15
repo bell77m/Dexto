@@ -39,14 +39,14 @@ export const Sidebar = component$(() => {
       </SidebarSection>
 
       {/* Settings Section */}
-      <SidebarSection title="Settings" class="mt-auto">
+      <SidebarSection title="Settings" class="mb-12">
         {settingsItems.map((item) => (
           <SidebarItem key={item.label} icon={item.icon} label={item.label} />
         ))}
       </SidebarSection>
 
       {/* Logo & Theme Toggle */}
-      <div class="self-center mt-4 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black">
+      <div class="self-center items-center mt-28 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black opacity-25">
         <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
       </div>
       <ThemeToggle />

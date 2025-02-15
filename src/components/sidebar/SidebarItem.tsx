@@ -27,7 +27,7 @@ type SidebarItemProps = {
 
 export const SidebarItem = component$((props: SidebarItemProps) => {
   return (
-    <button class="flex gap-3 items-center px-3 py-2.5 mt-2 max-w-full whitespace-nowrap bg-gray-900 rounded-lg w-[236px] hover:bg-gray-800 transition text-left">
+    <button class="flex gap-3 items-center px-3 py-2.5 mt-0 max-w-full whitespace-nowrap bg-gray-900 rounded-lg w-[236px] hover:bg-gray-800 transition text-left">
       <img
         loading="lazy"
         src={props.icon}

@@ -2,7 +2,7 @@ import { component$ } from "@builder.io/qwik";
 
 export const ThemeToggle = component$(() => {
   return (
-    <div class="flex flex-col items-start px-6 pt-6 mt-56 w-full text-xs tracking-tight leading-none whitespace-nowrap bg-gray-800 min-h-[88px]">
+    <div class="flex flex-col items-start px-6 pt-6 w-full text-xs tracking-tight leading-none whitespace-nowrap bg-gray-800 min-h-[88px] mt-auto">
       <div class="flex gap-1 items-start p-1 w-full bg-gray-900 rounded-lg max-w-[233px]">
         <div class="flex gap-1 w-56 rounded-md">
           <div class="flex flex-1 gap-2 justify-center items-center px-3 py-2 rounded-md text-neutral-400">
