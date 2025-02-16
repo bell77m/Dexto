@@ -39,7 +39,7 @@ export const Sidebar = component$(() => {
       </SidebarSection>
 
       {/* Settings Section */}
-      <SidebarSection title="Settings" class="mb-12">
+      <SidebarSection title="Settings">
         {settingsItems.map((item) => (
           <SidebarItem key={item.label} icon={item.icon} label={item.label} />
         ))}
