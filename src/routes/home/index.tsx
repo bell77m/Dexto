@@ -27,9 +27,9 @@ export default component$(() => {
         Message from developer
       </h2>
       <article class="flex flex-col items-start self-stretch 
-  px-6 pt-6 pb-20 mt-5 w-[1400px] h-[250px] ml-8
-  text-base font-medium tracking-tight leading-5 text-white 
-  bg-gray-800 rounded-lg">
+        px-6 pt-6 pb-20 mt-5 w-[1365px] h-[250px] ml-8
+        text-base font-medium tracking-tight leading-5 text-white 
+      bg-gray-800 rounded-lg">
         <span>Version 0.0.1, release 01/01/2025</span>
         <br />
         <p class="text-zinc-600">
