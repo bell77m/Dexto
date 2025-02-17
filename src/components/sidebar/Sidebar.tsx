@@ -53,7 +53,7 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export const Sidebar = component$(() => {
   const mainItems = [
-    { icon: "/image/home.svg", label: "Home", href: "/" },
+    { icon: "/image/home.svg", label: "Home", href: "/home" },
     { icon: "/image/project.svg", label: "Project", href: "/project" },
     { icon: "/image/chat.svg", label: "Chat", href: "/chat" },
     { icon: "/image/add-friend.svg", label: "Add friends", href: "/add-friend" },
