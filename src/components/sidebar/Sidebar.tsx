@@ -53,17 +53,17 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export const Sidebar = component$(() => {
   const mainItems = [
-    { icon: "/image/home.svg", label: "Home" },
-    { icon: "/image/project.svg", label: "Project" },
-    { icon: "/image/chat.svg", label: "Chat" },
-    { icon: "/image/add-friend.svg", label: "Add friends" },
-    { icon: "/image/forum.svg", label: "Forum" },
-    { icon: "/image/git.svg", label: "Git" },
+    { icon: "/image/home.svg", label: "Home", href: "/" },
+    { icon: "/image/project.svg", label: "Project", href: "/project" },
+    { icon: "/image/chat.svg", label: "Chat", href: "/chat" },
+    { icon: "/image/add-friend.svg", label: "Add friends", href: "/add-friend" },
+    { icon: "/image/forum.svg", label: "Forum", href: "/forum" },
+    { icon: "/image/git.svg", label: "Git", href: "/git" },
   ];
 
   const settingsItems = [
-    { icon: "/image/notification.svg", label: "Notification" },
-    { icon: "/image/settings.svg", label: "Settings" },
+    { icon: "/image/notification.svg", label: "Notification", href: "/notification" },
+    { icon: "/image/settings.svg", label: "Settings", href: "/settings" },
   ];
 
   return (
@@ -82,14 +82,14 @@ export const Sidebar = component$(() => {
       {/* Main Menu */}
       <SidebarSection>
         {mainItems.map((item) => (
-          <SidebarItem key={item.label} icon={item.icon} label={item.label} />
+          <SidebarItem key={item.label} icon={item.icon} label={item.label} href={item.href} />
         ))}
       </SidebarSection>
 
       {/* Settings Section */}
       <SidebarSection title="Settings">
         {settingsItems.map((item) => (
-          <SidebarItem key={item.label} icon={item.icon} label={item.label} />
+          <SidebarItem key={item.label} icon={item.icon} label={item.label} href={item.href} />
         ))}
       </SidebarSection>
 

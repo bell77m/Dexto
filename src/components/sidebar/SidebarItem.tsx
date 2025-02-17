@@ -39,15 +39,22 @@
 //   );
 // });
 import { component$ } from "@builder.io/qwik";
+import { useNavigate } from "@builder.io/qwik-city";
 
 type SidebarItemProps = {
   icon: string;
   label: string;
+  href?: string;
 };
 
 export const SidebarItem = component$((props: SidebarItemProps) => {
+  const nav = useNavigate();
+
   return (
-    <button class="flex gap-3 items-center px-3 py-2.5 mt-0 max-w-full whitespace-nowrap bg-gray-900 rounded-lg w-[236px] hover:bg-gray-800 transition text-left">
+    <button
+      class="flex gap-3 items-center px-3 py-2.5 mt-0 max-w-full whitespace-nowrap bg-gray-900 rounded-lg w-[236px] hover:bg-gray-800 transition text-left"
+      onClick$={() => props.href && nav(props.href)}
+    >
       <img
         loading="lazy"
         src={props.icon}
