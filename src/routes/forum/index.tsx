@@ -14,7 +14,6 @@ export const Forum = component$(() => {
       <ForumArticle />
       <ForumComments />
       <ForumRecommended />
-      <ForumFooter />
     </div>
   );
 });

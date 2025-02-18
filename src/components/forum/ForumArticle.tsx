@@ -112,7 +112,6 @@ export const ForumArticle = component$(() => {
             </li>
           </ul>
         </section>
-
         <div class="flex flex-wrap gap-5 justify-between mt-11 max-w-full text-xs font-light text-center whitespace-nowrap w-[550px] max-md:mt-10">
           <button class="px-6 py-3.5 rounded-2xl bg-stone-200 bg-opacity-70 max-md:px-5">
             Technology
