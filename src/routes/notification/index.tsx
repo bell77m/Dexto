@@ -38,6 +38,41 @@ export default component$(() => {
       description: "Sommeone has invite you to project",
       image1: "/image/project.svg",
       image2: "/image/minnie.svg"
+    },
+    {
+      id: 6,
+      title: "Project Invite",
+      description: "Sommeone has invite you to project",
+      image1: "/image/project.svg",
+      image2: "/image/minnie.svg"
+    },
+    {
+      id: 7,
+      title: "Friend Request",
+      description: "Sommeone want to be your friend",
+      image1: "/image/add-friend.svg",
+      image2: "/image/donaldduck.svg"
+    },
+    {
+      id: 8,
+      title: "Project Invite",
+      description: "Sommeone has invite you to project",
+      image1: "/image/project.svg",
+      image2: "/image/minnie.svg"
+    },
+    {
+      id: 9,
+      title: "Friend Request",
+      description: "Sommeone want to be your friend",
+      image1: "/image/add-friend.svg",
+      image2: "/image/donaldduck.svg"
+    },
+    {
+      id: 10,
+      title: "Project Invite",
+      description: "Sommeone has invite you to project",
+      image1: "/image/project.svg",
+      image2: "/image/minnie.svg"
     }
   ]
 
@@ -53,7 +88,7 @@ export default component$(() => {
             </h1>
           </div>
           <div class="w-full h-px mt-4 bg-gray-400"></div>
-          <div class="max-w-[1200px] h-full ml-32 mt-7 p-3 overflow-y-auto scroll-smooth">
+          <div class="max-w-[1200px] h-full ml-32 mt-7 p-3 overflow-y-auto scroll-smooth scrollbar-hidden">
           {notiData.map((item) => (
             <Notification key={item.id} {...item} />
           ))}
