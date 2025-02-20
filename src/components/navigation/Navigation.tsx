@@ -54,7 +54,7 @@ export const Navigation = component$(() => {
     { label: "Home", padding: "px-8 py-3", href: "/" },
     { label: "About", padding: "px-8 py-2.5", href: "/about" },
     { label: "Guides", padding: "px-7 py-2.5", href: "/guide" },
-    { label: "Forum", padding: "px-8 py-3", href: "/forum" },
+    { label: "forum", padding: "px-8 py-3", href: "/forum" },
   ];
 
   return (

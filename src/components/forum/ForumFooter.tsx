@@ -10,9 +10,6 @@ export const ForumFooter = component$(() => {
         <a href="/guides" class="self-stretch my-auto">
           Guides
         </a>
-        <a href="/forum" class="self-stretch my-auto">
-          Forum
-        </a>
         <a href="/terms" class="self-stretch my-auto">
           Terms of Services
         </a>
