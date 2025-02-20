@@ -68,13 +68,9 @@ export const ForumHeader = component$(() => {
           {/* Dropdown Menu */}
           <div class="relative menu-container">
             <button onClick$={toggleMenu} class="focus:outline-none">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/58cc2ce32467543551bc1dd0ba60399b01a2aed2b8ce343fe03712da5d15ecd4"
-                alt="Menu icon"
-                width="51"
-                height="52"
-                class="w-[51px] h-[52px] cursor-pointer"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
             </button>
 
             {state.menuOpen && (

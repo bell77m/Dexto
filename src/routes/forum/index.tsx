@@ -11,7 +11,6 @@ export const Forum = component$(() => {
     <div class="flex flex-col w-full">
       <ForumHeader />
       <ForumContent />
-      <ForumArticle />
       <ForumComments />
       <ForumRecommended />
     </div>
