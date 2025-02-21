@@ -1,13 +1,13 @@
 import { component$ } from '@builder.io/qwik';
-import { MessageSection } from '~/components/creamm/MessageSection';
+import { MyProject } from '~/components/creamm/MyProject';
 import { Sidebar } from '~/components/sidebar/Sidebar';
 
 export default component$(() => {
   return (
     <>
     <div class="flex h-screen">
-    <Sidebar/>
-    <MessageSection class="flex-grow"/>
+      <Sidebar/>
+      <MyProject class="flex-grow"/>
     </div>
     </>
   );
