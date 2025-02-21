@@ -1,8 +1,14 @@
-import { component$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal , $ } from '@builder.io/qwik';
 import { Sidebar } from '~/components/sidebar/Sidebar';
 
 export default component$(() => { 
   const searchQuery = useSignal('');
+  const isSearching = useSignal(false);
+
+  const handleSearch = $(() => {
+    console.log('Search triggered', searchQuery.value);
+    isSearching.value = true;
+  });
 
   return (
     <>
@@ -27,8 +33,25 @@ export default component$(() => {
               />
               <img src="/image/search-icon.svg" width="30" height="30" 
               class="absolute right-2 top-1/2 transform -translate-y-1/2" 
+              onClick$={handleSearch}
               />
           </div>
+
+          {searchQuery.value && (
+            <div class="w-3/4 mx-auto mt-6 grid grid-cols-1 gap-4">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} class="p-4 bg-gray-800 rounded-xl min-h-[60px] flex items-center justify-center text-gray-500">
+                {/* แสดงผลการค้นหาผู้ใช้ */}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {isSearching.value && !searchQuery.value && (
+            <div class="w-3/4 mx-auto mt-6 text-center text-gray-500">
+              No user found 
+            </div>
+          )}
         </section>
       </div>
     </>
