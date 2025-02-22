@@ -148,7 +148,7 @@ export const MyProject = component$((props: { class?: string }) => {
                 <img alt="Edit Icon" src="https://img.icons8.com/?size=100&id=8Y4tD58oU8lB&format=png&color=FFFFFF" width="25" height="25" />
               </button>
               <button class="bg-gray-700 hover:bg-gray-500 text-white px-2 py-1 rounded-md">
-                <img alt="Download Icon" src="https://img.icons8.com/?size=100&id=xfmO9wVKAyAR&format=png&color=FFFFFF" width="25" height="25" />
+                <img alt="Download Icon" src="https://img.icons8.com/?size=100&id=xfmO9wVKAyAR&format=png&color=FFFFFF" width="25" height="25" onClick$={() => alert("Download complete!")} />
               </button>
               <button
                 class="bg-gray-700 hover:bg-gray-500 text-white px-2 py-1 rounded-md"
