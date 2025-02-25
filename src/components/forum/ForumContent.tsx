@@ -1,9 +1,11 @@
 import { component$, useSignal, $ ,useOnWindow,useStore,useTask$} from "@builder.io/qwik";
+import FAB from "~/components/forum/FAB";
 {/*หัวโพสต์*/}
 export const ForumContent = component$(() => {
   const likes = useSignal(0); // Signal to track likes count
   const hasLiked = useSignal(false); // Track whether the user has liked
   const state = useStore({ menuOpen: false, reportOpen: false, selectedReason: "" });
+  const state2 = useStore({ selected: [] as string[] });
   const comments = useSignal<string[]>([]);
   const newComment = useSignal("");
   const showModal = useSignal(false);
@@ -14,6 +16,15 @@ export const ForumContent = component$(() => {
     track(() => comments.value.length);
     latestCount.value = comments.value.length; // ✅ Forces UI update
   });
+
+  const toggleSelection = (value: string) => {
+    if (state2.selected.includes(value)) {
+      state2.selected = state2.selected.filter((item) => item !== value);
+    } else {
+      state2.selected = [...state2.selected, value];
+    }
+  };
+  
 
   const addLike = $(() => {
     if (!hasLiked.value) {
@@ -40,10 +51,9 @@ export const ForumContent = component$(() => {
   });
 
   const submitReport = $(() => {
-    if (state.selectedReason) {
-      console.log("Report submitted for reason:", state.selectedReason);
-      closeReport();
-    }
+    console.log("Reported:", state2.selected);
+    state2.selected = [];
+    closeReport();
   });
 
   useOnWindow(
@@ -174,24 +184,6 @@ export const ForumContent = component$(() => {
             <h2 style="font-weight: 600; font-size: 36px;">
               RTX 50-series Price
             </h2>
-            <ul class="mt-4 space-y-2">
-              <li>
-                <span style="font-weight: 600;">RTX 5090</span> — $1,999
-                (Available January 30)
-              </li>
-              <li>
-                <span style="font-weight: 600;">RTX5080</span> — $999 (Available
-                January 30)
-              </li>
-              <li>
-                <span style="font-weight: 600;">RTX 5070 Ti</span> — $749
-                (Availability Starting in February)
-              </li>
-              <li>
-                <span style="font-weight: 600;">RTX 5070</span> — $549
-                (Availability Starting in February)
-              </li>
-            </ul>
           </section>
           <div class="flex flex-wrap gap-5 justify-between mt-11 max-w-full text-xs font-light text-center whitespace-nowrap w-[550px] max-md:mt-10">
             <button class="px-6 py-3.5 rounded-2xl bg-stone-200 bg-opacity-70 max-md:px-5">
@@ -215,18 +207,19 @@ export const ForumContent = component$(() => {
             <div class="bg-white p-6 rounded-lg w-96">
               <h2 class="text-xl font-semibold mb-4">Why do you want to report this post?</h2>
               <div class="space-y-2">
-                {["I don't like this post", "Spam", "Hate speech", "Other"].map((reason) => (
+                {["I don't like this post", "Spam", "Hate speech"].map((reason) => (
                   <label key={reason} class="flex items-center gap-2 cursor-pointer">
                     <input
-                      type="radio"
+                      type="checkbox"
                       name="reportReason"
                       value={reason}
-                      checked={state.selectedReason === reason}
-                      onChange$={() => (state.selectedReason = reason)}
+                      checked={state2.selected.includes(reason)}
+                      onChange$={() => toggleSelection(reason)}
                     />
                     {reason}
                   </label>
                 ))}
+                <p class="mt-4">Selected: {state2.selected.join(", ") || "None"}</p>
               </div>
               <div class="flex justify-end gap-2 mt-4">
                 <button onClick$={closeReport} class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
@@ -317,6 +310,7 @@ export const ForumContent = component$(() => {
         ))}
       </div>
     </section>
+    <FAB />
     </main>
     
   );
