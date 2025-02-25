@@ -44,7 +44,7 @@ export const TestimonialsSection = component$(() => {
       <div class="mt-9 text-4xl font-semibold text-center text-white max-md:max-w-full">
         What Our Customers Are Saying
       </div>
-      <div class="overflow-hidden mt-20 w-full overflow-x-auto scroll-smooth snap-x snap-mandatory ">
+      <div class="overflow-hidden mt-20 w-full overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hidden">
       <div class="flex gap-5 flex-nowrap w-max bg-gree">
             {testimonials.map((testimonial, index) => (
               <div key={index} class="flex flex-col w-1/3 max-md:ml-0 max-md:w-full snap-center">
