@@ -108,6 +108,11 @@ export const MyProject = component$((props: { class?: string }) => {
         </div>
       )}
 
+      {projects.value.length === 0 && 
+        <p class="mt-20 ml-[285px] w-full text-gray-400">
+            No projects available.
+        </p>}
+
       <div class="mt-8 ml-20 w-full max-w-3xl space-y-4">
         {projects.value.map((project, index) => (
           <div key={index} class="relative flex flex-col items-start px-6 py-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-300 group">
