@@ -1,5 +1,5 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
-import { Link } from '@builder.io/qwik-city';
+import { Link, useNavigate } from '@builder.io/qwik-city';
 
 export default component$(() => {
   const name = useSignal('');
@@ -9,6 +9,7 @@ export default component$(() => {
   const agree = useSignal(false);
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
+  const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทาง
 
   const handleSubmit$ = $(async () => {
     errorMessage.value = ''; // เคลียร์ error ก่อนเริ่ม
@@ -33,7 +34,7 @@ export default component$(() => {
     }
 
     try {
-      const response = await fetch("http://10.6.38.139:3000/graphql", {
+      const response = await fetch("http://10.6.38.160:3000/graphql", {  // ใช้ URL ของ GraphQL Backend
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,11 +64,15 @@ export default component$(() => {
       }
 
       alert("Signup successful!");
+      // Clear form after successful signup
       name.value = '';
       email.value = '';
       password.value = '';
       confirmPassword.value = '';
       agree.value = false;
+
+      // นำทางไปยังหน้า login
+      navigate('/login');
     } catch (error) {
       errorMessage.value = "Network error. Please try again!";
     } finally {
@@ -149,4 +154,3 @@ export default component$(() => {
     </div>
   );
 });
-

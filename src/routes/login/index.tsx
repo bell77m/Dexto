@@ -1,22 +1,22 @@
-import { component$, useSignal, $ } from "@builder.io/qwik";
-import { Link, useNavigate } from "@builder.io/qwik-city";
+import { component$, useSignal, $ } from '@builder.io/qwik';
+import { Link, useNavigate } from '@builder.io/qwik-city';
 
 export default component$(() => {
-  const email = useSignal("");
-  const password = useSignal("");
+  const email = useSignal('');
+  const password = useSignal('');
   const agree = useSignal(false);
-  const errorMessage = useSignal("");
+  const errorMessage = useSignal('');
   const isLoading = useSignal(false);
-  const navigate = useNavigate(); // ใช้สำหรับ redirect
+  const navigate = useNavigate();
 
   const handleLogin$ = $(async () => {
-    errorMessage.value = "";
-    isLoading.value = true;
+    errorMessage.value = ''; // เคลียร์ข้อความผิดพลาด
+    isLoading.value = true; // เริ่มการโหลด
 
     try {
-      const response = await fetch("http://10.6.38.139:3000/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('http://10.6.38.160:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
             mutation LoginUser($email: String!, $password: String!) {
@@ -38,16 +38,16 @@ export default component$(() => {
       const result = await response.json();
       const loginData = result.data?.loginUser;
 
-      if (!loginData.success) {
-        errorMessage.value = loginData.message || "Login failed!";
+      if (!loginData?.success) {
+        errorMessage.value = loginData?.message || 'Login failed!';
         isLoading.value = false;
         return;
       }
 
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate("/dashboard"); // ✅ Redirect หลังจาก login สำเร็จ
+      navigate('/dashboard'); // เปลี่ยนไปที่หน้าหลักหรือ Dashboard
     } catch (error) {
-      errorMessage.value = "Network error. Please try again!";
+      errorMessage.value = 'Network error. Please try again!';
     } finally {
       isLoading.value = false;
     }
@@ -81,7 +81,11 @@ export default component$(() => {
           {errorMessage.value && <p class="text-red-500 mb-4">{errorMessage.value}</p>}
 
           <div class="flex items-center mb-4">
-            <input type="checkbox" class="mr-2" onChange$={(e) => (agree.value = (e.target as HTMLInputElement).checked)} />
+            <input
+              type="checkbox"
+              class="mr-2"
+              onChange$={(e) => (agree.value = (e.target as HTMLInputElement).checked)}
+            />
             <span>Remember me</span>
           </div>
           <button
@@ -89,7 +93,7 @@ export default component$(() => {
             class="w-full bg-black text-white py-2 rounded disabled:opacity-50"
             disabled={!email.value || !password.value || isLoading.value}
           >
-            {isLoading.value ? "Logging in..." : "Sign in"}
+            {isLoading.value ? 'Logging in...' : 'Sign in'}
           </button>
         </form>
         <div class="flex items-center w-full max-w-sm my-4">
