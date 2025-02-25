@@ -13,7 +13,7 @@ export const StartSection = component$((props: StartSectionProps) => {
           <p class="self-stretch mt-20 max-md:mt-10 max-md:max-w-full">
             {props.description}
           </p>
-          <ActionButton text={props.buttonText} />
+          <ActionButton text={props.buttonText} href="/signup" />
         </div>
       </div>
       <div class="flex shrink-0 mt-20 h-0 bg-stone-900 max-md:mt-10 max-md:max-w-full" />

@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
 
 interface CollaborationHeroProps {
   title: string;
@@ -18,16 +19,14 @@ export const CollaborationHero = component$((props: CollaborationHeroProps) => {
         <h1 class="z-0 text-9xl font-bold max-md:max-w-full max-md:text-4xl">
           {props.title}
         </h1>
-        <button 
-          class="flex z-0 self-center mt-20 max-w-full bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] min-h-[71px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[281px] max-md:mt-10"
+        <Link 
+          href="/guide"
+          class="flex z-0 self-center mt-20 max-w-full bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] min-h-[71px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[281px] max-md:mt-10 text-center flex items-center justify-center text-2xl font-medium text-white"
           aria-label={props.buttonText}
-          tabIndex={0}>
-            
-        
-          <span class="absolute z-0 text-2xl font-medium bottom-[21px] h-[29px] left-[394px] w-[138px]">
-            {props.buttonText}
-          </span>
-        </button>
+          tabIndex={0}
+        >
+          {props.buttonText}
+        </Link>
       </div>
     </div>
   );

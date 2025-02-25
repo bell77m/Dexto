@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
 import { FeatureCard } from "./FeatureCard";
 import type { CollaborationProps } from "./types";
 
@@ -35,12 +36,13 @@ export const Collaboration = component$(() => {
             <div class="self-stretch text-6xl font-bold max-md:text-4xl">
               Function of DEXTO
             </div>
-            <button 
-              class="px-16 py-5 mt-12 font-medium text-center bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] max-md:px-5 max-md:mt-10"
+            <Link 
+              href="/guide"
+              class="px-16 py-5 mt-12 font-medium text-center bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] max-md:px-5 max-md:mt-10 text-white"
               tabIndex={0}
             >
               More detail
-            </button>
+            </Link>
           </div>
         </div>
         <div class="flex flex-col ml-5 w-[63%] max-md:ml-0 max-md:w-full">
