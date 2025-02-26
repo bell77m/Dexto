@@ -14,7 +14,7 @@ export default component$(() => {
     isLoading.value = true; // เริ่มการโหลด
 
     try {
-      const response = await fetch('http://10.6.38.160:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+      const response = await fetch('http://10.6.38.131:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,7 +61,6 @@ export default component$(() => {
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
         </Link>
         <h1 class="text-3xl font-bold mb-1">Welcome back!</h1>
-        <h2 class="text-2xl mb-6">Enter your Credentials to access your account</h2>
         <form class="w-full max-w-sm" preventdefault:submit onSubmit$={handleLogin$}>
           <label class="block mb-2">Email address</label>
           <input

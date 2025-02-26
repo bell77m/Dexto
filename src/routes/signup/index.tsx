@@ -34,7 +34,7 @@ export default component$(() => {
     }
 
     try {
-      const response = await fetch("http://10.6.38.160:3000/graphql", {  // ใช้ URL ของ GraphQL Backend
+      const response = await fetch("http://10.6.38.131:3000/graphql", {  // ใช้ URL ของ GraphQL Backend
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
