@@ -5,7 +5,7 @@ import { Sidebar } from '~/components/sidebar/Sidebar';
 export default component$(() => {
   return (
     <>
-    <div class="flex h-screen">
+    <div class="flex h-screen w-full overflow-hidden">
       <Sidebar/>
       <MyProject class="flex-grow"/>
     </div>
