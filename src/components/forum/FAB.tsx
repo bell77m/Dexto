@@ -8,6 +8,9 @@ export default component$(() => {
   const tags = useSignal<string[]>([]);
   const comments = useSignal<{ title: string; text: string; tags: string[]; image?: string }[]>([]);
   const imageFile = useSignal<File | null>(null);
+  const likes = useSignal(0); // Signal to track likes count
+  const hasLiked = useSignal(false); // Track whether the user has liked
+  const latestCount = useSignal(comments.value.length);
 
   return (
     <div>
@@ -164,25 +167,66 @@ export default component$(() => {
           </div>
         </div>
       )}
-
-      <div class="mt-10 p-5">
-        {comments.value.map((comment, index) => (
-          <div key={index} class="p-3 border-b">
-            <h4 class="text-lg font-bold">{comment.title}</h4>
-            <p class="text-gray-800">{comment.text}</p>
-            <div class="flex flex-wrap mt-2">
-              {comment.tags.map((tag, idx) => (
-                <span key={idx} class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm mr-2">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-            {comment.image && (
-              <img src={comment.image} alt="Uploaded" class="mt-2 max-w-full h-40 object-cover rounded" />
-            )}
-          </div>
+      <article class="flex flex-col max-w-full w-[808px] p-10 bg-white shadow-md rounded-lg">
+  {comments.value.map((comment, index) => (
+    <div key={index} class="p-6 border-b last:border-b-0">
+      <h4 class="text-3xl font-bold text-black">{comment.title}</h4>
+      <p class="mt-4 text-lg font-light text-black">{comment.text}</p>
+      <div class="flex flex-wrap gap-2 mt-4">
+        {comment.tags.map((tag, idx) => (
+          <span
+            key={idx}
+            class="px-4 py-2 rounded-2xl bg-gray-200 text-gray-700 text-sm font-medium"
+          >
+            #{tag}
+          </span>
         ))}
       </div>
+      {comment.image && (
+        <img
+          src={comment.image}
+          alt="Uploaded"
+          class="mt-6 w-full max-h-80 object-cover rounded-lg"
+        />
+      )}
+      <div class="flex items-center gap-4 mt-6 text-xl text-black">
+        <button class="flex items-center gap-2 active:scale-110">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class={`size-6 transition-all ${hasLiked.value ? "text-red-500 fill-red-500" : "hover:text-red-500"}`}
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+            />
+          </svg>
+          <span>{likes.value}</span>
+        </button>
+        <div class="flex gap-2 items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+            />
+          </svg>
+          <span>{latestCount}</span>
+        </div>
+      </div>
+    </div>
+  ))}
+</article>
     </div>
   );
 });
