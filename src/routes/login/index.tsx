@@ -14,7 +14,7 @@ export default component$(() => {
     isLoading.value = true; // เริ่มการโหลด
 
     try {
-      const response = await fetch('http://10.6.38.131:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+      const response = await fetch('http://10.6.38.165:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -45,7 +45,7 @@ export default component$(() => {
       }
 
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/dashboard'); // เปลี่ยนไปที่หน้าหลักหรือ Dashboard
+      navigate('/home'); // เปลี่ยนไปที่หน้าหลักหรือ Dashboard
     } catch (error) {
       errorMessage.value = 'Network error. Please try again!';
     } finally {
