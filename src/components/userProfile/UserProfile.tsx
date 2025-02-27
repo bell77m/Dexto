@@ -42,7 +42,7 @@ export const UserProfile = component$((props: UserProfileProps) => {
           <div class="mx-0 my-6 h-px bg-stone-300"></div>
           <div class="mb-2 text-base font-bold text-white">AVATAR</div>
           <div class="flex gap-4 mt-4 max-sm:flex-col max-sm:gap-2">
-            <label class="p-2.5 text-base text-black bg-emerald-300 rounded-lg cursor-pointer border-none">
+            <label class="p-2.5 text-base text-black bg-emerald-300 rounded-md cursor-pointer border-none">
               Change Avatar
               <input
                 type="file"
@@ -80,12 +80,15 @@ export const UserProfile = component$((props: UserProfileProps) => {
         ) : (
           <div class="bg-gray-800 rounded-full h-[180px] w-[180px] border-2 border-stone-300"></div>
         )}
-        <div class="flex gap-5 mt-auto max-sm:flex-col max-sm:gap-2">
-          <button class="px-3.5 py-2.5 text-base text-black bg-emerald-300 rounded-lg cursor-pointer border-none">
+        <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
+          <button class="px-4 py-2 text-base text-black bg-emerald-300 rounded-md cursor-pointer border-none">
             Save Change
           </button>
-          <button class="p-2.5 text-base text-white bg-transparent cursor-pointer border-none">
+          <button class="px-4 py-2 text-base text-white bg-transparent cursor-pointer border-none">
             Cancel
+          </button>
+          <button class="px-4 py-2 text-base text-white bg-red-500 rounded-md cursor-pointer border-none">
+            Logout
           </button>
         </div>
       </div>
