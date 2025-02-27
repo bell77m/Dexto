@@ -21,7 +21,7 @@ export const UserProfile = component$((props: UserProfileProps) => {
   return (
     <div class="flex p-5 w-full h-screen bg-gray-900 max-md:flex-col max-sm:p-2.5">
       <div class="flex-1 px-10 py-5">
-        <Link href="/" class="flex shrink-0 items-center cursor-pointer">
+        <Link href="/home" class="flex shrink-0 items-center cursor-pointer">
           <img
             alt="My DEXTO Icon"
             src="/image/DextoLogo.svg"
@@ -62,15 +62,17 @@ export const UserProfile = component$((props: UserProfileProps) => {
         </div>
       </div>
       <div class="flex flex-col items-center p-5 w-[300px] max-md:w-full">
-        <button
-          class="flex flex-col items-center self-end mb-5"
-          onClick$={() => console.log("ESC clicked")}
-        >
-          <div class="mb-1 text-base font-bold text-white rounded-full border-gray-800 border-solid border-[3px] h-[30px] w-[30px] flex items-center justify-center">
-            x
-          </div>
-          <div class="text-xs text-white">ESC</div>
-        </button>
+        <Link href="/home">
+          <button
+            class="flex flex-col items-center self-end mb-5"
+            onClick$={() => console.log("ESC clicked")}
+          >
+              <div class="mb-1 text-base font-bold text-white rounded-full border-gray-800 border-solid border-[3px] h-[30px] w-[30px] flex items-center justify-center">
+                x
+              </div>
+            <div class="text-xs text-white">ESC</div>
+          </button>
+        </Link>
         {avatarUrl.value ? (
           <img
             src={avatarUrl.value}
