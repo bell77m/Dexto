@@ -9,11 +9,11 @@ export default component$(() => {
   const agree = useSignal(false);
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
-  const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทาง
+  const navigate = useNavigate(); 
 
   const handleSubmit$ = $(async () => {
-    errorMessage.value = ''; // เคลียร์ error ก่อนเริ่ม
-    isLoading.value = true;  // เริ่มโหลด
+    errorMessage.value = ''; 
+    isLoading.value = true;  
 
     if (!agree.value) {
       errorMessage.value = "You must agree to the terms & policy!";
@@ -34,7 +34,7 @@ export default component$(() => {
     }
 
     try {
-      const response = await fetch("http://10.6.38.131:3000/graphql", {  // ใช้ URL ของ GraphQL Backend
+      const response = await fetch("http://10.6.38.144:3000/graphql", {  
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -57,6 +57,13 @@ export default component$(() => {
 
       const result = await response.json();
 
+      if (!response.ok) {
+        errorMessage.value = "Server error, please try again later.";
+        isLoading.value = false;
+        return;
+      }
+      
+
       if (result.errors) {
         errorMessage.value = result.errors[0].message || "Signup failed!";
         isLoading.value = false;
@@ -64,14 +71,14 @@ export default component$(() => {
       }
 
       alert("Signup successful!");
-      // Clear form after successful signup
+     
       name.value = '';
       email.value = '';
       password.value = '';
       confirmPassword.value = '';
       agree.value = false;
 
-      // นำทางไปยังหน้า login
+      
       navigate('/login');
     } catch (error) {
       errorMessage.value = "Network error. Please try again!";
@@ -82,7 +89,6 @@ export default component$(() => {
 
   return (
     <div class="flex min-h-screen overflow-hidden">
-      {/* Left Side - Signup Form */}
       <div class="w-1/2 flex flex-col justify-center items-center bg-white p-6 max-h-screen overflow-auto">
         <Link href="/" class="flex shrink-0 items-center cursor-pointer">
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
@@ -149,7 +155,6 @@ export default component$(() => {
         <p class="mt-4">Have an account? <a href="/login" class="text-blue-600">Log In</a></p>
       </div>
 
-      {/* Right Side - Image Background */}
       <div class="w-1/2 min-h-screen bg-cover bg-center" style="background-image: url('/image/World.svg')"></div>
     </div>
   );

@@ -9,12 +9,14 @@ export default component$(() => {
   const isLoading = useSignal(false);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://10.6.38.144:3000/graphql';
+
   const handleLogin$ = $(async () => {
-    errorMessage.value = ''; // เคลียร์ข้อความผิดพลาด
-    isLoading.value = true; // เริ่มการโหลด
+    errorMessage.value = ''; 
+    isLoading.value = true; 
 
     try {
-      const response = await fetch('http://10.6.38.131:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -35,6 +37,10 @@ export default component$(() => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error('Server error. Please try again later.');
+      }
+      
       const result = await response.json();
       const loginData = result.data?.loginUser;
 
@@ -45,7 +51,7 @@ export default component$(() => {
       }
 
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/dashboard'); // เปลี่ยนไปที่หน้าหลักหรือ Dashboard
+      navigate('/dashboard'); 
     } catch (error) {
       errorMessage.value = 'Network error. Please try again!';
     } finally {
@@ -55,7 +61,6 @@ export default component$(() => {
 
   return (
     <div class="flex min-h-screen overflow-hidden">
-      {/* Left Side - Login Form */}
       <div class="w-1/2 flex flex-col justify-center items-center bg-white p-6 max-h-screen overflow-auto">
         <Link href="/" class="flex shrink-0 items-center cursor-pointer mb-7">
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
@@ -110,7 +115,6 @@ export default component$(() => {
         </p>
       </div>
 
-      {/* Right Side - Image Background */}
       <div class="w-1/2 min-h-screen bg-cover bg-center" style="background-image: url('/image/World.svg')"></div>
     </div>
   );
