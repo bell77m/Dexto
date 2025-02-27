@@ -9,7 +9,7 @@ export default component$(() => {
   const isLoading = useSignal(false);
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://10.6.38.144:3000/graphql';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://dexto.com:3000/graphql';
 
   const handleLogin$ = $(async () => {
     errorMessage.value = ''; 
