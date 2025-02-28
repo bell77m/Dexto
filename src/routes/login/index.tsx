@@ -14,7 +14,7 @@ export default component$(() => {
     isLoading.value = true; // เริ่มการโหลด
 
     try {
-      const response = await fetch('http://10.6.38.165:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+      const response = await fetch('http://dexto.com:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
