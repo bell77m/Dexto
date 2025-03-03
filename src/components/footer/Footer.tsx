@@ -51,10 +51,10 @@ export const Footer = component$(() => {
           <div class="flex flex-col">
             <div class="text-2xl font-semibold">WANT TO BE A PART OF US?</div>
             <form class="flex gap-2.5 self-start mt-10">
-                <Link href="/signUp" class="underline">
+                <Link href="/signup" class="underline">
                   SIGN UP FOR OUR COMMUNITY
                 </Link>
-                <Link href="/signUp" aria-label="Submit signup">
+                <Link href="/signup" aria-label="Submit signup">
                   <img
                     loading="lazy"
                     src="https://cdn.builder.io/api/v1/image/assets/TEMP/e40fa9753d102fbfeefed538adc4a5272b86425388f55303e79ccebd2de0020d?placeholderIfAbsent=true&apiKey=83086b8ef5ae4f9392edc247fd20d152"
