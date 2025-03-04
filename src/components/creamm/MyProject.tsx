@@ -10,9 +10,7 @@ export const MyProject = component$((props: { class?: string }) => {
     switch (language) {
       case "Python":
         return "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg";
-      case "C++":
-        return "https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg";
-      case "Java":
+      case "Javascript":
         return "https://img.icons8.com/?size=100&id=13679&format=png&color=000000";
       default:
         return "https://upload.wikimedia.org/wikipedia/commons/5/5b/Logo_JavaScript.svg";
@@ -66,7 +64,7 @@ export const MyProject = component$((props: { class?: string }) => {
 
             <h3 class="mt-4">Choose Language:</h3>
             <div class="flex gap-4 mt-2">
-              {["Python", "C++", "Java"].map((lang) => (
+              {["Python","Javascript"].map((lang) => (
                 <button
                   key={lang}
                   class={`px-4 py-2 rounded-md ${selectedLanguage.value === lang ? "bg-green-600" : "bg-gray-600"} text-white`}
