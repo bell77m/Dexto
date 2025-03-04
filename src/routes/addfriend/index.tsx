@@ -48,7 +48,7 @@ export default component$(() => {
 
           {searchQuery.value && (
             <div class="w-3/4 mx-auto mt-6 grid grid-cols-1 gap-4">
-              {[...Array(2)].map((_, index) => (
+              {[...Array(1)].map((_, index) => (
                 <div key={index} class="p-4 bg-gray-800 rounded-xl min-h-[60px] flex items-center justify-between text-gray-500">
                   <div class="flex items-center space-x-4">
                     <img src="/image/man-user-svgrepo-com.svg" width="40" height="40" class="rounded-full" />
