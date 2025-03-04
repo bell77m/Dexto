@@ -28,7 +28,7 @@ export const ChatMain = component$(() => {
     <div class="flex h-screen w-full bg-gray-900 text-white">
       {/* Sidebar */}
       <aside class="w-1/2 bg-gray-800 p-4 overflow-y-auto">
-        <h2 class="text-center font-semibold mt-4 mb-8">Chats</h2>
+        <h2 class="text-center font-semibold mt-4 mb-8">Chat</h2>
 
         {/* Search */}
         <div class="flex gap-2 pb-2">
