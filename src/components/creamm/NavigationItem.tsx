@@ -1,22 +1,21 @@
 import { component$ } from "@builder.io/qwik";
-
-interface NavigationItemProps {
-  icon: string;
-  label: string;
-  isActive?: boolean;
-}
+import type { NavigationItemProps } from "./types";
 
 export const NavigationItem = component$<NavigationItemProps>(
   ({ icon, label, isActive = false }) => {
     return (
-      <nav
-        class={`flex gap-3 items-center px-3 py-2.5 max-w-full whitespace-nowrap ${
+      <button
+        class={`flex gap-3 items-center px-3 py-2.5 mt-2 max-w-full whitespace-nowrap rounded-lg w-[236px] ${
           isActive ? "bg-gray-800" : "bg-gray-900"
-        } rounded-lg w-[236px]`}
+        }`}
       >
-        <i class={`ti ti-${icon} text-lg text-white`}></i>
-        <span class="flex-1 self-stretch my-auto text-white">{label}</span>
-      </nav>
+        <img
+          src={icon}
+          alt=""
+          class="object-contain shrink-0 self-stretch my-auto w-5 aspect-square"
+        />
+        <span class="flex-1 shrink self-stretch my-auto basis-0">{label}</span>
+      </button>
     );
   }
 );

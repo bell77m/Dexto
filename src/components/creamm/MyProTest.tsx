@@ -1,23 +1,41 @@
-import { component$, useSignal } from "@builder.io/qwik";
+import { $, component$, useSignal } from "@builder.io/qwik";
 
-export const MyProject = component$((props: { class?: string }) => {
+export const MyProTest = component$((props: { class?: string }) => {
   const isCreating = useSignal(false);
   const newProjectName = useSignal("");
   const selectedLanguage = useSignal("");
   const projects = useSignal<{ name: string; language: string; image: string; createdAt: number; isEditing: boolean }[]>([]);
+  const fileInputRef = useSignal<HTMLInputElement | null>(null);
 
-  const getLanguageImage = (language: string) => {
-    switch (language) {
+  const getLanguageImage = $( (language: string) => {
+    switch(language) {
       case "Python":
-        return "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg";
+          return "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg";
       case "C++":
-        return "https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg";
+          return "https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg";
       case "Java":
-        return "https://img.icons8.com/?size=100&id=13679&format=png&color=000000";
+          return "https://upload.wikimedia.org/wikipedia/commons/3/30/Java_programming_language_logo.svg";  // เปลี่ยนลิงก์ใหม่
       default:
-        return "https://upload.wikimedia.org/wikipedia/commons/5/5b/Logo_JavaScript.svg";
+          return "https://upload.wikimedia.org/wikipedia/commons/5/5b/Logo_JavaScript.svg";
     }
-  };
+  });
+  
+
+  const getLanguageFromFile = $((fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch(ext){
+      case "py":
+        return "Python";
+      case "cpp":
+      case "cc":
+        return "C++";
+      case "java":
+        return "Java";
+      default:
+        return "Unknown";
+    }
+  });
+  
 
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now();
@@ -47,11 +65,36 @@ export const MyProject = component$((props: { class?: string }) => {
         <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" onClick$={() => (isCreating.value = true)}>
          Create your Project
         </button>
-        <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" onClick$={() => alert("Import feature is under development!")}>
+        <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+         onClick$={() => fileInputRef.value?.click()}>
          Import your Project
         </button>
       </h2>
 
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        class="hidden"
+        accept=".cpp,.py,.java"
+        onChange$={(e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const language = getLanguageFromFile(file.name);
+            projects.value = [
+              ...projects.value,
+              {
+                name: file.name,
+                language: language,
+                image: getLanguageImage(language),
+                createdAt: Date.now(),
+                isEditing: false,
+              },
+            ];
+            alert(`Selected file: ${file.name}`);
+          }
+        }}
+      />
 
       {isCreating.value && (
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -170,4 +213,3 @@ export const MyProject = component$((props: { class?: string }) => {
     </section>
   );
 });
-
