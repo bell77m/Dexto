@@ -1,8 +1,12 @@
 import { component$, useStore, $, useOnWindow } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
+import { Toggle } from "../navigation/Toggle";
+import { useNavigate } from "@builder.io/qwik-city";
 
-export const ForumHeader = component$(() => {
+export const ForumHeadernotlog = component$(() => {
   const state = useStore({ menuOpen: false });
+
+    const nav = useNavigate();
 
   const toggleMenu = $(() => {
     state.menuOpen = !state.menuOpen;
@@ -52,45 +56,22 @@ export const ForumHeader = component$(() => {
 
         <div class="grow shrink self-stretch my-auto w-48">
         <div class="flex gap-8 items-center justify-between w-full">
-          {/* Profile Section */}
-          <div class="flex gap-4 text-base font-medium text-black rounded-full items-center">
-            <img
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/39a8f244998f57adda168bb506962cdc51a4265a2566ebd51be7be71503ad577"
-              alt="User avatar"
-              width="32"
-              height="32"
-              class="w-8 h-8 rounded-full"
-            />
-            <span>Jane Doe</span>
-          </div>
+        
+          
+            
 
-          {/* Dropdown Menu */}
-          <div class="relative menu-container">
-            <button onClick$={toggleMenu} class="focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button>
-
-            {state.menuOpen && (
-              <div
-                class="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-50"
-                onClick$={(e) => e.stopPropagation()}
-              >
-                <a href="#" class="block px-4 py-2 hover:bg-gray-100">
-                  Settings
-                </a>
-                <a href="#" class="block px-4 py-2 hover:bg-gray-100">
-                <Link href="/" class="flex shrink-0 items-center cursor-pointer">
-                  Logout
+           <div class="flex grow shrink gap-4 items-center self-stretch my-auto min-w-[240px] w-[303px]">
+                <Link href="/login" class="px-8 py-2.5 text-black">
+                    Login
                 </Link>
-                </a>
-              </div>
-            )}
+                <div class="flex flex-col self-stretch my-auto w-28 text-base text-center text-black">
+                <button onClick$={() => nav("/signup")} class="px-3 py-2.5 rounded-xl border border-black border-solid max-md:px-5">
+                    Sign Up
+                </button>
+                </div>
+            </div>
           </div>
         </div>
-      </div>
       </nav>
     </header>
   );

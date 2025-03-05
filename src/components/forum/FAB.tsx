@@ -1,4 +1,5 @@
 import { component$, useSignal, $, useStore, useOnWindow, useTask$} from "@builder.io/qwik";
+import { ForumRecommended } from "./ForumRecommended";
 
 export default component$(() => {
   const showCommentBox = useSignal(false);
@@ -28,6 +29,17 @@ export default component$(() => {
       latestCount.value = commentsR.value.length; 
     });
   
+    const deletePost = $((index: number) => {
+      comments.value.splice(index, 1);
+      comments.value = [...comments.value];
+    
+      // Remove all comments related to the deleted post
+      commentsR.value = commentsR.value.filter(comment => comment.id !== index);
+      commentsReply.value = commentsReply.value.filter(reply => reply.parentId !== index);
+
+      state.menuOpen = !state.menuOpen;
+    });
+    
     const addComment = $(() => {
       if (!newCommentR.value.trim()) return; // ✅ Prevent empty comments
       commentsR.value = [...commentsR.value, { id: Date.now(), text: newCommentR.value.trim() }]; 
@@ -139,16 +151,19 @@ export default component$(() => {
               />
               <div class="flex flex-wrap mt-2">
                 {tags.value.map((tag, index) => (
-                  <span
-                    key={index}
-                    class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm mr-2 mt-1"
-                  >
+                  <span key={index} class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm mr-2 mt-1 flex items-center">
                     {tag}
+                    <button class="ml-2 text-red-500 hover:text-red-700" 
+                      onClick$={() => { 
+                        tags.value = tags.value.filter((_, i) => i !== index); // Remove tag immediately
+                      }}>
+                      ✕
+                    </button>
                   </span>
                 ))}
               </div>
             </div>
-
+           
             <div class="mt-3">
               <label class="cursor-pointer">
               <svg 
@@ -314,18 +329,6 @@ export default component$(() => {
               </div>
             </div>
             <div  class="flex gap-10 justify-between items-center self-start">
-              <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke-width="1.5" 
-                  stroke="currentColor" 
-                  class="size-6">
-              <path 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
-              </svg>
               <div class="relative menu-container">
                 <button onClick$={toggleMenu} class="focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -337,8 +340,10 @@ export default component$(() => {
                     class="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-50"
                     onClick$={(e) => e.stopPropagation()}
                   >
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">
-                      Not interested
+                    <a href="#" class="block px-4 py-2 hover:bg-red-300" onClick$={() => deletePost(index)}>
+                      <div class = "text-red-500 hover:text-red-700">
+                      Delete
+                      </div>
                     </a>
                     <a href="#" onClick$={openReport} class="block px-4 py-2 hover:bg-gray-100">
                       Report
