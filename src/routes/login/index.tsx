@@ -1,5 +1,7 @@
+// login.tsx
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
+import { useUserStore } from '~/store/store'; // นำเข้า store
 
 export default component$(() => {
   const email = useSignal('');
@@ -8,6 +10,9 @@ export default component$(() => {
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
   const navigate = useNavigate();
+
+  // ใช้ store สำหรับเก็บข้อมูลผู้ใช้ที่ล็อกอิน
+  const userStore = useUserStore();  // เรียกใช้ store ที่นี่
 
   const handleLogin$ = $(async () => {
     errorMessage.value = ''; // เคลียร์ข้อความผิดพลาด
@@ -44,8 +49,18 @@ export default component$(() => {
         return;
       }
 
+      // เก็บข้อมูลใน localStorage
+      localStorage.setItem('userDisplayName', loginData.user.displayName);
+      localStorage.setItem('userId', loginData.user.id.toString());
+
+      // เก็บข้อมูลใน store
+      userStore.displayName = loginData.user.displayName;
+      userStore.userId = loginData.user.id;
+
+      console.log('Sidebar Display Name login :', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/home');
+      navigate('/home');  // เปลี่ยนเส้นทางไปที่หน้า Home
+
     } catch (error) {
       errorMessage.value = 'Network error. Please try again!';
     } finally {

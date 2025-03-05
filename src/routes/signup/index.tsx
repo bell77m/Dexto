@@ -33,8 +33,8 @@ export default component$(() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
-            mutation CreateUser($displayName: String!, $email: String!, $password: String!) {
-              createUser(displayName: $displayName, email: $email, password: $password) {
+            mutation AddUser($displayName: String!, $email: String!, $password: String!) {
+              addUser(displayName: $displayName, email: $email, password: $password) {
                 id
                 displayName
                 email
