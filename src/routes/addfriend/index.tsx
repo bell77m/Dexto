@@ -51,7 +51,7 @@ export default component$(() => {
               {[...Array(1)].map((_, index) => (
                 <div key={index} class="p-4 bg-gray-800 rounded-xl min-h-[60px] flex items-center justify-between text-gray-500">
                   <div class="flex items-center space-x-4">
-                    <img src="/image/man-user-svgrepo-com.svg" width="40" height="40" class="rounded-full" />
+                    <img src="/image/defaultProfile.svg" width="40" height="40" class="rounded-full" />
                     <span>User Name</span>
                   </div>
                   {!friendRequested.value ? (
