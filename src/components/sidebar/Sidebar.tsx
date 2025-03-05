@@ -1,15 +1,11 @@
-// Sidebar.tsx
 import { component$ } from "@builder.io/qwik";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarSection } from "./SidebarSection";
 import { ThemeToggle } from "./ThemeToggle";
-import { useUserStore } from '~/store/store'; // นำเข้า store
+import { useUserStore } from "~/store/store"; // นำเข้า useUserStore
 
 export const Sidebar = component$(() => {
-  // ใช้ store เพื่อดึงข้อมูล displayName และ userId
-  const userStore = useUserStore();
-
-  console.log('Sidebar Display Name:', userStore.displayName);
+  const { displayName } = useUserStore(); // ใช้งาน user store
 
   const mainItems = [
     { icon: "/image/home.svg", label: "Home", href: "/home" },
@@ -36,7 +32,7 @@ export const Sidebar = component$(() => {
           alt="User avatar"
         />
         {/* ใช้ displayName จาก store */}
-        <div class="self-stretch my-auto w-[170px]">{userStore.displayName || 'Guest'}</div>
+        <div class="self-stretch my-auto w-[170px]">{displayName.value || "Guest"}</div>
       </div>
 
       {/* Main Menu */}

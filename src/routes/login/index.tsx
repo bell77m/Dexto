@@ -1,4 +1,3 @@
-// login.tsx
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from '~/store/store'; // นำเข้า store
@@ -49,13 +48,9 @@ export default component$(() => {
         return;
       }
 
-      // เก็บข้อมูลใน localStorage
-      localStorage.setItem('userDisplayName', loginData.user.displayName);
-      localStorage.setItem('userId', loginData.user.id.toString());
-
-      // เก็บข้อมูลใน store
-      userStore.displayName = loginData.user.displayName;
-      userStore.userId = loginData.user.id;
+      // ห่อหุ้มการอัพเดต store ด้วย QRL
+      const { updateStore } = userStore;
+      updateStore(loginData.user.displayName, loginData.user.id);
 
       console.log('Sidebar Display Name login :', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
