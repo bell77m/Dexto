@@ -32,7 +32,7 @@ export const Sidebar = component$(() => {
           alt="User avatar"
         />
         {/* ใช้ displayName จาก store */}
-        <div class="self-stretch my-auto w-[170px]">{displayName.value || "Guest"}</div>
+        <div class="self-stretch my-auto w-[170px]">{displayName.value || "Loading"}</div>
       </div>
 
       {/* Main Menu */}
