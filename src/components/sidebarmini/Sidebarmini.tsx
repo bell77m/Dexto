@@ -20,7 +20,7 @@ export const Sidebarmini = component$(() => {
   return (
     <div class="flex flex-col font-medium bg-gray-900 border border-solid border-zinc-600 left-0 top-0 h-screen w-[100px] overflow-auto">
       {/* Header */}
-      <div class="flex gap-6 justify-center items-center px-6 py-4 text-xl font-bold bg-gray-800 min-h-[72px] text-zinc-500">
+      <div class="flex gap-6 justify-center items-center px-6 py-4 text-xl font-bold bg-gray-800 min-h-[75px] text-zinc-500">
         <img
           loading="lazy"
           src="https://cdn.builder.io/api/v1/image/assets/TEMP/0510abcdc39434e57aaa04c65ac9590a8487a1aaefb8dde89a72f7a0f6081905"
