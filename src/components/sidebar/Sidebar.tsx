@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useUserStore } from "~/store/store"; // นำเข้า useUserStore
 
 export const Sidebar = component$(() => {
-  const { displayName } = useUserStore(); // ใช้งาน user store
+  const { userId, displayName, profilePictureUrl} = useUserStore(); // ใช้งาน user store
 
   const mainItems = [
     { icon: "/image/home.svg", label: "Home", href: "/home" },
@@ -27,12 +27,17 @@ export const Sidebar = component$(() => {
       <div class="flex gap-6 justify-between items-center px-6 py-4 text-xl font-bold bg-gray-800 min-h-[72px] text-zinc-500">
         <img
           loading="lazy"
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/0510abcdc39434e57aaa04c65ac9590a8487a1aaefb8dde89a72f7a0f6081905"
+          src={profilePictureUrl.value || "https://camo.githubusercontent.com/bfb2b63eeb7b21626c1a896e6e58a55838135977ce8b5d7ee13a60080b56a1e7/68747470733a2f2f6173736574732d76322e6c6f7474696566696c65732e636f6d2f612f30336364633665302d313138622d313165652d626630382d3037643838613934316362642f696969774730764a514e2e676966"} 
           class="object-contain shrink-0 self-stretch my-auto rounded-full aspect-square w-[42px]"
           alt="User avatar"
         />
         {/* ใช้ displayName จาก store */}
-        <div class="self-stretch my-auto w-[170px]">{displayName.value || "Loading"}</div>
+        <div class="self-stretch my-auto w-[170px]">
+          <span>
+            {displayName.value || "Loading"} 
+            {/* {userId.value || "Unknown"} */}
+          </span>
+        </div>
       </div>
 
       {/* Main Menu */}

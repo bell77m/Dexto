@@ -31,6 +31,7 @@ export default component$(() => {
                   id
                   displayName
                   email
+                  profilePictureUrl  
                 }
               }
             }
@@ -48,9 +49,17 @@ export default component$(() => {
         return;
       }
 
+      console.log('User Data:', loginData.user);
+      
       // ห่อหุ้มการอัพเดต store ด้วย QRL
       const { updateStore } = userStore;
-      updateStore(loginData.user.displayName, loginData.user.id);
+      updateStore(
+        loginData.user.displayName,
+        loginData.user.id,
+        loginData.user.profilePictureUrl
+      );
+
+      
 
       console.log('Sidebar Display Name login :', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
