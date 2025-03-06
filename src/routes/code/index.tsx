@@ -7,8 +7,11 @@ export default component$(() => {
       <div class="flex w-full h-screen bg-gray-900">
         <Sidebarmini/>
         <div class="w-[300px] flex flex-col font-medium bg-gray-900 border border-solid border-zinc-600">
-          <div class="min-h-[255px] mt-2 rounded-xl flex justify-center px-6 py-4 text-xl font-bold text-zinc-400 bg-gray-800">
-            Project
+          <div class="min-h-[255px] flex-col mt-2 rounded-xl flex justify-start items-center px-6 py-4 text-xl font-bold text-zinc-400 bg-gray-800">
+            <div class="w-fit h-fit text-xl justify-center font-bold text-zinc-400 bg-gray-800">
+              Project
+            </div>
+            <div class="bg-gray-900 w-[250px] h-[55px] mt-8"></div>
           </div>
           <div class="min-h-[655px] mt-1 rounded-xl flex justify-center px-6 py-4 text-xl font-bold text-zinc-400 bg-gray-800">
             Voice Chat
