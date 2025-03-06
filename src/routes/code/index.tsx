@@ -1,6 +1,6 @@
-import { component$ } from '@builder.io/qwik';
-import { Sidebarmini } from '~/components/sidebarmini/Sidebarmini';
-import { VoiceChat } from '~/components/voice-chat/VoiceChat';
+import { component$, useSignal } from "@builder.io/qwik";
+import { Sidebarmini } from "~/components/sidebarmini/Sidebarmini";
+import { VoiceChat } from "~/components/voice-chat/VoiceChat";
 
 export default component$(() => {
   const userData = [
@@ -8,68 +8,103 @@ export default component$(() => {
       id: 1,
       name: "Mickie Mouse",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg"
+      mic: "/image/chat.svg",
     },
     {
       id: 2,
       name: "Minnie1234",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg"
+      mic: "/image/chat.svg",
     },
     {
       id: 3,
       name: "Daisy Duck",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg"
+      mic: "/image/chat.svg",
     },
     {
       id: 4,
       name: "Doraemon",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg"
+      mic: "/image/chat.svg",
     },
     {
       id: 5,
       name: "Nobita",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg"
-    }
-  ]
-  
+      mic: "/image/chat.svg",
+    },
+  ];
+  const isMicOn = useSignal(true);
+  const isHpOn = useSignal(true);
   return (
     <>
-      <div class="flex w-full h-screen bg-gray-900">
-        <Sidebarmini/>
-        <div class="w-[300px] flex flex-col font-medium bg-gray-900 border border-solid border-zinc-600">
-          <div class="min-h-[255px] flex-col mt-2 rounded-xl flex justify-start items-center px-6 py-4 text-xl font-bold text-zinc-400 bg-gray-800">
-            <div class="w-fit h-fit text-xl justify-center font-bold text-zinc-400 bg-gray-800">Project</div>
-            <div class="bg-gray-900 flex !flex-row  w-[250px] h-[55px] mt-8 p-4 rounded-md border border-solid border-zinc-400">
+      <div class="flex h-screen w-full bg-gray-900">
+        <Sidebarmini />
+        <div class="flex w-[300px] flex-col border border-solid border-zinc-600 bg-gray-900 font-medium">
+          <div class="mt-2 flex min-h-[255px] flex-col items-center justify-start rounded-xl bg-gray-800 px-6 py-4 text-xl font-bold text-zinc-400">
+            <div class="h-fit w-fit justify-center bg-gray-800 text-xl font-bold text-zinc-400">
+              Project
+            </div>
+            <div class="mt-8 flex h-[55px]  w-[250px] !flex-row rounded-md border border-solid border-zinc-400 bg-gray-900 p-4">
               <div>
-              <img alt="Python" src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" width="25" height="25" />
+                <img
+                  alt="Python"
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg"
+                  width="25"
+                  height="25"
+                />
               </div>
-              <div class="font-bold text-base text-zinc-400 px-3">Project1.py</div>
+              <div class="px-3 text-base font-bold text-zinc-400">
+                Project1.py
+              </div>
             </div>
-            <button class="w-[150px] h-[50px] rounded-md bg-red-600 mt-14 text-white active:scale-110">Leave</button>
+            <button class="mt-14 h-[50px] w-[150px] rounded-md bg-red-600 text-white active:scale-110">
+              Leave
+            </button>
           </div>
-          <div class="min-h-[655px] flex-col mt-2 rounded-xl flex justify-start items-center px-6 py-4 text-xl font-bold text-zinc-400 bg-gray-800">
-            <div class="w-fit h-fit text-xl justify-center font-bold text-zinc-400 bg-gray-800 mb-3">Voice Chat</div>
+          <div class="mt-2 flex min-h-[655px] flex-col items-center justify-start rounded-xl bg-gray-800 px-6 py-4 text-xl font-bold text-zinc-400">
+            <div class="mb-3 h-fit w-fit justify-center bg-gray-800 text-xl font-bold text-zinc-400">
+              Voice Chat
+            </div>
             {userData.map((item) => (
-            <VoiceChat key={item.id} {...item} />
+              <VoiceChat key={item.id} {...item} />
             ))}
-          <div class="w-[270px] h-[80px] mt-auto bg-gray-900 rounded-md border border-solid border-zinc-400">
-            <div class="flex items-center py-7 px-3">
-              <img alt="User" src="/image/DextoMiniLogo.svg" width="25" height="25" />
-              <div class="px-3">
-                <h1 class="text-base font-bold text-zinc-400">Dexto_Owner</h1>
-              </div>
-              <div class="ml-5">
-                <img alt="User" src="/image/DextoMiniLogo.svg" width="25" height="25" />
-              </div>
-              <div class="ml-5">
-                <img alt="User" src="/image/DextoMiniLogo.svg" width="25" height="25" />
+            <div class="mt-auto h-[80px] w-[270px] rounded-md border border-solid border-zinc-400 bg-gray-900">
+              <div class="flex items-center px-3 py-7">
+                <img
+                  alt="User"
+                  src="/image/DextoMiniLogo.svg"
+                  width="25"
+                  height="25"
+                />
+                <div class="px-3">
+                  <h1 class="text-base font-bold text-zinc-400">Dexto_Owner</h1>
+                </div>
+                <div class="ml-5">
+                  <img
+                    alt="Mic"
+                    src={
+                      isMicOn.value ? "/image/MicOn.svg" : "/image/MicOff.svg"
+                    }
+                    width="25"
+                    height="25"
+                    class="cursor-pointer hover:opacity-80"
+                    onClick$={() => (isMicOn.value = !isMicOn.value)} // อัปเดตสถานะ
+                  />
+                </div>
+                <div class="ml-5">
+                  <img
+                    alt="Headphone"
+                    src={isHpOn.value ? "/image/HpOn.svg" : "/image/HpOff.svg"}
+                    width="25"
+                    height="25"
+                    class="cursor-pointer hover:opacity-80"
+                    onClick$={() => (isHpOn.value = !isHpOn.value)}
+                  />
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
