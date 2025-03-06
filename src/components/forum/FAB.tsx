@@ -1,5 +1,4 @@
 import { component$, useSignal, $, useStore, useOnWindow, useTask$} from "@builder.io/qwik";
-import { ForumRecommended } from "./ForumRecommended";
 
 export default component$(() => {
   const showCommentBox = useSignal(false);
@@ -9,6 +8,7 @@ export default component$(() => {
   const newComment = useSignal("");
   const newTag = useSignal("");
   const tags = useSignal<string[]>([]);
+  const sendTags = useSignal<string[]>([]);
   const comments = useSignal<{ title: string; text: string; tags: string[]; image?: string; user: string; timestamp: string; }[]>([]);
   const imageFile = useSignal<File | null>(null);
   const likes = useSignal(0); // Signal to track likes count
@@ -23,11 +23,16 @@ export default component$(() => {
   const newCommentReply = useSignal("");
   const selectedCommentId = useSignal<number | null>(null);
 
-
     useTask$(({ track }) => {
+      track(() => tags.value);
+      track(() => comments.value);
       track(() => commentsR.value.length);
-      latestCount.value = commentsR.value.length; 
+      sendTags.value = [...tags.value];
+      latestCount.value = commentsR.value.length;
+      console.log("🔥 FAB useTask - Updated Tags:", tags.value);
+      console.log("🔥 FAB useTask - Updated Comments:", comments.value);
     });
+
   
     const deletePost = $((index: number) => {
       comments.value.splice(index, 1);
@@ -57,6 +62,8 @@ export default component$(() => {
       }
     });
 
+
+  
     const toggleSelection = (value: string) => {
       if (state2.selected.includes(value)) {
         state2.selected = state2.selected.filter((item) => item !== value);
@@ -208,22 +215,41 @@ export default component$(() => {
                   if (postTitle.value.trim() || newComment.value.trim() || imageFile.value || tags.value.length) {
                     const reader = new FileReader();
                     const timestamp = new Date().toLocaleString();
+
+                    const newPost = {
+                      title: postTitle.value,
+                      text: newComment.value,
+                      tags: [...tags.value], // ✅ Keep the tags reference
+                      image: imageFile.value ? URL.createObjectURL(imageFile.value) : undefined,
+                      user: userName.value || "Anonymous",
+                      timestamp : timestamp,
+                    };
+                    
+                    console.log("✅ Adding Post with Tags:", newPost);
+
                     reader.onload = () => {
                       comments.value = [
-                        ...comments.value,
+                        ...comments.value,newPost,
                         {
                           title: postTitle.value,
                           text: newComment.value,
                           tags: [...tags.value],
                           image: reader.result as string,
                           user: userName.value || "Anonymous", // If user doesn't enter a name, use "Anonymous"
-                          timestamp,
+                          timestamp: new Date().toLocaleString(),
                         },
                       ];
+                      console.log("🔥 FAB: Sending Posts to ForumRecommended:", comments.value);
+                      console.log("🔥 FAB: Sending Tags to ForumRecommended:", tags.value);
+                      setTimeout(() => {
+                        console.log("⚠️ Clearing tags AFTER update...");
+                        tags.value = [];
+                      }, 2000);
+
                       postTitle.value = "";
                       newComment.value = "";
                       imageFile.value = null;
-                      tags.value = [];
+                      
                       userName.value = "";
                       showModal.value = false;
                     };
@@ -237,7 +263,7 @@ export default component$(() => {
                       ];
                       postTitle.value = "";
                       newComment.value = "";
-                      tags.value = [];
+                      
                       userName.value = "";
                       showModal.value = false;
                     }
@@ -254,7 +280,7 @@ export default component$(() => {
                   postTitle.value = "";
                   newComment.value = "";
                   imageFile.value = null;
-                  tags.value = [];
+                  
                 }}
               >
                 Cancel
@@ -282,6 +308,7 @@ export default component$(() => {
                 </span>
               ))}
             </div>
+            
             {comment.image && (
               <img
                 src={comment.image}
@@ -289,6 +316,7 @@ export default component$(() => {
                 class="mt-6 w-full max-h-80 object-cover rounded-lg"
               />
             )}
+            
             <div class="flex flex-wrap gap-5 justify-between py-6 mt-20 w-full bg-white-[0px_4px_4px_rgba(0,0,0,0.05)] max-md:px-5 max-md:mt-10 max-md:max-w-full">
             <div class="flex gap-10 text-center">
               <button onClick$={addLike} class="flex items-center gap-2 active:scale-110">
@@ -401,6 +429,7 @@ export default component$(() => {
             </div>
             </div>
               ))}
+              
             <div>
               {commentsR.value.map((comment) => (
                 <article key={comment.id}
@@ -443,8 +472,13 @@ export default component$(() => {
 
                 </article>
               ))}
-            </div>
-            </article>
+            </div>  
+            </article>     
+        
+              {tags.value.length >= 0 && (
+                <ForumRecommended posts={[...comments.value]} currentTags={[...tags.value]} />
+              )}
+            
             {showCommentBox.value&& (
               <div>
                 {/* Response Box */}
@@ -530,7 +564,102 @@ export default component$(() => {
                 )}
             </div>
             )}
-          </div>            
-        
+          </div>
+                       
+      );    
+    });
+
+    interface Props {
+      posts: { 
+        title: string;
+        text: string;
+        tags: string[];
+        image?: string;
+        user: string;
+        timestamp: string;
+      }[];
+      currentTags: string[];
+    }
+    
+    const posts = [
+      {
+        title: "The Future of AI in Medicine",
+        text: "Artificial intelligence is transforming the healthcare industry...",
+        tags: ["AI"],
+        image: "https://example.com/ai-medicine.jpg",
+        user: "Dr. Smith",
+        timestamp: "March 4, 2025",
+      },
+      {
+        title: "Understanding Quantum Computing",
+        text: "Quantum computing is a rapidly evolving field...",
+        tags: ["Quantum Computing", "Physics", "Technology"],
+        image: "https://example.com/quantum-computing.jpg",
+        user: "Jane Doe",
+        timestamp: "March 3, 2025",
+      },
+      {
+        title: "The Rise of Electric Vehicles",
+        text: "EVs are becoming more popular due to their environmental benefits...",
+        tags: ["Electric Vehicles", "Sustainability", "Technology"],
+        image: "https://example.com/electric-cars.jpg",
+        user: "Elon Musk Fan",
+        timestamp: "March 2, 2025",
+      },
+      {
+        title: "How to Build a Web App with React",
+        text: "A step-by-step guide to building modern web applications...",
+        tags: ["React", "Web Development", "Programming","AI"],
+        image: "https://example.com/react-web-app.jpg",
+        user: "Coder123",
+        timestamp: "March 1, 2025",
+      },
+      {
+        title: "AI vs Human Creativity",
+        text: "Can artificial intelligence truly replace human creativity?",
+        tags: ["AI"],
+        image: "https://example.com/ai-vs-human.jpg",
+        user: "Philosopher",
+        timestamp: "March 5, 2025",
+      },
+    ];
+  
+
+    const ForumRecommended = component$<Props>(({ posts = [], currentTags = [] }) => {
+      console.log("📢 ForumRecommended - Received Tags:", currentTags);
+      console.log("📢 ForumRecommended - Received Posts:", posts);
+    
+      const filteredPosts = posts.filter(post => {
+        if (!currentTags.length) return false; 
+        return post.tags.some((tag: string) => currentTags.includes(tag));
+      });
+    
+      return (
+        <section class="flex overflow-hidden flex-col items-center px-20 pt-28 pb-48 w-full bg-white">
+          <div class="flex flex-col max-w-full w-[812px]">
+            <h2 class="self-start ml-3.5 text-4xl font-semibold text-black">
+              Recommended from Dexto
+            </h2>
+            <div class="mt-10">
+              {filteredPosts.length > 0 ? (
+                <div class="flex gap-5 flex-wrap">
+                  {filteredPosts.map((article, index) => (
+                    <article key={index} class="w-6/12">
+                      <div class="flex flex-col py-2 w-full">
+                        <h3 class="text-2xl font-bold text-black">{article.title}</h3>
+                        <p class="mt-2 text-sm font-light text-black">{article.text}</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500">
+                          Posted by {article.user} on {article.timestamp}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p class="text-gray-500 mt-5">No similar posts found.</p>
+              )}
+            </div>
+          </div>
+        </section>
       );
     });

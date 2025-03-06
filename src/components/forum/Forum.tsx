@@ -14,17 +14,6 @@ import { ForumFooter } from "./ForumFooter";
 export const Forum = component$(() => {
   const statuslogin = useSignal(true); // Change this to true for testing logged-in state
 
-  const posts = useSignal<{ 
-    title: string;
-    text: string;
-    tags: string[];
-    image?: string;
-    user: string;
-    timestamp: string;
-  }[]>([]); // ✅ Ensures `posts` is always an array
-
-  const currentTags = useSignal<string[]>([]);
-
   return (
     <div class="flex flex-col w-full">
       {statuslogin.value ? (
@@ -32,9 +21,6 @@ export const Forum = component$(() => {
           <ForumHeader />
           <ForumContent />
           {/*<ForumComments/>*/}
-          <ForumRecommended 
-           posts={posts.value} 
-           currentTags={currentTags.value}/>
           <ForumFooter />
         </>
       ) : (
