@@ -3,9 +3,9 @@ import { $, component$, useSignal } from "@builder.io/qwik";
 // ฟังก์ชันสำหรับกำหนดไอคอนตามประเภทไฟล์
 const getLanguageImage = $((language: string) => {
   if (language === "Python") {
-    return "📄ᵖʸ";  // สำหรับไฟล์ Python
+    return "ᵖʸ📄";  // สำหรับไฟล์ Python
   } else if (language === "Javascript") {
-    return "📄ʲˢ";  // สำหรับไฟล์ Javascript
+    return "ʲˢ📄";  // สำหรับไฟล์ Javascript
   } else {
     return "📂";  // สำหรับไฟล์อื่นๆ
   }
