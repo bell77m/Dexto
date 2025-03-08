@@ -63,7 +63,7 @@ export const UserProfile = component$((props: UserProfileProps) => {
               {[...Array(6)].map((_, i) => (
                 <img
                   key={i}
-                  src={`/image/Picture0${i + 1}.png`}
+                  src={`/image/Picture0${i + 1}.svg`}
                   alt={`Avatar ${i + 1}`}
                   class="cursor-pointer rounded-lg w-[80px] h-[80px] border-2 border-transparent hover:border-emerald-300"
                   onClick$={() => selectAvatar(`Picture0${i + 1}.png`)}
