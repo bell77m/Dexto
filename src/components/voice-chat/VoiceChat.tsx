@@ -3,10 +3,9 @@ import { component$, useStore, useSignal } from '@builder.io/qwik';
 interface VoiceChatProps {
   name: string;
   pic: string;
-  mic: string;
 }
 
-export const VoiceChat = component$<VoiceChatProps>(({ name, pic, mic }) => {
+export const VoiceChat = component$<VoiceChatProps>(({ name, pic }) => {
   // Store เก็บสีที่ถูกใช้ไปแล้ว
   const store = useStore({
     usedColors: [] as string[],
@@ -55,8 +54,7 @@ export const VoiceChat = component$<VoiceChatProps>(({ name, pic, mic }) => {
         <h1 class="text-base font-bold text-zinc-400">{name}</h1>
       </div>
 
-      {/*}
-      <div class="w-fit h-fit ml-auto px-1">
+      {/*<div class="w-fit h-fit ml-auto px-1">
         <img alt="Mic Status" src={isMicOn.value ? "/image/MicOn.svg" : "/image/MicOff.svg"} class="w-6 h-6 rounded-full" 
         onClick$={() => (isMicOn.value = !isMicOn.value)} />
       </div>
@@ -67,8 +65,7 @@ export const VoiceChat = component$<VoiceChatProps>(({ name, pic, mic }) => {
           isHpOn.value = !isHpOn.value; // Toggle หูฟัง
           isMicOn.value = isHpOn.value; // ถ้าหูฟังเปิด ไมค์ต้องเปิดด้วย
         }} />
-      </div>
-      */}
+      </div>*/}
     </div>
   );
 });

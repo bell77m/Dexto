@@ -8,32 +8,32 @@ export default component$(() => {
       id: 1,
       name: "Mickie Mouse",
       pic: "/image/home.svg",
-      mic: "/image/MicOn.svg",
     },
     {
       id: 2,
       name: "Minnie1234",
       pic: "/image/home.svg",
-      mic: "/image/MicOn.svg",
     },
     {
       id: 3,
       name: "Daisy Duck",
       pic: "/image/home.svg",
-      mic: "/image/MicOn.svg",
     },
     {
       id: 4,
       name: "Doraemon",
       pic: "/image/home.svg",
-      mic: "/image/MicOn.svg",
     },
     {
       id: 5,
       name: "Nobita",
       pic: "/image/home.svg",
-      mic: "/image/MicOn.svg",
     },
+    {
+      id: 6,
+      name: "Shizuka",
+      pic: "/image/home.svg",
+    }
   ];
 
   const isMicOn = useSignal(true);
@@ -112,7 +112,7 @@ export default component$(() => {
             </div>
           </div>
         </div>
-        <div class="w-[1310px] h-[932px] text-code text-white bg-gray-900">
+        <div class="w-[1310px] h-[932px] bg-gray-900">
           fix
         </div>
       </div>
