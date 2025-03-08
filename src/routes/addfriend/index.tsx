@@ -6,14 +6,14 @@ export default component$(() => {
   const searchQuery = useSignal('');
   const isSearching = useSignal(false);
   const searchResults = useSignal([]);
-  const hasSearched = useSignal(false); // ✅ ตรวจสอบว่าผู้ใช้เคยกด Search หรือไม่
+  const hasSearched = useSignal(false);
   const { userId } = useUserStore();
 
   const handleSearch = $(async () => {
     if (!searchQuery.value.trim()) return;
 
     isSearching.value = true;
-    hasSearched.value = true; // ✅ กำหนดให้รู้ว่าเคยกด Search แล้ว
+    hasSearched.value = true;
     try {
       const response = await fetch('http://dexto.com:3000/graphql', {
         method: 'POST',
@@ -45,6 +45,37 @@ export default component$(() => {
     }
   });
 
+  const sendFriendRequest = $(async (friendId: number) => {
+    try {
+      const response = await fetch('http://dexto.com:3000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `
+            mutation SendFriendRequest($userId: Int!, $friendId: Int!) {
+              sendFriendRequest(userId: $userId, friendId: $friendId) {
+                success
+              }
+            }
+          `,
+          variables: { userId: userId.value, friendId },
+        }),
+      });
+
+      const result = await response.json();
+      if (result.data?.sendFriendRequest?.success) {
+        console.log(`✅ Friend request sent to user ${friendId}`);
+        searchResults.value = searchResults.value.map(user =>
+          user.id === friendId ? { ...user, requestSent: true } : user
+        ); // ✅ อัปเดต requestSent เป็น true
+      } else {
+        console.error("❌ Failed to send friend request");
+      }
+    } catch (error) {
+      console.error("❌ Error sending friend request:", error);
+    }
+  });
+
   return (
     <>
       <div class="flex h-screen">
@@ -72,7 +103,7 @@ export default component$(() => {
               />
             </div>
 
-            {/* ✅ แสดงข้อความเมื่อกด Search และไม่พบผู้ใช้ */}
+            {/* ✅ แสดงข้อความเมื่อกด Search แล้วไม่พบผู้ใช้ */}
             {hasSearched.value && searchResults.value.length === 0 && !isSearching.value && (
               <div class="mt-2 text-red-500 text-sm">⚠️ No users found</div>
             )}
@@ -85,9 +116,9 @@ export default component$(() => {
                 <div key={user.id} class="p-4 bg-gray-800 rounded-xl min-h-[60px] flex items-center justify-between text-gray-500">
                   <div class="flex items-center space-x-4">
                     <img src={user.profilePictureUrl || "/image/defaultProfile.svg"} width="40" height="40" class="rounded-full" />
-                    <div class="flex flex-col"> {/* ✅ แสดงผลแบบแยกบรรทัด */}
+                    <div class="flex flex-col">
                       <span class="font-semibold">{user.displayName}</span>
-                      <span class="text-sm text-gray-400">{user.email}</span> {/* ✅ อีเมลแสดงเป็นสีเทา */}
+                      <span class="text-sm text-gray-400">{user.email}</span>
                     </div>
                   </div>
                   {user.requestSent ? (
@@ -95,7 +126,7 @@ export default component$(() => {
                       Request Sent
                     </button>
                   ) : (
-                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg">
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded-lg" onClick$={() => sendFriendRequest(user.id)}>
                       Send Request
                     </button>
                   )}
