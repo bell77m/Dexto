@@ -8,35 +8,37 @@ export default component$(() => {
       id: 1,
       name: "Mickie Mouse",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg",
+      mic: "/image/MicOn.svg",
     },
     {
       id: 2,
       name: "Minnie1234",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg",
+      mic: "/image/MicOn.svg",
     },
     {
       id: 3,
       name: "Daisy Duck",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg",
+      mic: "/image/MicOn.svg",
     },
     {
       id: 4,
       name: "Doraemon",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg",
+      mic: "/image/MicOn.svg",
     },
     {
       id: 5,
       name: "Nobita",
       pic: "/image/home.svg",
-      mic: "/image/chat.svg",
+      mic: "/image/MicOn.svg",
     },
   ];
+
   const isMicOn = useSignal(true);
   const isHpOn = useSignal(true);
+
   return (
     <>
       <div class="flex h-screen w-full bg-gray-900">
@@ -90,7 +92,7 @@ export default component$(() => {
                     width="25"
                     height="25"
                     class="cursor-pointer hover:opacity-80"
-                    onClick$={() => (isMicOn.value = !isMicOn.value)} // อัปเดตสถานะ
+                    onClick$={() => (isMicOn.value = !isMicOn.value)}
                   />
                 </div>
                 <div class="ml-5">
@@ -100,12 +102,18 @@ export default component$(() => {
                     width="25"
                     height="25"
                     class="cursor-pointer hover:opacity-80"
-                    onClick$={() => (isHpOn.value = !isHpOn.value)}
+                    onClick$={() => {
+                      isHpOn.value = !isHpOn.value; // Toggle หูฟัง
+                      isMicOn.value = isHpOn.value; // ถ้าหูฟังเปิด ไมค์ต้องเปิดด้วย
+                    }}
                   />
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="w-[1310px] h-[932px] text-code text-white bg-gray-900">
+          fix
         </div>
       </div>
     </>
