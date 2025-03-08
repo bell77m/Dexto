@@ -1,11 +1,19 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, $ } from "@builder.io/qwik";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarSection } from "./SidebarSection";
 import { ThemeToggle } from "./ThemeToggle";
-import { useUserStore } from "~/store/store"; // นำเข้า useUserStore
+import { useUserStore } from "~/store/store"; // ✅ นำเข้า useUserStore
+import { useNavigate } from "@builder.io/qwik-city"; // ✅ ใช้สำหรับ Redirect
 
 export const Sidebar = component$(() => {
-  const { userId, displayName, profilePictureUrl} = useUserStore(); // ใช้งาน user store
+  const { displayName, profilePictureUrl, logoutUser } = useUserStore(); // ✅ ใช้ logoutUser จาก store
+  const navigate = useNavigate(); // ✅ ใช้สำหรับเปลี่ยนหน้า
+
+  const handleLogout = $(async () => {
+    console.log(`🔴 Logging out: ${displayName.value}`); // ✅ แสดงข้อความ Logout
+    await logoutUser();
+    navigate("/login"); // ✅ Redirect ไปหน้า Login
+  });
 
   const mainItems = [
     { icon: "/image/home.svg", label: "Home", href: "/home" },
@@ -27,16 +35,13 @@ export const Sidebar = component$(() => {
       <div class="flex gap-6 justify-between items-center px-6 py-4 text-xl font-bold bg-gray-800 min-h-[72px] text-zinc-500">
         <img
           loading="lazy"
-          src={profilePictureUrl.value || "https://camo.githubusercontent.com/bfb2b63eeb7b21626c1a896e6e58a55838135977ce8b5d7ee13a60080b56a1e7/68747470733a2f2f6173736574732d76322e6c6f7474696566696c65732e636f6d2f612f30336364633665302d313138622d313165652d626630382d3037643838613934316362642f696969774730764a514e2e676966"} 
+          src={profilePictureUrl.value || "/image/defaultProfile.svg"}
           class="object-contain shrink-0 self-stretch my-auto rounded-full aspect-square w-[42px]"
           alt="User avatar"
         />
         {/* ใช้ displayName จาก store */}
         <div class="self-stretch my-auto w-[170px]">
-          <span>
-            {displayName.value || "Loading"} 
-            {/* {userId.value || "Unknown"} */}
-          </span>
+          <span>{displayName.value || "Loading"}</span>
         </div>
       </div>
 
@@ -54,11 +59,22 @@ export const Sidebar = component$(() => {
         ))}
       </SidebarSection>
 
+      {/* ปุ่ม Logout */}
+      <div class="mt-auto p-4">
+        <button
+          class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-800"
+          onClick$={handleLogout} // ✅ เรียกฟังก์ชัน Logout
+        >
+          Logout
+        </button>
+      </div>
+
       {/* Logo & Theme Toggle */}
-      <div class="self-center items-center mt-28 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black opacity-25">
+      <div class="self-center items-center mt-4 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black opacity-25">
         <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
       </div>
-      <ThemeToggle />
+
+      <ThemeToggle /> {/* ✅ ปุ่ม Theme Toggle อยู่ใต้ Logout */}
     </div>
   );
 });
