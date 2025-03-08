@@ -5,7 +5,6 @@ export default component$(() => {
   const searchQuery = useSignal('');
   const searchResults = useSignal([]);
   const isSearching = useSignal(false);
-  const friendRequested = useSignal<number | null>(null);
 
   const handleSearch = $(async () => {
     isSearching.value = true;
@@ -15,19 +14,20 @@ export default component$(() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
-            query SearchUsers($query: String!) {
-              searchUsers(query: $query) {
+            query SearchUsers($query: String!, $userId: Int!) {
+              searchUsers(query: $query, userId: $userId) {
                 id
                 displayName
                 email
                 profilePictureUrl
+                requestSent  # ✅ เพิ่ม requestSent
               }
             }
           `,
-          variables: { query: searchQuery.value },
+          variables: { query: searchQuery.value, userId: 1 },  // ✅ userId ที่ล็อกอิน
         }),
       });
-
+  
       const result = await response.json();
       searchResults.value = result.data?.searchUsers || [];
     } catch (error) {
@@ -51,13 +51,15 @@ export default component$(() => {
               }
             }
           `,
-          variables: { userId: 1, friendId }, // เปลี่ยน `userId` เป็น ID ของผู้ใช้ที่ล็อกอิน
+          variables: { userId: 1, friendId }, // ✅ userId ที่ล็อกอิน
         }),
       });
 
       const result = await response.json();
       if (result.data?.sendFriendRequest.success) {
-        friendRequested.value = friendId;
+        searchResults.value = searchResults.value.map(user =>
+          user.id === friendId ? { ...user, requestSent: true } : user
+        );
       } else {
         alert(result.data?.sendFriendRequest.message || "Failed to send friend request.");
       }
@@ -106,24 +108,24 @@ export default component$(() => {
                     <p class="text-sm text-gray-400">{user.email}</p>
                   </div>
                 </div>
-                {friendRequested.value !== user.id ? (
+                {user.requestSent ? (
+                  <span class="text-green-400 font-bold">Request Sent!</span>
+                ) : (
                   <button
                     class="px-4 py-2 bg-blue-500 text-white rounded-lg"
                     onClick$={() => sendFriendRequest(user.id)}
                   >
                     Send Request
                   </button>
-                ) : (
-                  <span class="text-green-400 font-bold">Request Sent!</span>
                 )}
               </div>
             ))}
           </div>
         )}
 
-        {!isSearching.value && searchResults.value.length === 0 && searchQuery.value && (
+        {/* {!isSearching.value && searchResults.value.length === 0 && searchQuery.value && (
           <p class="text-center text-gray-400 mt-4">No users found.</p>
-        )}
+        )} */}
       </section>
     </div>
   );
