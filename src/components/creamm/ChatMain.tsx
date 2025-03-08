@@ -18,7 +18,8 @@ export const ChatMain = component$(() => {
 
   const selectedUser = useSignal(users.value[0]);
   const messages = useSignal<{ userId: number; text: string; self: boolean; timestamp: number }[]>([]);
-  const searchTerm = useSignal("");
+  const searchTerm = useSignal(""); // ใช้สำหรับค้นหารายชื่อผู้ใช้
+  const messageText = useSignal(""); // ใช้สำหรับส่งข้อความ
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
 
   const openFileDialog = $(() => {
@@ -36,12 +37,12 @@ export const ChatMain = component$(() => {
   });
 
   const sendMessage = $(() => {
-    if (searchTerm.value.trim()) {
+    if (messageText.value.trim()) {
       messages.value = [
         ...messages.value,
-        { userId: selectedUser.value.id, text: searchTerm.value, self: true, timestamp: Date.now() },
+        { userId: selectedUser.value.id, text: messageText.value, self: true, timestamp: Date.now() },
       ];
-      searchTerm.value = "";
+      messageText.value = "";
     }
   });
 
@@ -53,60 +54,62 @@ export const ChatMain = component$(() => {
   return (
     <div class="flex h-screen w-full bg-gray-900 text-white">
       {/* Sidebar */}
-      <aside class="w-1/3 h-screen bg-gray-800 p-4 flex flex-col">
+      <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
 
-        {/* Search */}
-        <div class="pb-2">
+        {/* Search Bar */}
+        <div class="mb-2">
           <input
             class="w-full p-2 bg-gray-600 rounded-md"
             value={searchTerm.value}
             onInput$={(e) => (searchTerm.value = (e.target as HTMLInputElement).value)}
-            placeholder="Search by name or ID"
+            placeholder="Search by name"
           />
         </div>
 
-        {/* Users List - Scrollable */}
+        {/* User List with Hidden Scroll */}
         <ul class="flex-1 overflow-y-auto scrollbar-hide">
-          {users.value.map((user) => {
-            const userMessages = messages.value.filter((msg) => msg.userId === user.id);
-            const lastMessage = userMessages.length ? userMessages[userMessages.length - 1] : null;
+          {users.value
+            .filter((user) => user.name.toLowerCase().includes(searchTerm.value.toLowerCase()))
+            .map((user) => {
+              const userMessages = messages.value.filter((msg) => msg.userId === user.id);
+              const lastMessage = userMessages.length ? userMessages[userMessages.length - 1] : null;
 
-            return (
-              <li
-                key={user.id}
-                class={`flex items-center p-4 cursor-pointer rounded-md gap-4 ${
-                  selectedUser.value.id === user.id ? "bg-gray-700" : ""
-                }`}
-                onClick$={() => (selectedUser.value = user)}
-              >
-                <img
-                  src={`https://ui-avatars.com/api/?name=${user.name}&background=random&color=fff&size=40`}
-                  alt={user.name}
-                  class="w-10 h-10 rounded-full"
-                />
+              return (
+                <li
+                  key={user.id}
+                  class={`flex items-center p-4 cursor-pointer rounded-md gap-4 ${
+                    selectedUser.value.id === user.id ? "bg-gray-700" : ""
+                  }`}
+                  onClick$={() => (selectedUser.value = user)}
+                >
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${user.name}&background=random&color=fff&size=40`}
+                    alt={user.name}
+                    class="w-10 h-10 rounded-full"
+                  />
 
-                <div class="flex-1">
-                  <div class="flex justify-between">
-                    <span class="font-semibold">{user.name}</span>
-                    {lastMessage && <span class="text-gray-400 text-sm">{formatTime(lastMessage.timestamp)}</span>}
+                  <div class="flex-1">
+                    <div class="flex justify-between">
+                      <span class="font-semibold">{user.name}</span>
+                      {lastMessage && <span class="text-gray-400 text-sm">{formatTime(lastMessage.timestamp)}</span>}
+                    </div>
+                    <p class="text-gray-300 text-sm truncate">
+                      {lastMessage ? lastMessage.text : "No messages yet"}
+                    </p>
                   </div>
-                  <p class="text-gray-300 text-sm truncate">
-                    {lastMessage ? lastMessage.text : "No messages yet"}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
+                </li>
+              );
+            })}
         </ul>
       </aside>
 
       {/* Chat Panel */}
-      <section class="w-2/3 h-screen flex flex-col p-4">
+      <section class="w-2/3 flex flex-col p-4">
         <h2 class="text-lg font-semibold border-b pb-2">{selectedUser.value.name}</h2>
 
         {/* Messages */}
-        <div class="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide">
+        <div class="flex-1 overflow-y-auto p-4 space-y-2">
           {messages.value
             .filter((msg) => msg.userId === selectedUser.value.id)
             .map((msg, index) => (
@@ -126,8 +129,8 @@ export const ChatMain = component$(() => {
           <input type="file" ref={(el) => (fileInputRef.value = el)} class="hidden" onChange$={handleFileUpload} />
           <input
             class="flex-1 p-2 bg-gray-800 rounded-md"
-            value={searchTerm.value}
-            onInput$={(e) => (searchTerm.value = (e.target as HTMLInputElement).value)}
+            value={messageText.value}
+            onInput$={(e) => (messageText.value = (e.target as HTMLInputElement).value)}
             placeholder="Type a message..."
           />
           <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={sendMessage}>
