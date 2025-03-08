@@ -1,21 +1,22 @@
-import { component$, useSignal } from "@builder.io/qwik";
+import { $, component$, useSignal } from "@builder.io/qwik";
+
+// ฟังก์ชันสำหรับกำหนดไอคอนตามประเภทไฟล์
+const getLanguageImage = $((language: string) => {
+  if (language === "Python") {
+    return "📄ᵖʸ";  // สำหรับไฟล์ Python
+  } else if (language === "Javascript") {
+    return "📄ʲˢ";  // สำหรับไฟล์ Javascript
+  } else {
+    return "📂";  // สำหรับไฟล์อื่นๆ
+  }
+});
 
 export const MyProject = component$((props: { class?: string }) => {
   const isCreating = useSignal(false);
   const newProjectName = useSignal("");
   const selectedLanguage = useSignal("");
   const projects = useSignal<{ name: string; language: string; image: string; createdAt: number; isEditing: boolean }[]>([]);
-
-  const getLanguageImage = (language: string) => {
-    switch (language) {
-      case "Python":
-        return "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg";
-      case "Javascript":
-        return "https://img.icons8.com/?size=100&id=13679&format=png&color=000000";
-      default:
-        return "https://upload.wikimedia.org/wikipedia/commons/5/5b/Logo_JavaScript.svg";
-    }
-  };
+  const fileInputRef = useSignal<HTMLInputElement | null>(null);
 
   const formatTimeAgo = (timestamp: number) => {
     const now = Date.now();
@@ -37,19 +38,51 @@ export const MyProject = component$((props: { class?: string }) => {
     }
   };
 
+  const handleFileUpload = $((e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const fileType = file.name.split(".").pop()?.toLowerCase();
+      if (fileType === "py" || fileType === "js") {
+        alert(`File ${file.name} is valid and uploaded!`);
+        
+        // เพิ่มโปรเจกต์ใหม่หลังจากการอัปโหลดไฟล์
+        const newProject = {
+          name: file.name,
+          language: fileType === "py" ? "Python" : "Javascript",
+          image: getLanguageImage(fileType === "py" ? "Python" : "Javascript"), // ใช้ฟังก์ชัน getLanguageImage เพื่อกำหนดไอคอน
+          createdAt: Date.now(),
+          isEditing: false,
+        };
+        projects.value = [...projects.value, newProject];  // เพิ่มโปรเจกต์เข้าไปในรายการ
+      } else {
+        alert("Please upload only Python (.py) or JavaScript (.js) files.");
+      }
+    }
+  });
+
   return (
     <section class={`flex flex-col flex-grow items-start text-white bg-gray-900 ${props.class || ""}`}>
       <h1 class="mt-12 ml-20 text-2xl font-semibold tracking-tight leading-none">My Project</h1>
 
       <h2 class="flex gap-10 mt-10 ml-20 text-xs font-semibold tracking-tight leading-none">
         <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" onClick$={() => (isCreating.value = true)}>
-         Create your Project
+          Create your Project
         </button>
-        <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" onClick$={() => alert("Import feature is under development!")}>
-         Import your Project
+        <button
+          class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          onClick$={() => fileInputRef.value?.click()}
+        >
+          Import your Project
         </button>
       </h2>
 
+      {/* File Upload */}
+      <input
+        type="file"
+        ref={(el) => (fileInputRef.value = el)}
+        class="hidden"
+        onChange$={handleFileUpload}
+      />
 
       {isCreating.value && (
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -64,7 +97,7 @@ export const MyProject = component$((props: { class?: string }) => {
 
             <h3 class="mt-4">Choose Language:</h3>
             <div class="flex gap-4 mt-2">
-              {["Python","Javascript"].map((lang) => (
+              {["Python", "Javascript"].map((lang) => (
                 <button
                   key={lang}
                   class={`px-4 py-2 rounded-md ${selectedLanguage.value === lang ? "bg-green-600" : "bg-gray-600"} text-white`}
@@ -88,7 +121,7 @@ export const MyProject = component$((props: { class?: string }) => {
                       {
                         name: newProjectName.value,
                         language: selectedLanguage.value,
-                        image: getLanguageImage(selectedLanguage.value),
+                        image: getLanguageImage(selectedLanguage.value), // ใช้ฟังก์ชัน getLanguageImage เพื่อกำหนดไอคอน
                         createdAt: Date.now(),
                         isEditing: false,
                       },
@@ -111,11 +144,12 @@ export const MyProject = component$((props: { class?: string }) => {
             No projects available.
         </p>}
 
-      <div class="mt-8 ml-20 w-full max-w-3xl space-y-4">
+      {/* Project List */}
+      <div class="mt-8 ml-20 w-full max-w-3xl space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         {projects.value.map((project, index) => (
           <div key={index} class="relative flex flex-col items-start px-6 py-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-300 group">
             <div class="flex gap-6 items-center">
-              <img alt={`${project.language} Logo`} src={project.image} width="50" height="50" />
+              <span class="text-3xl">{project.image}</span> {/* แสดงไอคอน 📄ᵖʸ หรือ 📄ʲˢ */}
               <div>
                 {project.isEditing ? (
                   <input
@@ -168,4 +202,3 @@ export const MyProject = component$((props: { class?: string }) => {
     </section>
   );
 });
-
