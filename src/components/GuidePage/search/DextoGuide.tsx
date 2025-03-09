@@ -15,9 +15,9 @@ export const DextoGuide = component$(() => {
             GUIDE
           </div>
         </div>
-        <div class="mt-10">
+        {/*<div class="mt-10">
           <SearchBar />
-        </div>
+        </div>*/}
       </div>
     </div>
   );
