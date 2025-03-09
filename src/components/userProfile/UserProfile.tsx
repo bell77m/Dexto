@@ -1,6 +1,7 @@
 import { component$, useSignal, $ } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
 
+
 interface UserProfileProps {
   initialDisplayName?: string;
 }
