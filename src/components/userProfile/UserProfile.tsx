@@ -1,24 +1,29 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
-import { avatarUrls } from "./avatarConfig";// ✅ นำเข้า Avatar URLs
-
+import { avatarUrls } from "./avatarConfig";
 export const UserProfile = component$(() => {
   const { displayName, profilePictureUrl, userId, updateStore } = useUserStore();
   const showPopup = useSignal(false);
   const selectedAvatar = useSignal(profilePictureUrl.value.trim());
   const newDisplayName = useSignal(displayName.value);
-  const isSaving = useSignal(false); // ✅ เพิ่มสถานะปุ่ม
+  const isSaving = useSignal(false);
+
+  // ✅ เก็บค่าต้นฉบับไว้ใช้สำหรับปุ่ม Cancel
+  const originalDisplayName = useSignal(displayName.value);
+  const originalAvatar = useSignal(profilePictureUrl.value.trim());
 
   // ✅ โหลดข้อมูลล่าสุดเมื่อเปิดหน้า
   useVisibleTask$(() => {
     newDisplayName.value = displayName.value;
     selectedAvatar.value = profilePictureUrl.value.trim();
+    originalDisplayName.value = displayName.value;
+    originalAvatar.value = profilePictureUrl.value.trim();
   });
 
-  // ✅ เมื่อเลือกรูปใหม่ อัปเดตรูปในวงกลมทันที
-  const selectAvatar = $((url: string) => {
-    selectedAvatar.value = url;
-    showPopup.value = false;
+  // ✅ เมื่อกด `Cancel` → คืนค่ากลับไปที่ค่าก่อนหน้า
+  const resetProfile = $(() => {
+    newDisplayName.value = originalDisplayName.value;
+    selectedAvatar.value = originalAvatar.value;
   });
 
   // ✅ ฟังก์ชันอัปเดตข้อมูลลง Database
@@ -32,19 +37,6 @@ export const UserProfile = component$(() => {
     }
 
     isSaving.value = true; // ✅ เปลี่ยนปุ่มเป็น "Saving..."
-
-    console.log("🚀 Sending GraphQL Mutation:", JSON.stringify({
-      query: `
-        mutation UpdateUserProfile($id: Int!, $displayName: String!, $profilePictureUrl: String!) {
-          updateUser(id: $id, displayName: $displayName, profilePictureUrl: $profilePictureUrl) {
-            id
-            displayName
-            profilePictureUrl
-          }
-        }
-      `,
-      variables: { id: userId.value, displayName: cleanDisplayName, profilePictureUrl: cleanUrl }
-    }, null, 2));
 
     try {
       const response = await fetch("http://dexto.com:3000/graphql", {
@@ -70,6 +62,8 @@ export const UserProfile = component$(() => {
       } else if (result.data?.updateUser) {
         console.log("✅ Profile updated successfully!");
         updateStore(cleanDisplayName, userId.value, cleanUrl); // ✅ อัปเดต Store
+        originalDisplayName.value = cleanDisplayName; // ✅ อัปเดตค่าใหม่
+        originalAvatar.value = cleanUrl;
         // alert("Profile updated successfully!");
       } else {
         console.error("❌ Failed to update profile.");
@@ -78,8 +72,8 @@ export const UserProfile = component$(() => {
       console.error("❌ Error updating profile:", error);
     } finally {
       setTimeout(() => {
-      isSaving.value = false;
-      }, 2000); 
+        isSaving.value = false; // ✅ หลังจาก 2 วินาที เปลี่ยนปุ่มกลับเป็น Save Change
+      }, 2000);
     }
   });
 
@@ -110,13 +104,20 @@ export const UserProfile = component$(() => {
         <img src={selectedAvatar.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
         <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
           <button
-            class={`px-4 py-2 text-base text-black rounded-md cursor-pointer border-none ${isSaving.value ? "bg-gray-500" : "bg-emerald-300"}`}
+            class={`px-4 py-2 text-base text-black rounded-md cursor-pointer border-none ${
+              isSaving.value ? "bg-gray-500" : "bg-emerald-300"
+            }`}
             onClick$={saveProfile}
             disabled={isSaving.value}
           >
             {isSaving.value ? "Saving..." : "Save Change"}
           </button>
-          <button class="px-4 py-2 text-base text-white bg-transparent cursor-pointer border-none">Cancel</button>
+          <button
+            class="px-4 py-2 text-base text-white bg-gray-600 rounded-md cursor-pointer border-none"
+            onClick$={resetProfile} // ✅ เมื่อกดปุ่มนี้ ข้อมูลจะกลับเป็นค่าก่อนหน้า
+          >
+            Cancel
+          </button>
         </div>
       </div>
 
@@ -129,10 +130,10 @@ export const UserProfile = component$(() => {
               {avatarUrls.map((url, i) => (
                 <img
                   key={i}
-                  src={url}  // ✅ ใช้ URL จากอาร์เรย์ที่นำเข้า
+                  src={url}
                   alt={`Avatar ${i + 1}`}
                   class="cursor-pointer rounded-lg w-[80px] h-[80px] border-2 border-transparent hover:border-emerald-300"
-                  onClick$={() => selectAvatar(url)}
+                  onClick$={() => (selectedAvatar.value = url)}
                 />
               ))}
             </div>
