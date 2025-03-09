@@ -1,3 +1,4 @@
+
 import { component$, useSignal, $, useStore, useOnWindow, useTask$} from "@builder.io/qwik";
 
 export default component$(() => {
@@ -8,69 +9,120 @@ export default component$(() => {
   const newComment = useSignal("");
   const newTag = useSignal("");
   const tags = useSignal<string[]>([]);
-  const sendTags = useSignal<string[]>([]);
-  const comments = useSignal<{ title: string; text: string; tags: string[]; image?: string; user: string; timestamp: string; }[]>([]);
+  const comments = useSignal<{ id: number; title: string; text: string; tags: string[]; image?: string; user: string; timestamp: string; likes: number; hasLiked: boolean;}[]>([]);
   const imageFile = useSignal<File | null>(null);
-  const likes = useSignal(0); // Signal to track likes count
-  const hasLiked = useSignal(false); // Track whether the user has liked
-  const latestCount = useSignal(comments.value.length);
   const state2 = useStore({ selected: [] as string[] });
   const state = useStore({ menuOpen: false, reportOpen: false, selectedReason: "" });
   const userName = useSignal("");
-  const commentsR = useSignal<{ id: number; text: string }[]>([]);
+  const commentsR = useSignal<{ postId: number; id: number; text: string }[]>([]);
   const newCommentR = useSignal("");
   const commentsReply = useSignal<{ parentId: number | null; text: string }[]>([]);
   const newCommentReply = useSignal("");
   const selectedCommentId = useSignal<number | null>(null);
+  const selectedPostId = useSignal<number | null>(null);
+  const postCommentMap = useStore<{ [postId: number]: number[] }>({});
 
-    useTask$(({ track }) => {
-      track(() => tags.value);
-      track(() => comments.value);
-      track(() => commentsR.value.length);
-      sendTags.value = [...tags.value];
-      latestCount.value = commentsR.value.length;
-      console.log("🔥 FAB useTask - Updated Tags:", tags.value);
-      console.log("🔥 FAB useTask - Updated Comments:", comments.value);
-    });
-
+      
+        useTask$(({ track }) => {
+          track(() => showCommentBox.value); // Runs when showCommentBox changes
+          if (showCommentBox.value && selectedCommentId.value !== null) {
+            selectedPostId.value = selectedCommentId.value; // ✅ Set correct postId
+            console.log("🟢 PostId set using useTask$:", selectedPostId.value);
+          }
+        });
   
-    const deletePost = $((index: number) => {
-      comments.value.splice(index, 1);
-      comments.value = [...comments.value];
-    
-      // Remove all comments related to the deleted post
-      commentsR.value = commentsR.value.filter(comment => comment.id !== index);
-      commentsReply.value = commentsReply.value.filter(reply => reply.parentId !== index);
+        const addComment = $((postId: number) => {
+          if (!newCommentR.value.trim()) return;
+        
+          // ✅ Generate a unique ID for the new comment
+          const commentId = Date.now();
+        
+          console.log("🟢 Adding new comment to postId:", postId);
+        
+          // ✅ Ensure comment is added under the correct post
+          commentsR.value = [
+            ...commentsR.value,
+            { postId: postId, id: commentId, text: newCommentR.value.trim() }
+          ];
+        
+          // ✅ Track comment under this post
+          if (!postCommentMap[postId]) {
+            postCommentMap[postId] = [];
+          }
+          postCommentMap[postId].push(commentId);
+        
+          console.log("🟢 Updated postCommentMap:", JSON.stringify(postCommentMap, null, 2));
+        
+          newCommentR.value = ""; 
+          showCommentBox.value = false;
+        });
+        const deletePost = $((postId: number) => {
+          console.log("🔴 Attempting to delete post:", postId);
+          console.log("🟡 Current comments before deletion:", JSON.stringify(commentsR.value, null, 2));  
+        
+          // ✅ Get all comment IDs associated with this post
+          const commentsToDelete = postCommentMap[postId] || [];
+        
+          console.log("🟡 Comments linked to this post:", commentsToDelete);
+        
+          // ✅ Remove all comments linked to this post
+          commentsR.value = commentsR.value.filter(comment => !commentsToDelete.includes(comment.id));
+        
+          console.log("🟡 Remaining comments after deletion:", JSON.stringify(commentsR.value, null, 2));
+        
+          // ✅ Remove post from tracking map
+          delete postCommentMap[postId];
+        
+          // ✅ Remove the post itself
+          comments.value = comments.value.filter(post => post.id !== postId);
+          console.log("🟢 Post deleted successfully:", postId);
+        
+          state.menuOpen = false;
+        });
+        const resetPostInputs = () => {
+          postTitle.value = "";
+          newComment.value = "";
+          imageFile.value = null;
+          tags.value = [];
+          userName.value = "";
+          showModal.value = false;
+        };
+                
+        const deleteComment = $((commentId: number) => {
+          console.log("🔴 Deleting comment:", commentId);
 
-      state.menuOpen = !state.menuOpen;
-    });
-    
-    const addComment = $(() => {
-      if (!newCommentR.value.trim()) return; // ✅ Prevent empty comments
-      commentsR.value = [...commentsR.value, { id: Date.now(), text: newCommentR.value.trim() }]; 
-      newCommentR.value = ""; 
-      showCommentBox.value = false;
-    });
-    
-  const addLike = $(() => {
-      if (!hasLiked.value) {
-        likes.value++;
-        hasLiked.value = true;
-      }else if(hasLiked.value == true){
-        likes.value--;
-        hasLiked.value = false;
-      }
-    });
+          commentsR.value = commentsR.value.filter(comment => comment.id !== commentId);
+     
+          Object.keys(postCommentMap).forEach(postId => {
+            postCommentMap[Number(postId)] = postCommentMap[Number(postId)].filter(id => id !== commentId);
+          });
+        
+          console.log("🟡 Remaining comments after deletion:", JSON.stringify(commentsR.value, null, 2));
+          console.log("🟡 Updated postCommentMap:", JSON.stringify(postCommentMap, null, 2));
+        
+          console.log("🟢 Comment deleted successfully:", commentId);
+        });
+        
+        
+        const addLike = $((postId: number) => {
+          comments.value = comments.value.map(post =>
+            post.id === postId 
+              ? { 
+                  ...post, 
+                  likes: post.hasLiked ? post.likes - 1 : post.likes + 1, // ✅ Increase or decrease likes
+                  hasLiked: !post.hasLiked // ✅ Toggle like state
+                } 
+              : post
+          );
+        });
 
-
-  
-    const toggleSelection = (value: string) => {
-      if (state2.selected.includes(value)) {
-        state2.selected = state2.selected.filter((item) => item !== value);
-      } else {
-        state2.selected = [...state2.selected, value];
-      }
-    };
+      const toggleSelection = (value: string) => {
+        if (state2.selected.includes(value)) {
+          state2.selected = state2.selected.filter((item) => item !== value);
+        } else {
+          state2.selected = [...state2.selected, value];
+        }
+      };
 
      const toggleMenu = $(() => {
         state.menuOpen = !state.menuOpen;
@@ -159,18 +211,18 @@ export default component$(() => {
               <div class="flex flex-wrap mt-2">
                 {tags.value.map((tag, index) => (
                   <span key={index} class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm mr-2 mt-1 flex items-center">
-                    {tag}
-                    <button class="ml-2 text-red-500 hover:text-red-700" 
-                      onClick$={() => { 
-                        tags.value = tags.value.filter((_, i) => i !== index); // Remove tag immediately
-                      }}>
-                      ✕
-                    </button>
+                  {tag}
+                  <button class="ml-2 text-red-500 hover:text-red-700" 
+                    onClick$={() => { 
+                      tags.value = tags.value.filter((_, i) => i !== index); // Remove tag immediately
+                    }}>
+                    ✕
+                  </button>
                   </span>
                 ))}
               </div>
             </div>
-           
+
             <div class="mt-3">
               <label class="cursor-pointer">
               <svg 
@@ -215,60 +267,38 @@ export default component$(() => {
                   if (postTitle.value.trim() || newComment.value.trim() || imageFile.value || tags.value.length) {
                     const reader = new FileReader();
                     const timestamp = new Date().toLocaleString();
-
+                
+                    // ✅ Ensure each post has a unique ID
+                    const postId = Date.now();
+                    console.log(`🟢 Creating new post with ID: ${postId}`);
+                
+                    // ✅ Initialize empty comment tracking for this post
+                    postCommentMap[postId] = [];
+                
                     const newPost = {
+                      id: postId,
                       title: postTitle.value,
                       text: newComment.value,
-                      tags: [...tags.value], // ✅ Keep the tags reference
-                      image: imageFile.value ? URL.createObjectURL(imageFile.value) : undefined,
+                      tags: [...tags.value],
                       user: userName.value || "Anonymous",
-                      timestamp : timestamp,
+                      timestamp,
+                      likes: 0,
+                      hasLiked: false,
                     };
-                    
-                    console.log("✅ Adding Post with Tags:", newPost);
-
-                    reader.onload = () => {
-                      comments.value = [
-                        ...comments.value,newPost,
-                        {
-                          title: postTitle.value,
-                          text: newComment.value,
-                          tags: [...tags.value],
-                          image: reader.result as string,
-                          user: userName.value || "Anonymous", // If user doesn't enter a name, use "Anonymous"
-                          timestamp: new Date().toLocaleString(),
-                        },
-                      ];
-                      console.log("🔥 FAB: Sending Posts to ForumRecommended:", comments.value);
-                      console.log("🔥 FAB: Sending Tags to ForumRecommended:", tags.value);
-                      setTimeout(() => {
-                        console.log("⚠️ Clearing tags AFTER update...");
-                        tags.value = [];
-                      }, 2000);
-
-                      postTitle.value = "";
-                      newComment.value = "";
-                      imageFile.value = null;
-                      
-                      userName.value = "";
-                      showModal.value = false;
-                    };
+                
                     if (imageFile.value) {
+                      reader.onload = () => {
+                        comments.value = [...comments.value, { ...newPost, image: reader.result as string }];
+                        resetPostInputs();
+                      };
                       reader.readAsDataURL(imageFile.value);
                     } else {
-                      comments.value = [
-                        ...comments.value,
-                        { title: postTitle.value, text: newComment.value, tags: [...tags.value],user: userName.value || "Anonymous",
-                          timestamp },
-                      ];
-                      postTitle.value = "";
-                      newComment.value = "";
-                      
-                      userName.value = "";
-                      showModal.value = false;
+                      comments.value = [...comments.value, newPost];
+                      resetPostInputs();
                     }
                   }
                 }}
+                
               >
                 Post
               </button>
@@ -280,7 +310,7 @@ export default component$(() => {
                   postTitle.value = "";
                   newComment.value = "";
                   imageFile.value = null;
-                  
+                  tags.value = [];
                 }}
               >
                 Cancel
@@ -308,7 +338,6 @@ export default component$(() => {
                 </span>
               ))}
             </div>
-            
             {comment.image && (
               <img
                 src={comment.image}
@@ -316,25 +345,27 @@ export default component$(() => {
                 class="mt-6 w-full max-h-80 object-cover rounded-lg"
               />
             )}
-            
             <div class="flex flex-wrap gap-5 justify-between py-6 mt-20 w-full bg-white-[0px_4px_4px_rgba(0,0,0,0.05)] max-md:px-5 max-md:mt-10 max-md:max-w-full">
             <div class="flex gap-10 text-center">
-              <button onClick$={addLike} class="flex items-center gap-2 active:scale-110">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class={`size-6 transition-all ${hasLiked.value ? "text-red-500 fill-red-500" : "hover:text-red-500"}`}
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                  />
-                </svg>
-                <span>{likes.value}</span>
-              </button>
+            <button 
+              onClick$={() => addLike(comment.id)} 
+              class="flex items-center gap-2 active:scale-110"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class={`size-6 transition-all ${comment.hasLiked ? "text-red-500 fill-red-500" : "hover:text-red-500"}`}
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                />
+              </svg>
+              <span>{comment.likes}</span>
+            </button>
               <div class="flex gap-10 text-center">
                 <button onClick$={() => { showCommentBox.value = true}} class="flex items-center gap-2 active:scale-110">
                 <svg
@@ -351,7 +382,7 @@ export default component$(() => {
                     d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
                   />
                 </svg>
-                <span class="text-base font-medium">{latestCount}</span>
+                <span class="text-base font-medium"></span>
                 </button>
           
               </div>
@@ -368,10 +399,10 @@ export default component$(() => {
                     class="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-50"
                     onClick$={(e) => e.stopPropagation()}
                   >
-                    <a href="#" class="block px-4 py-2 hover:bg-red-300" onClick$={() => deletePost(index)}>
-                      <div class = "text-red-500 hover:text-red-700">
-                      Delete
-                      </div>
+                    <a href="#" class="block px-4 py-2 hover:bg-red-300" onClick$={() => deletePost(comment.id)}>
+                       <div class = "text-red-500 hover:text-red-700">
+                       Delete
+                       </div>
                     </a>
                     <a href="#" onClick$={openReport} class="block px-4 py-2 hover:bg-gray-100">
                       Report
@@ -409,7 +440,7 @@ export default component$(() => {
             <section class="flex overflow-hidden flex-col justify-center items-center px-20 py-28 w-full text-base text-black bg-stone-50 max-md:px-5 max-md:pb-24 max-md:max-w-full">
               <div class="mb-0 max-w-full w-[833px] max-md:mb-2.5">
                 <h2 class="self-start ml-4 text-3xl md:text-4xl font-semibold max-md:ml-2.5">
-                  Responses ({latestCount})
+                  Responses
                 </h2>
                 
                 {/* Respond Button */}
@@ -419,19 +450,16 @@ export default component$(() => {
                     class="px-10 py-4 whitespace-nowrap bg-green-500 rounded-2xl text-sm md:text-base max-md:px-5"
                     onClick$={() => {
                       showCommentBox.value = true; // Open the modal
+                      selectedCommentId.value = index;
                     }}
                   >
                     Respond
                   </button>
                 </div>
-              </div>
-            </section>
-            </div>
-            </div>
-              ))}
-              
-            <div>
-              {commentsR.value.map((comment) => (
+                <div>
+                {commentsR.value 
+                .filter(comment => comment.postId === index) // ✅ Only show comments for this post
+                .map(comment => (
                 <article key={comment.id}
                   class="flex flex-col justify-center items-center px-7 py-6 mt-16 bg-white rounded-2xl min-h-[223px] shadow-md"
                 >
@@ -446,6 +474,12 @@ export default component$(() => {
                         />
                         <div class="flex flex-col items-start mt-1">
                           <span class="font-medium">User</span>
+                          <button 
+                            class="text-red-500 hover:text-red-700" 
+                            onClick$={() => deleteComment(comment.id)} // ✅ Delete comment on click
+                          >
+                            ✕
+                          </button>
                           <p class="self-stretch mt-6 font-light">{comment.text}</p>
                           <button onClick$={() => { 
                             showRespondBox.value = true; 
@@ -472,13 +506,13 @@ export default component$(() => {
 
                 </article>
               ))}
-            </div>  
-            </article>     
-        
-              {tags.value.length >= 0 && (
-                <ForumRecommended posts={[...comments.value]} currentTags={[...tags.value]} />
-              )}
-            
+                </div>
+              </div>
+            </section>
+            </div>
+            </div>
+              ))}
+            </article>
             {showCommentBox.value&& (
               <div>
                 {/* Response Box */}
@@ -494,14 +528,13 @@ export default component$(() => {
                     <div class="flex justify-end gap-2 mt-3">
                       <button
                         class="px-4 py-2 bg-blue-500 text-white rounded"
-                        onClick$={() => { {addComment}
-                          if (newCommentR.value.trim()) {
-                              commentsR.value = [...commentsR.value, { id: Date.now(), text: newCommentR.value }]; // ✅ Assign a unique ID
-                              newCommentR.value = ""; // Clear input
-                              showCommentBox.value = false;
-                          }
-                        }}                  
-                      >
+                        onClick$={() => { if (selectedCommentId.value !== null) {
+                          console.log("🟢 Submitting comment for postId:", selectedCommentId.value);
+                          addComment(selectedCommentId.value); // ✅ Ensure correct postId is passed
+                          selectedCommentId.value = null; // ✅ Reset after posting
+                        }
+                      }}
+                      >              
                         Submit
                       </button>
                       <button
@@ -564,102 +597,7 @@ export default component$(() => {
                 )}
             </div>
             )}
-          </div>
-                       
-      );    
-    });
-
-    interface Props {
-      posts: { 
-        title: string;
-        text: string;
-        tags: string[];
-        image?: string;
-        user: string;
-        timestamp: string;
-      }[];
-      currentTags: string[];
-    }
-    
-    const posts = [
-      {
-        title: "The Future of AI in Medicine",
-        text: "Artificial intelligence is transforming the healthcare industry...",
-        tags: ["AI"],
-        image: "https://example.com/ai-medicine.jpg",
-        user: "Dr. Smith",
-        timestamp: "March 4, 2025",
-      },
-      {
-        title: "Understanding Quantum Computing",
-        text: "Quantum computing is a rapidly evolving field...",
-        tags: ["Quantum Computing", "Physics", "Technology"],
-        image: "https://example.com/quantum-computing.jpg",
-        user: "Jane Doe",
-        timestamp: "March 3, 2025",
-      },
-      {
-        title: "The Rise of Electric Vehicles",
-        text: "EVs are becoming more popular due to their environmental benefits...",
-        tags: ["Electric Vehicles", "Sustainability", "Technology"],
-        image: "https://example.com/electric-cars.jpg",
-        user: "Elon Musk Fan",
-        timestamp: "March 2, 2025",
-      },
-      {
-        title: "How to Build a Web App with React",
-        text: "A step-by-step guide to building modern web applications...",
-        tags: ["React", "Web Development", "Programming","AI"],
-        image: "https://example.com/react-web-app.jpg",
-        user: "Coder123",
-        timestamp: "March 1, 2025",
-      },
-      {
-        title: "AI vs Human Creativity",
-        text: "Can artificial intelligence truly replace human creativity?",
-        tags: ["AI"],
-        image: "https://example.com/ai-vs-human.jpg",
-        user: "Philosopher",
-        timestamp: "March 5, 2025",
-      },
-    ];
-  
-
-    const ForumRecommended = component$<Props>(({ posts = [], currentTags = [] }) => {
-      console.log("📢 ForumRecommended - Received Tags:", currentTags);
-      console.log("📢 ForumRecommended - Received Posts:", posts);
-    
-      const filteredPosts = posts.filter(post => {
-        if (!currentTags.length) return false; 
-        return post.tags.some((tag: string) => currentTags.includes(tag));
-      });
-    
-      return (
-        <section class="flex overflow-hidden flex-col items-center px-20 pt-28 pb-48 w-full bg-white">
-          <div class="flex flex-col max-w-full w-[812px]">
-            <h2 class="self-start ml-3.5 text-4xl font-semibold text-black">
-              Recommended from Dexto
-            </h2>
-            <div class="mt-10">
-              {filteredPosts.length > 0 ? (
-                <div class="flex gap-5 flex-wrap">
-                  {filteredPosts.map((article, index) => (
-                    <article key={index} class="w-6/12">
-                      <div class="flex flex-col py-2 w-full">
-                        <h3 class="text-2xl font-bold text-black">{article.title}</h3>
-                        <p class="mt-2 text-sm font-light text-black">{article.text}</p>
-                        <p class="mt-1 text-xs font-medium text-gray-500">
-                          Posted by {article.user} on {article.timestamp}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <p class="text-gray-500 mt-5">No similar posts found.</p>
-              )}
-            </div>
-          </div>
-        </section>
+          </div>            
+        
       );
     });
