@@ -70,14 +70,16 @@ export const UserProfile = component$(() => {
       } else if (result.data?.updateUser) {
         console.log("✅ Profile updated successfully!");
         updateStore(cleanDisplayName, userId.value, cleanUrl); // ✅ อัปเดต Store
-        alert("Profile updated successfully!");
+        // alert("Profile updated successfully!");
       } else {
         console.error("❌ Failed to update profile.");
       }
     } catch (error) {
       console.error("❌ Error updating profile:", error);
     } finally {
-      isSaving.value = false; // ✅ รีเซ็ตปุ่มหลังจากบันทึกสำเร็จ
+      setTimeout(() => {
+      isSaving.value = false;
+      }, 2000); 
     }
   });
 
