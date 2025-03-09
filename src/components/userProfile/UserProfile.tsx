@@ -1,11 +1,19 @@
-import { component$, useSignal, $ } from "@builder.io/qwik";
+import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
-import { avatarUrls } from "./avatarConfig";
+import { avatarUrls } from "./avatarConfig";// ✅ นำเข้า Avatar URLs
 
 export const UserProfile = component$(() => {
   const { displayName, profilePictureUrl, userId, updateStore } = useUserStore();
   const showPopup = useSignal(false);
-  const selectedAvatar = useSignal(profilePictureUrl.value.trim()); // ✅ ใช้ trim() ป้องกันปัญหา
+  const selectedAvatar = useSignal(profilePictureUrl.value.trim());
+  const newDisplayName = useSignal(displayName.value);
+  const isSaving = useSignal(false); // ✅ เพิ่มสถานะปุ่ม
+
+  // ✅ โหลดข้อมูลล่าสุดเมื่อเปิดหน้า
+  useVisibleTask$(() => {
+    newDisplayName.value = displayName.value;
+    selectedAvatar.value = profilePictureUrl.value.trim();
+  });
 
   // ✅ เมื่อเลือกรูปใหม่ อัปเดตรูปในวงกลมทันที
   const selectAvatar = $((url: string) => {
@@ -13,25 +21,29 @@ export const UserProfile = component$(() => {
     showPopup.value = false;
   });
 
-  // ✅ อัปเดต Database เมื่อกด Save Change
+  // ✅ ฟังก์ชันอัปเดตข้อมูลลง Database
   const saveProfile = $(async () => {
-    const cleanUrl = selectedAvatar.value.trim(); // ✅ ป้องกัน Syntax Error
+    const cleanUrl = selectedAvatar.value.trim();
+    const cleanDisplayName = newDisplayName.value.trim();
 
-    if (!cleanUrl) {
-      console.error("❌ Invalid Avatar URL");
+    if (!cleanUrl || !cleanDisplayName) {
+      console.error("❌ Invalid data");
       return;
     }
 
+    isSaving.value = true; // ✅ เปลี่ยนปุ่มเป็น "Saving..."
+
     console.log("🚀 Sending GraphQL Mutation:", JSON.stringify({
       query: `
-        mutation UpdateUserProfile($id: Int!, $profilePictureUrl: String!) {
-          updateUser(id: $id, profilePictureUrl: $profilePictureUrl) {
+        mutation UpdateUserProfile($id: Int!, $displayName: String!, $profilePictureUrl: String!) {
+          updateUser(id: $id, displayName: $displayName, profilePictureUrl: $profilePictureUrl) {
             id
+            displayName
             profilePictureUrl
           }
         }
       `,
-      variables: { id: userId.value, profilePictureUrl: cleanUrl }
+      variables: { id: userId.value, displayName: cleanDisplayName, profilePictureUrl: cleanUrl }
     }, null, 2));
 
     try {
@@ -40,14 +52,15 @@ export const UserProfile = component$(() => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: `
-            mutation UpdateUserProfile($id: Int!, $profilePictureUrl: String!) {
-              updateUser(id: $id, profilePictureUrl: $profilePictureUrl) {
+            mutation UpdateUserProfile($id: Int!, $displayName: String!, $profilePictureUrl: String!) {
+              updateUser(id: $id, displayName: $displayName, profilePictureUrl: $profilePictureUrl) {
                 id
+                displayName
                 profilePictureUrl
               }
             }
           `,
-          variables: { id: userId.value, profilePictureUrl: cleanUrl },
+          variables: { id: userId.value, displayName: cleanDisplayName, profilePictureUrl: cleanUrl },
         }),
       });
 
@@ -55,13 +68,16 @@ export const UserProfile = component$(() => {
       if (result.errors) {
         console.error("❌ GraphQL Error:", result.errors);
       } else if (result.data?.updateUser) {
-        console.log("✅ Profile picture updated!");
-        updateStore(displayName.value, userId.value, cleanUrl); // ✅ อัปเดต Store
+        console.log("✅ Profile updated successfully!");
+        updateStore(cleanDisplayName, userId.value, cleanUrl); // ✅ อัปเดต Store
+        alert("Profile updated successfully!");
       } else {
-        console.error("❌ Failed to update profile picture.");
+        console.error("❌ Failed to update profile.");
       }
     } catch (error) {
-      console.error("❌ Error updating profile picture:", error);
+      console.error("❌ Error updating profile:", error);
+    } finally {
+      isSaving.value = false; // ✅ รีเซ็ตปุ่มหลังจากบันทึกสำเร็จ
     }
   });
 
@@ -72,9 +88,9 @@ export const UserProfile = component$(() => {
         <div class="mb-2 text-base font-bold text-white">DISPLAY NAME</div>
         <input
           type="text"
-          value={displayName.value}
+          value={newDisplayName.value}
+          onInput$={(e) => (newDisplayName.value = (e.target as HTMLInputElement).value)}
           class="p-3 mb-6 w-full text-base text-white bg-gray-800 rounded-lg border-none"
-          disabled
         />
         <div class="mx-0 my-6 h-px bg-stone-300"></div>
         <div class="mb-2 text-base font-bold text-white">AVATAR</div>
@@ -91,8 +107,12 @@ export const UserProfile = component$(() => {
         {/* ✅ รูปที่แสดงเป็นรูปที่เลือก */}
         <img src={selectedAvatar.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
         <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
-          <button class="px-4 py-2 text-base text-black bg-emerald-300 rounded-md cursor-pointer border-none" onClick$={saveProfile}>
-            Save Change
+          <button
+            class={`px-4 py-2 text-base text-black rounded-md cursor-pointer border-none ${isSaving.value ? "bg-gray-500" : "bg-emerald-300"}`}
+            onClick$={saveProfile}
+            disabled={isSaving.value}
+          >
+            {isSaving.value ? "Saving..." : "Save Change"}
           </button>
           <button class="px-4 py-2 text-base text-white bg-transparent cursor-pointer border-none">Cancel</button>
         </div>
