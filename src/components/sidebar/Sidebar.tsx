@@ -59,6 +59,13 @@ export const Sidebar = component$(() => {
         ))}
       </SidebarSection>
 
+      {/* Logo & Theme Toggle */}
+      <div class="self-center items-center mt-4 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black opacity-25">
+        <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
+      </div>
+
+      <ThemeToggle /> {/* ✅ ปุ่ม Theme Toggle อยู่ใต้ Logout */}
+
       {/* ปุ่ม Logout */}
       <div class="mt-auto p-4">
         <button
@@ -68,13 +75,7 @@ export const Sidebar = component$(() => {
           Logout
         </button>
       </div>
-
-      {/* Logo & Theme Toggle */}
-      <div class="self-center items-center mt-4 ml-4 text-3xl font-extrabold tracking-widest leading-none text-center text-black opacity-25">
-        <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
-      </div>
-
-      <ThemeToggle /> {/* ✅ ปุ่ม Theme Toggle อยู่ใต้ Logout */}
+      
     </div>
   );
 });
