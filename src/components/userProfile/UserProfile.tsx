@@ -107,10 +107,10 @@ export const UserProfile = component$(() => {
               {avatarUrls.map((url, i) => (
                 <img
                   key={i}
-                  src={url}  // ✅ ใช้ URL จากอาร์เรย์
+                  src={url}  // ✅ ใช้ URL จากอาร์เรย์ที่นำเข้า
                   alt={`Avatar ${i + 1}`}
                   class="cursor-pointer rounded-lg w-[80px] h-[80px] border-2 border-transparent hover:border-emerald-300"
-                  onClick$={() => selectAvatar(url)}  // ✅ บันทึก URL ที่เลือก
+                  onClick$={() => selectAvatar(url)}
                 />
               ))}
             </div>
