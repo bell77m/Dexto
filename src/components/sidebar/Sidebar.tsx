@@ -35,7 +35,7 @@ export const Sidebar = component$(() => {
       <div class="flex gap-6 justify-between items-center px-6 py-4 text-xl font-bold bg-gray-800 min-h-[72px] text-zinc-500">
         <img
           loading="lazy"
-          src={profilePictureUrl.value || "/image/defaultProfile.svg"}
+          src={profilePictureUrl.value || "https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif"}
           class="object-contain shrink-0 self-stretch my-auto rounded-full aspect-square w-[42px]"
           alt="User avatar"
         />
