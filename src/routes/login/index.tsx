@@ -1,6 +1,6 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
-import { useUserStore } from '~/store/store'; // นำเข้า store
+import { useUserStore } from '~/store/store'; 
 
 export default component$(() => {
   const email = useSignal('');
@@ -10,15 +10,15 @@ export default component$(() => {
   const isLoading = useSignal(false);
   const navigate = useNavigate();
 
-  // ใช้ store สำหรับเก็บข้อมูลผู้ใช้ที่ล็อกอิน
-  const userStore = useUserStore();  // เรียกใช้ store ที่นี่
+  
+  const userStore = useUserStore();  
 
   const handleLogin$ = $(async () => {
-    errorMessage.value = ''; // เคลียร์ข้อความผิดพลาด
-    isLoading.value = true; // เริ่มการโหลด
+    errorMessage.value = ''; 
+    isLoading.value = true; 
 
     try {
-      const response = await fetch('http://dexto.com:3000/graphql', {  // URL ของ backend ที่เชื่อมต่อ
+      const response = await fetch('http://dexto.com:3000/graphql', {  
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,7 +51,7 @@ export default component$(() => {
 
       console.log('User Data:', loginData.user);
       
-      // ห่อหุ้มการอัพเดต store ด้วย QRL
+    
       const { updateStore } = userStore;
       updateStore(
         loginData.user.displayName,
@@ -59,12 +59,10 @@ export default component$(() => {
         loginData.user.profilePictureUrl
       );
 
-      
 
       console.log('Sidebar Display Name login :', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/home');  // เปลี่ยนเส้นทางไปที่หน้า Home
-
+      navigate('/home');  
     } catch (error) {
       errorMessage.value = 'Network error. Please try again!';
     } finally {
@@ -74,6 +72,7 @@ export default component$(() => {
 
   return (
     <div class="flex min-h-screen overflow-hidden">
+
       {/* Left Side - Login Form */}
       <div class="w-1/2 flex flex-col justify-center items-center bg-white p-6 max-h-screen overflow-auto">
         <Link href="/" class="flex shrink-0 items-center cursor-pointer mb-7">

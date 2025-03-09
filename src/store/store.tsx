@@ -19,11 +19,11 @@ export const useUserStore = () => {
       isLoggedIn.value = true;
     } else {
       isLoggedIn.value = false;
-      console.warn("⚠️ User is not logged in. Redirecting to /login...");
+      console.warn("User is not logged in. Redirecting to /login...");
       navigate("/login");
     }
 
-    // ✅ ทำให้สามารถ Logout ผ่าน Console ได้
+    
     (window as any).logoutUser = logoutUser;
     console.log("🔹 พิมพ์ `logoutUser()` ใน Console เพื่อออกจากระบบ");
   });
@@ -41,11 +41,11 @@ export const useUserStore = () => {
 
   const logoutUser = $(async () => {
     if (!isLoggedIn.value) {
-      console.warn("⚠️ User is already logged out.");
+      console.warn("User is already logged out.");
       return;
     }
 
-    console.log(`🔴 Logging out: ${displayName.value} (ID: ${userId.value})`);
+    console.log(`Logging out: ${displayName.value} (ID: ${userId.value})`);
 
     try {
       const response = await fetch('http://dexto.com:3000/graphql', {
@@ -62,7 +62,7 @@ export const useUserStore = () => {
 
       const result = await response.json();
       if (result.data?.logoutUser) {
-        console.log(`✅ User ${displayName.value} has logged out successfully.`);
+        console.log(`User ${displayName.value} has logged out successfully.`);
         displayName.value = '';
         userId.value = '';
         profilePictureUrl.value = '';
@@ -70,10 +70,10 @@ export const useUserStore = () => {
         localStorage.removeItem(STORAGE_KEY);
         navigate("/login");
       } else {
-        console.error("❌ Logout failed:", result.errors || "Unknown error");
+        console.error("Logout failed:", result.errors || "Unknown error");
       }
     } catch (error) {
-      console.error("❌ Failed to logout due to network error:", error);
+      console.error("Failed to logout due to network error:", error);
     }
   });
 

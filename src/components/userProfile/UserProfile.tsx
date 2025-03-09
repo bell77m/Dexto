@@ -8,11 +8,11 @@ export const UserProfile = component$(() => {
   const newDisplayName = useSignal(displayName.value);
   const isSaving = useSignal(false);
 
-  // ✅ เก็บค่าต้นฉบับไว้ใช้สำหรับปุ่ม Cancel
+  
   const originalDisplayName = useSignal(displayName.value);
   const originalAvatar = useSignal(profilePictureUrl.value.trim());
 
-  // ✅ โหลดข้อมูลล่าสุดเมื่อเปิดหน้า
+  
   useVisibleTask$(() => {
     newDisplayName.value = displayName.value;
     selectedAvatar.value = profilePictureUrl.value.trim();
@@ -20,13 +20,13 @@ export const UserProfile = component$(() => {
     originalAvatar.value = profilePictureUrl.value.trim();
   });
 
-  // ✅ เมื่อกด `Cancel` → คืนค่ากลับไปที่ค่าก่อนหน้า
+
   const resetProfile = $(() => {
     newDisplayName.value = originalDisplayName.value;
     selectedAvatar.value = originalAvatar.value;
   });
 
-  // ✅ ฟังก์ชันอัปเดตข้อมูลลง Database
+ 
   const saveProfile = $(async () => {
     const cleanUrl = selectedAvatar.value.trim();
     const cleanDisplayName = newDisplayName.value.trim();
@@ -36,7 +36,7 @@ export const UserProfile = component$(() => {
       return;
     }
 
-    isSaving.value = true; // ✅ เปลี่ยนปุ่มเป็น "Saving..."
+    isSaving.value = true; 
 
     try {
       const response = await fetch("http://dexto.com:3000/graphql", {
@@ -61,8 +61,8 @@ export const UserProfile = component$(() => {
         console.error("❌ GraphQL Error:", result.errors);
       } else if (result.data?.updateUser) {
         console.log("✅ Profile updated successfully!");
-        updateStore(cleanDisplayName, userId.value, cleanUrl); // ✅ อัปเดต Store
-        originalDisplayName.value = cleanDisplayName; // ✅ อัปเดตค่าใหม่
+        updateStore(cleanDisplayName, userId.value, cleanUrl); 
+        originalDisplayName.value = cleanDisplayName; 
         originalAvatar.value = cleanUrl;
         // alert("Profile updated successfully!");
       } else {
@@ -72,7 +72,7 @@ export const UserProfile = component$(() => {
       console.error("❌ Error updating profile:", error);
     } finally {
       setTimeout(() => {
-        isSaving.value = false; // ✅ หลังจาก 2 วินาที เปลี่ยนปุ่มกลับเป็น Save Change
+        isSaving.value = false; 
       }, 2000);
     }
   });
@@ -100,7 +100,7 @@ export const UserProfile = component$(() => {
         </div>
       </div>
       <div class="flex flex-col items-center p-5 w-[300px] max-md:w-full">
-        {/* ✅ รูปที่แสดงเป็นรูปที่เลือก */}
+        {/* รูปที่แสดงเป็นรูปที่เลือก */}
         <img src={selectedAvatar.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
         <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
           <button
@@ -114,14 +114,14 @@ export const UserProfile = component$(() => {
           </button>
           <button
             class="px-4 py-2 text-base text-white bg-gray-600 rounded-md cursor-pointer border-none"
-            onClick$={resetProfile} // ✅ เมื่อกดปุ่มนี้ ข้อมูลจะกลับเป็นค่าก่อนหน้า
+            onClick$={resetProfile} // เมื่อกดปุ่มนี้ ข้อมูลจะกลับเป็นค่าก่อนหน้า
           >
             Cancel
           </button>
         </div>
       </div>
 
-      {/* ✅ Popup เลือก Avatar */}
+      {/*  Popup เลือก Avatar */}
       {showPopup.value && (
         <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
           <div class="bg-gray-800 p-5 rounded-lg w-[300px] text-center">

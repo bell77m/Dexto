@@ -1,10 +1,10 @@
 // home.tsx
 import { component$ } from '@builder.io/qwik';
 import { Sidebar } from '~/components/sidebar/Sidebar';
-import { useUserStore } from '~/store/store';  // นำเข้า store
+import { useUserStore } from '~/store/store';  
 
 export default component$(() => {
-  // ใช้ store เพื่อดึงข้อมูล displayName และ userId
+ 
   const userStore = useUserStore();
   console.log('Sidebar Display Name home :', userStore.displayName);
 

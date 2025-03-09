@@ -4,8 +4,8 @@ import { useUserStore } from "~/store/store";
 
 export default component$(() => {
   const { userId } = useUserStore();
-  const friendRequests = useSignal([]); // ✅ เก็บรายการคำขอที่ได้รับ
-  const isLoading = useSignal(true);  // ✅ เพิ่มสถานะ Loading
+  const friendRequests = useSignal([]); 
+  const isLoading = useSignal(true);  
 
   const fetchFriendRequests = $(async () => {
     isLoading.value = true;
@@ -45,7 +45,7 @@ export default component$(() => {
   });
 
   useVisibleTask$(() => {
-    fetchFriendRequests(); // ✅ โหลดข้อมูลทันทีเมื่อหน้า Notification เปิด
+    fetchFriendRequests();
   });
 
   const handleAccept = $(async (senderId: number) => {

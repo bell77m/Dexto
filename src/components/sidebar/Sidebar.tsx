@@ -2,17 +2,17 @@ import { component$, $ } from "@builder.io/qwik";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarSection } from "./SidebarSection";
 import { ThemeToggle } from "./ThemeToggle";
-import { useUserStore } from "~/store/store"; // ✅ นำเข้า useUserStore
-import { useNavigate } from "@builder.io/qwik-city"; // ✅ ใช้สำหรับ Redirect
+import { useUserStore } from "~/store/store"; 
+import { useNavigate } from "@builder.io/qwik-city"; 
 
 export const Sidebar = component$(() => {
-  const { displayName, profilePictureUrl, logoutUser } = useUserStore(); // ✅ ใช้ logoutUser จาก store
-  const navigate = useNavigate(); // ✅ ใช้สำหรับเปลี่ยนหน้า
+  const { displayName, profilePictureUrl, logoutUser } = useUserStore(); 
+  const navigate = useNavigate(); 
 
   const handleLogout = $(async () => {
-    console.log(`🔴 Logging out: ${displayName.value}`); // ✅ แสดงข้อความ Logout
+    console.log(`🔴 Logging out: ${displayName.value}`); 
     await logoutUser();
-    navigate("/login"); // ✅ Redirect ไปหน้า Login
+    navigate("/login");
   });
 
   const mainItems = [
@@ -64,13 +64,13 @@ export const Sidebar = component$(() => {
         <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
       </div>
 
-      <ThemeToggle /> {/* ✅ ปุ่ม Theme Toggle อยู่ใต้ Logout */}
+      <ThemeToggle /> {/* ปุ่ม Theme Toggle  */}
 
       {/* ปุ่ม Logout */}
       <div class="mt-auto p-4">
         <button
           class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-800"
-          onClick$={handleLogout} // ✅ เรียกฟังก์ชัน Logout
+          onClick$={handleLogout} 
         >
           Logout
         </button>

@@ -69,7 +69,7 @@ export default component$(() => {
         console.log(`✅ Friend request sent to user ${friendId}`);
         searchResults.value = searchResults.value.map(user =>
           user.id === friendId ? { ...user, requestSent: true } : user
-        ); // ✅ อัปเดต requestSent เป็น true
+        );
       } else {
         console.error("❌ Failed to send friend request");
       }
