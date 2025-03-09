@@ -27,6 +27,8 @@ export default component$(() => {
                 email
                 profilePictureUrl
                 requestSent
+                requestReceived
+                isFriend
               }
             }
           `,
@@ -103,7 +105,6 @@ export default component$(() => {
               />
             </div>
 
-            {/* ✅ แสดงข้อความเมื่อกด Search แล้วไม่พบผู้ใช้ */}
             {hasSearched.value && searchResults.value.length === 0 && !isSearching.value && (
               <div class="mt-2 text-red-500 text-sm">⚠️ No users found</div>
             )}
@@ -113,24 +114,36 @@ export default component$(() => {
           {searchResults.value.length > 0 && (
             <div class="w-3/4 mx-auto mt-6 grid grid-cols-1 gap-4">
               {searchResults.value.map(user => (
-                <div key={user.id} class="p-4 bg-gray-800 rounded-xl min-h-[60px] flex items-center justify-between text-gray-500">
+                <div key={user.id} class="p-4 bg-gray-800 rounded-xl flex items-center justify-between text-gray-500">
                   <div class="flex items-center space-x-4">
                     <img src={user.profilePictureUrl || "/image/defaultProfile.svg"} width="40" height="40" class="rounded-full" />
                     <div class="flex flex-col">
-                      <span class="font-semibold">{user.displayName}</span>
+                      {/* ✅ แสดงชื่อผู้ใช้ตามสถานะ */}
+                      {user.isFriend ? (
+                        <span class="font-semibold text-green-400">✔️ {user.displayName}</span>
+                      ) : user.requestReceived ? (
+                        <span class="font-semibold text-yellow-400">📩 {user.displayName}</span>
+                      ) : user.requestSent ? (
+                        <span class="font-semibold text-gray-400">⏳ {user.displayName}</span>
+                      ) : (
+                        <span class="font-semibold text-white">{user.displayName}</span>
+                      )}
                       <span class="text-sm text-gray-400">{user.email}</span>
                     </div>
                   </div>
-                  {user.requestSent ? (
-                    <button class="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-not-allowed" disabled>
-                      Request Sent
-                    </button>
+
+                  {/* ✅ แสดงปุ่มตามสถานะ */}
+                  {user.isFriend ? (
+                    <span class="px-4 py-2 bg-green-500 text-white rounded-lg">✔️ Friend</span>
+                  ) : user.requestReceived ? (
+                    <span class="px-4 py-2 bg-yellow-500 text-white rounded-lg">📩 Request Received</span>
+                  ) : user.requestSent ? (
+                    <span class="px-4 py-2 bg-gray-500 text-white rounded-lg">⏳ Pending</span>
                   ) : (
                     <button class="px-4 py-2 bg-blue-500 text-white rounded-lg" onClick$={() => sendFriendRequest(user.id)}>
                       Send Request
                     </button>
                   )}
-
                 </div>
               ))}
             </div>
