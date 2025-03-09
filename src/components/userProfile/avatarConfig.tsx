@@ -1,9 +1,15 @@
 export const avatarUrls = [
+    // rabbit
     "https://media-hosting.imagekit.io//f7b5c5c69a294b83/screenshot_1741452419587.png?Expires=1836060421&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=RgwEqdiKqjg7OgVT6olWwUa0o-3aq9ZcQZG49qwkISRUJLslek0q3KbkhyTssubyX~0NhEOFefKIgYkrMkOLZmGD1m0wp5gGMUV8vxe-AbmveEW7f1ShegTU0ksrhhH2ca6JZfZifAKWHONtXHhO0z8Owo5VNCCPZfnyFnbNQHc5Y2L1vCMQv2i36Wu2PG4mF4vi6HEDuD-v6xgNKk7q0k6cE8du8lHXIqjiZiYbGsdQzXCu8cfxj3GUmg0nd-TLY4Ek4x4LNft6rTVl~-3~OQQGkGCLreeExgsohJXNiIjudmNv7wo4BJe6CUs6c2xGKTo3BO4bkKfAH9BZYxMgkQ__",
+    // raccoon
     "https://media-hosting.imagekit.io//daa45e76876f47ed/screenshot_1741452432997.png?Expires=1836060434&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=kZU0X6yjSQPrsxor~GxynSoTkUdPkbe9pAKxuOfKUv1ejSQB1me3ZJ24D3gosQh9bEB1r5-nGHz7JcmBDFUXY1fz1GMjn-cbHcBJThfe-c180fxV6ryExFfEroeiAYTC9TBWYwbW-Nml27zULeRaQz0DxbEdvJJNGKb2R3S9ojAy4juS1Tw-V9yEnoWCVqxfwnJAZHAifC0LChjfziSYoSK7xd6ZRDyoL4y77EF18I~ZWzxO1262OyAN67dkiHcQ5OQXvUiOeJ5CYSwyK4sXwk0QXZFGaeTU4EjR6Zw10j2IGeDNLjRi1pHy1WyseG5JWAaJpLRQsmFKmuTMxSpflA__",
-    "https://example.com/avatar3.png",
-    "https://example.com/avatar4.png",
-    "https://example.com/avatar5.png",
-    "https://example.com/avatar6.png"
+    // hamster
+    "https://media-hosting.imagekit.io//803a22d5a0424f86/screenshot_1741452425552.png?Expires=1836060426&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=UiysumXF3o~uidCJZJ1VoXKCKo3KR8Z3X8~DALpMCO6-~~y8MfJXzxZyW~qte6gX34t9P8OYg8xGoJ-2Xb0VMg~Pj5HVVO60bSCcr2nEp6KDyBAaVgJwYtljwe3kq-iLVJNFrgla66LBfvj0A7KNwZ89YnD2CSf8ikUKUej3mSXlb7FT15XdKxXRPpB7CfrdfYt1HDaG5h6nN3K4BPZEzCufFGeWBLoJ8qiBnV0d6XX436dlyRaQD2aoQmkIFIINxz8svvvTprCBvti~Qj~4P8hSMUQwmj7z5anroMecWNFLZZyG-LsOXfwXV7wdonjtA74zKbkxurOrZjEKPDtiPQ__",
+    // dog
+    "https://media-hosting.imagekit.io//2c0d3f894c2a4e35/screenshot_1741452408015.png?Expires=1836060409&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=0WGJMEjjTXwJ7V4C1~cIZRw0LWug9z31RZBttO8-xWt9nj00EpE0jK2S37lq1Y502FqbQpQ08fwwlc0~uiEyStav9UOQN5kEcXIHiQ6BKyXiDqPO~fDQLHbE-z6ZDc-KpI0aG~iwXJcIjhrpDAVeIXN8oQ5Lwc3lY0t9PvyVOvgIbHXgrA62ZBsI~9XZJ1SIrz15d~~joqLwPyXompPYS8mAc52et-e~WfZuQ0GSpRP8ZC2HsRJjVr3FJHSzeu5D5~TvW8tFNpFoxO2m7XbjiJgJa5IKzbJks~R7oVuJRxNPl8iTdYQs6oICkbXgmlAKyIOeOQP5XDD0PWl2M1OTbw__",
+    // cat
+    "https://media-hosting.imagekit.io//d1445da46d0b4630/screenshot_1741452399903.png?Expires=1836060401&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=V7um6nNEX4DCkvIqquYn5KvWVtfEKa0xv84rr00wdfOvb~L6i4tHQ2gO3Lg4xNXndrYq~GBja-0cywLpbt~yFeRj4rQjIPGvo-rdBT58jcl1jxQ5nBFR0TUBzLXgzxEkvXXPadyipMdsgtBMsTiLF6Hi6LpXJsM05iqr1I2osfLnwzNOzeJk1hFH6YwYgDXK2R~Q2ALBhXKF~CqJMFu6i9nKkfMve463hVJGUfaYSdSVU7aUIlt~EUnUSR7O3U6iIywqtK18itpidZjcLR1JmZMuj5xkSV4aUZUTiyTOewuctobXOBqPf03HVLn5cBHa7kEZ5FgTGKKcceExAjJogQ__",
+    // ตัวไรไม่รู้ ใครรู้บอกที
+    "https://media-hosting.imagekit.io//bb402d74db6a48d6/screenshot_1741452385548.png?Expires=1836060387&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=1uDmnkZESADivTKLGTMyT4Znmn03mimT0g1szp8tttIzEhEP386V5xPFw1sLnXN5f3WWmOEN~z9dQTRA1C8Ct68Kkq4FoOjdyZaOGMIQjnXox4vBEzo7qkUbGmAPSNYHMsmizjGjwFes~o9rvncKM5iAj45TRu0dXwClulr4CSq4i5eVKgEv4I4YziVSPpPSMk5UOwg8I7np0~q1jBHxc9jGeMHUyuFysDIPihxMq1HsVpwiYyMWajeu5wp3klT0zhnxs3uK0ViyqH4j0eMIM5-TaUg9J9CDcXP~18TwrynsEbO2a3AVQ5F40kgrqu82OTqEs3-qEi0lF5220waGsQ__"
   ];
   
