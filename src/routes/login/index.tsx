@@ -114,16 +114,6 @@ export default component$(() => {
             {isLoading.value ? 'Logging in...' : 'Sign in'}
           </button>
         </form>
-        <div class="flex items-center w-full max-w-sm my-4">
-          <hr class="flex-grow border-gray-300" />
-          <span class="mx-2">or</span>
-          <hr class="flex-grow border-gray-300" />
-        </div>
-        <div class="flex space-x-4">
-          <button class="flex items-center px-4 py-2 border rounded">
-            <img src="/image/GoogleLogo.svg" class="w-5 h-5 mr-2" /> Sign in with Google
-          </button>
-        </div>
         <p class="mt-4">
           Don't have an account? <a href="/signup" class="text-blue-600">Sign Up</a>
         </p>
