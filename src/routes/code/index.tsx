@@ -112,8 +112,8 @@ export default component$(() => {
             </div>
           </div>
         </div>
-        <div class="w-[1310px] h-[932px] bg-gray-900">
-          fix
+        <div class="w-[1310px] h-[932px] bg-gray-900 text-white">
+          code here
         </div>
       </div>
     </>
