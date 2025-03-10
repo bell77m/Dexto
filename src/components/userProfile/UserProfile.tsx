@@ -48,7 +48,7 @@ export const UserProfile = component$((props: UserProfileProps) => {
             <div class="text-xs text-white">ESC</div>
           </button>
         </Link>
-        <img src={avatarUrl.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
+        <img src={avatarUrl.value} alt="Avatar Preview" class="rounded-full h-[250px] w-[250px] border-2 border-emerald-300" />
         <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
           <button class="px-4 py-2 text-base text-black bg-emerald-300 rounded-md cursor-pointer border-none">Save Change</button>
           <button class="px-4 py-2 text-base text-white bg-transparent cursor-pointer border-none">Cancel</button>
@@ -57,20 +57,20 @@ export const UserProfile = component$((props: UserProfileProps) => {
       </div>
       {showPopup.value && (
         <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
-          <div class="bg-gray-800 p-5 rounded-lg w-[300px] text-center">
+          <div class="bg-gray-800 p-8 rounded-lg w-[800px] text-center">
             <div class="text-white text-lg font-bold mb-4">Choose an Avatar</div>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-4 gap-6">
               {[...Array(6)].map((_, i) => (
                 <img
                   key={i}
                   src={`/image/Picture0${i + 1}.svg`}
                   alt={`Avatar ${i + 1}`}
-                  class="cursor-pointer rounded-lg w-[80px] h-[80px] border-2 border-transparent hover:border-emerald-300"
-                  onClick$={() => selectAvatar(`Picture0${i + 1}.png`)}
+                  class="cursor-pointer rounded-lg w-[150px] h-[150px] border-2 border-transparent hover:border-emerald-300"
+                  onClick$={() => selectAvatar(`Picture0${i + 1}.svg`)}
                 />
               ))}
             </div>
-            <button class="mt-4 px-4 py-2 text-white bg-red-500 rounded-md" onClick$={() => (showPopup.value = false)}>
+            <button class="mt-6 px-6 py-3 text-white bg-red-500 rounded-md" onClick$={() => (showPopup.value = false)}>
               Close
             </button>
           </div>
