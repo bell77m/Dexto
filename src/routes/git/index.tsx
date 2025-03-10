@@ -2,20 +2,21 @@ import { $, component$, useStore } from "@builder.io/qwik";
 import { Sidebarmini } from "~/components/sidebarmini/Sidebarmini";
 
 export default component$(() => {
+  // ใช้ useStore แทน useState เพื่อเก็บข้อมูล commit
   const state = useStore({
     commitHistory: [] as { message: string; time: string }[],
     message: ""
   });
 
-  // ใช้ $ เพื่อห่อหุ้มฟังก์ชัน
+  // ฟังก์ชันเพื่อเพิ่ม commit ลงในประวัติ
   const handleCommit = $(() => {
     if (state.message.trim() !== "") {
       const newCommit = {
         message: state.message,
-        time: new Date().toLocaleString(),
+        time: new Date().toLocaleString(), // ใช้เวลาปัจจุบัน
       };
-      state.commitHistory = [newCommit, ...state.commitHistory];
-      state.message = "";
+      state.commitHistory.push(newCommit); // ใช้ push เพื่อเพิ่ม commit ใหม่
+      state.message = ""; // ล้างข้อความหลังการ commit
     }
   });
 
