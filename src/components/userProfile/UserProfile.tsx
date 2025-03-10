@@ -17,7 +17,8 @@ export const UserProfile = component$((props: UserProfileProps) => {
 
   return (
     <div class="flex p-5 w-full h-screen bg-gray-900 max-md:flex-col max-sm:p-2.5">
-      <div class="flex-1 px-10 py-5">
+      {/* Sidebar ด้านซ้าย */}
+      <div class="flex-1 min-w-[400px] px-10 py-5">
         <Link href="/home" class="flex shrink-0 items-center cursor-pointer">
           <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
         </Link>
@@ -41,7 +42,9 @@ export const UserProfile = component$((props: UserProfileProps) => {
           </div>
         </div>
       </div>
-      <div class="flex flex-col items-center p-5 w-[300px] max-md:w-full">
+
+      {/* ฝั่งขวา (Avatar + ปุ่ม) */}
+      <div class="flex flex-col items-center p-5 w-[350px] max-md:w-[320px] max-sm:w-full">
         <Link href="/home">
           <button class="flex flex-col items-center self-end mb-5">
             <div class="mb-1 text-base font-bold text-white rounded-full border-gray-800 border-solid border-[3px] h-[30px] w-[30px] flex items-center justify-center">x</div>
@@ -55,6 +58,8 @@ export const UserProfile = component$((props: UserProfileProps) => {
           <button class="px-4 py-2 text-base text-white bg-red-500 rounded-md cursor-pointer border-none">Logout</button>
         </div>
       </div>
+
+      {/* Popup เลือก Avatar */}
       {showPopup.value && (
         <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
           <div class="bg-gray-800 p-8 rounded-lg w-[800px] text-center">
