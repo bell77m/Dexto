@@ -85,7 +85,7 @@ export default component$(() => {
         <section class="flex flex-col flex-grow items-start text-white bg-gray-900">
           <div class="flex items-center space-x-4">
             <img src="/image/add-friend.svg" width="30" height="30" class="mt-6 mx-9 ml-16" />
-            <h1 class="text-3xl mt-4 text-center text-gray-400">
+            <h1 class="text-xl mt-4 text-center text-gray-400 font-semibold">
               Add Friend
             </h1>
           </div>

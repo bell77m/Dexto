@@ -62,7 +62,7 @@ export const MyProject = component$((props: { class?: string }) => {
 
   return (
     <section class={`flex flex-col flex-grow items-start text-white bg-gray-900 ${props.class || ""}`}>
-      <h1 class="mt-12 ml-20 text-2xl font-semibold tracking-tight leading-none">My Project</h1>
+      <h1 class="mt-12 ml-20 text-2xl font-semibold tracking-tight leading-none text-neutral-400">My Project</h1>
 
       <h2 class="flex gap-10 mt-10 ml-20 text-xs font-semibold tracking-tight leading-none">
         <button class="px-20 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition" onClick$={() => (isCreating.value = true)}>

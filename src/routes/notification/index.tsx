@@ -120,7 +120,7 @@ export default component$(() => {
               height="30"
               class="mt-6 mx-9 ml-16"
             />
-            <h1 class="text-3xl mt-4 text-center text-gray-400">Friend Requests</h1>
+            <h1 class="text-xl mt-4 text-center text-neutral-400 font-semibold">Notification</h1>
           </div>
           <div class="w-full h-px mt-4 bg-gray-400"></div>
 
@@ -165,7 +165,7 @@ export default component$(() => {
               ))}
             </div>
           ) : (
-            <div class="text-gray-400 text-center w-full mt-6">No friend requests</div>
+            <div class="text-gray-400 text-center w-full mt-6">No Notification</div>
           )}
         </section>
       </div>
