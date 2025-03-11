@@ -8,6 +8,7 @@ export const ChatMain = component$(() => {
   const messages = useSignal([]);
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
+  const scrollContainerRef = useSignal<HTMLDivElement | null>(null); // ✅ ใช้เพื่อให้ Scroll Auto
 
   // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
   const loadFriends = $(() => {
@@ -44,9 +45,22 @@ export const ChatMain = component$(() => {
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
   });
 
+  // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
+  useVisibleTask$(() => {
+    if (scrollContainerRef.value) {
+      const observer = new MutationObserver(() => {
+        scrollContainerRef.value!.scrollTop = scrollContainerRef.value!.scrollHeight;
+      });
+
+      observer.observe(scrollContainerRef.value, { childList: true, subtree: true });
+
+      return () => observer.disconnect();
+    }
+  });
+
   // ✅ ส่งข้อความ และอัปเดต Database + UI ทันที
   const sendMessage = $(() => {
-    if (!messageText.value.trim() ) return;
+    if (!messageText.value.trim() || !selectedFriend.value) return;
 
     fetch("http://dexto.com:3000/graphql", {
       method: "POST",
@@ -61,7 +75,7 @@ export const ChatMain = component$(() => {
     })
       .then(() => {
         messageText.value = "";
-        loadMessages(); // ✅ UI อัปเดตทันที
+        loadMessages();
       })
       .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
   });
@@ -104,12 +118,16 @@ export const ChatMain = component$(() => {
         <h2 class="text-lg font-semibold border-b pb-2">{selectedFriend.value?.displayName || "Select a friend to start chat"}</h2>
 
         {/* Messages */}
-        <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-2">
           {messages.value.map((msg, index) => (
             <div key={index} class={`flex ${msg.senderId === userId.value ? "justify-end" : "justify-start"}`}>
-              <span class={`p-2 rounded-lg ${msg.senderId === userId.value ? "bg-blue-600" : "bg-gray-700"}`}>
-                {msg.message}
-              </span>
+              {msg.imageUrl ? (
+                <img src={msg.imageUrl} class="w-40 rounded-lg" />
+              ) : (
+                <span class={`p-2 rounded-lg ${msg.senderId === userId.value ? "bg-blue-600" : "bg-gray-700"}`}>
+                  {msg.message}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -117,7 +135,7 @@ export const ChatMain = component$(() => {
         {/* Input */}
         <div class="flex gap-2 border-t p-2">
           <input bind:value={messageText} class="flex-1 p-2 bg-gray-800 rounded-md" placeholder="Type a message..." />
-          <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={sendMessage}>Send</button>
+          <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={() => sendMessage()}>Send</button>
         </div>
       </section>
     </div>
