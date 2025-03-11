@@ -4,11 +4,9 @@ import { Sidebar } from '~/components/sidebar/Sidebar';
 
 export default component$(() => {
   return (
-    <>
     <div class="flex h-screen">
-      <Sidebar/>
-      <ChatMain class="flex-grow"/>
+      <Sidebar /> {/* ✅ Sidebar หลัก */}
+      <ChatMain /> {/* ✅ หน้าต่างแชทหลัก */}
     </div>
-    </>
   );
 });
