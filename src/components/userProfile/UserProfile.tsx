@@ -1,6 +1,7 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
 import { avatarUrls } from "./avatarConfig";
+
 export const UserProfile = component$(() => {
   const { displayName, profilePictureUrl, userId, updateStore } = useUserStore();
   const showPopup = useSignal(false);
@@ -85,9 +86,9 @@ export const UserProfile = component$(() => {
   });
 
   return (
-    <div class="flex p-5 w-full h-screen bg-gray-900 max-md:flex-col max-sm:p-2.5">
+    <div class="flex p-5 w-[1421px] h-screen bg-gray-900 max-md:flex-col max-sm:p-2.5">
       <div class="flex-1 px-10 py-5">
-        <h1 class="text-xl font-bold text-white mb-4">Edit Profile</h1>
+        <h1 class="text-xl font-semibold text-neutral-400 mb-4">Settings</h1>
         <div class="mb-2 text-base font-bold text-white">DISPLAY NAME</div>
         <input
           type="text"
