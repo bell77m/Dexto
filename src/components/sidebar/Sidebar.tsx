@@ -21,7 +21,6 @@ export const Sidebar = component$(() => {
     { icon: "/image/chat.svg", label: "Chat", href: "/chat" },
     { icon: "/image/add-friend.svg", label: "Add friends", href: "/addfriend" },
     { icon: "/image/forum.svg", label: "Forum", href: "/forum" },
-    { icon: "/image/git.svg", label: "Git", href: "/git" },
   ];
 
   const settingsItems = [
