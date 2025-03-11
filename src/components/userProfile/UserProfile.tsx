@@ -7,6 +7,13 @@ export const UserProfile = component$(() => {
   const selectedAvatar = useSignal(profilePictureUrl.value.trim());
   const newDisplayName = useSignal(displayName.value);
   const isSaving = useSignal(false);
+  const avatarUrl = useSignal<string>("/image/DeafaultPic.svg");
+ 
+
+  const selectAvatar = $((image: string) => {
+    avatarUrl.value = `/image/${image}`;
+    showPopup.value = false;
+  });
 
   
   const originalDisplayName = useSignal(displayName.value);
@@ -90,15 +97,25 @@ export const UserProfile = component$(() => {
         />
         <div class="mx-0 my-6 h-px bg-stone-300"></div>
         <div class="mb-2 text-base font-bold text-white">AVATAR</div>
-        <div class="flex gap-4 mt-4 max-sm:flex-col max-sm:gap-2">
+        <div class="flex flex-col gap-4 mt-4 max-sm:flex-col max-sm:gap-2">
           <button
-            class="p-2.5 text-base text-black bg-emerald-300 rounded-md cursor-pointer border-none"
+            class="p-2.5 text-base text-black bg-emerald-300 rounded-md w-40 cursor-pointer border-none"
             onClick$={() => (showPopup.value = true)}
           >
             Choose Avatar
           </button>
+        <div class="mx-0 my-6 h-px bg-stone-300"></div>
+          {/* Login with GitHub (now directly under Choose Avatar) */}
+          <a
+            href="https://github.com/login/oauth/authorize?client_id=yourClientID"
+            target="_blank"
+            class="p-3 text-base text-white bg-gray-800 rounded-lg border-none w-40 text-center hover:bg-gray-700"
+          >
+            Login with GitHub
+          </a>
         </div>
       </div>
+
       <div class="flex flex-col items-center p-5 w-[300px] max-md:w-full">
         {/* รูปที่แสดงเป็นรูปที่เลือก */}
         <img src={selectedAvatar.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
@@ -146,3 +163,5 @@ export const UserProfile = component$(() => {
     </div>
   );
 });
+
+
