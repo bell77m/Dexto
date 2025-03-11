@@ -140,7 +140,7 @@ export const MyProject = component$((props: { class?: string }) => {
       )}
 
       {projects.value.length === 0 && 
-        <p class="mt-20 ml-[285px] w-full text-gray-400">
+        <p class="mt-20 ml-[285px] text-gray-400">
             No projects available.
         </p>}
 
