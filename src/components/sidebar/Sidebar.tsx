@@ -64,7 +64,7 @@ export const Sidebar = component$(() => {
         <img alt="My DEXTO Icon" src="/image/DextoLogo.svg" width="167" height="32" />
       </div>
 
-      <ThemeToggle /> {/* ปุ่ม Theme Toggle  */}
+      {/* <ThemeToggle /> ปุ่ม Theme Toggle  */}
 
       {/* ปุ่ม Logout */}
       <div class="mt-auto p-4">
