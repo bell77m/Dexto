@@ -1,78 +1,62 @@
-import { component$, useSignal, $ ,useOnWindow,useStore,useTask$} from "@builder.io/qwik";
-import FAB from "~/components/forum/FAB";
-{/*หัวโพสต์*/}
-export const ForumContent = component$(() => {
-  const likes = useSignal(0); // Signal to track likes count
-  const hasLiked = useSignal(false); // Track whether the user has liked
-  const state = useStore({ menuOpen: false, reportOpen: false, selectedReason: "" });
-  const state2 = useStore({ selected: [] as string[] });
-  const comments = useSignal<string[]>([]);
-  const newComment = useSignal("");
-  const showModal = useSignal(false);
-  const latestCount = useSignal(comments.value.length); // Store latest count separately
+import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useUserStore } from "~/store/store";
 
-  // Track `comments.value.length` and update `latestCount`
-  useTask$(({ track }) => {
-    track(() => comments.value.length);
-    latestCount.value = comments.value.length; // ✅ Forces UI update
-  });
+export default component$(() => {
+  const { userId } = useUserStore(); // ✅ ดึง userId จาก Store
+  const posts = useSignal([]); // ✅ เก็บโพสต์ทั้งหมด
+  const isLoading = useSignal(true); // ✅ ใช้สำหรับแสดง Loading
 
-  const toggleSelection = (value: string) => {
-    if (state2.selected.includes(value)) {
-      state2.selected = state2.selected.filter((item) => item !== value);
-    } else {
-      state2.selected = [...state2.selected, value];
-    }
-  };
-  
-
-  const addLike = $(() => {
-    if (!hasLiked.value) {
-      likes.value++;
-      hasLiked.value = true;
-    }else if(hasLiked.value == true){
-      likes.value--;
-      hasLiked.value = false;
-    }
-  });
-
-  const toggleMenu = $(() => {
-    state.menuOpen = !state.menuOpen;
-  });
-
-  const openReport = $(() => {
-    state.reportOpen = true;
-    state.menuOpen = false;
-  });
-
-  const closeReport = $(() => {
-    state.reportOpen = false;
-    state.selectedReason = "";
-  });
-
-  const submitReport = $(() => {
-    console.log("Reported:", state2.selected);
-    state2.selected = [];
-    closeReport();
-  });
-
-  useOnWindow(
-    "click",
-    $((event) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".menu-container")) {
-        state.menuOpen = false;
+  // ✅ โหลดโพสต์จาก Database
+  const loadPosts = $(() => {
+    console.log("📢 Fetching forum posts..."); // ✅ Debug API Call
+    fetch("http://dexto.com:3000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `query { searchPosts(query: "") { 
+          id userId userName userProfile title content imageUrl tags likes createdAt 
+        }}`
+      }),
+    })
+    .then((res) => res.json())
+    .then((result) => {
+      console.log("✅ API Response:", result); // ✅ Debug Response
+      if (result.data?.searchPosts) {
+        posts.value = result.data.searchPosts;
+      } else {
+        console.error("❌ API returned empty data:", result);
       }
     })
-  );
+    .catch((error) => console.error("❌ API Error:", error))
+    .finally(() => (isLoading.value = false)); // ✅ ปิด Loading หลังจากโหลดเสร็จ
+  });
+
+  // ✅ โหลดโพสต์เมื่อ Component ปรากฏบนหน้าเว็บ
+  useVisibleTask$(() => loadPosts());
 
   return (
-    
-    <main class="flex overflow-hidden flex-col justify-center items-center px-20 py-24 w-full bg-white max-md:px-5 max-md:pt-24 max-md:max-w-full">
-      <FAB />
-      
-            
-    </main>
-    
+    <div class="p-6 bg-gray-900 text-white">
+      {isLoading.value ? (
+        <p class="text-center text-gray-400">📢 Loading forum posts...</p>
+      ) : posts.value.length === 0 ? (
+        <p class="text-center text-gray-400">🚫 No posts found</p>
+      ) : (
+        posts.value.map((post) => (
+          <div key={post.id} class="bg-gray-800 p-4 rounded-lg mt-4">
+            <div class="flex items-center space-x-4">
+              <img src={post.userProfile || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
+              <div>
+                <p class="font-semibold">{post.userName}</p>
+                <p class="text-sm text-gray-400">{new Date(post.createdAt).toLocaleString()}</p>
+              </div>
+            </div>
+            <h2 class="text-xl font-bold mt-2">{post.title}</h2>
+            <p class="text-gray-300">{post.content}</p>
+            {post.imageUrl && <img src={post.imageUrl} class="w-full mt-4 rounded-lg" />}
+            <p class="text-sm text-gray-400">Tags: {post.tags}</p>
+          </div>
+        ))
+      )}
+    </div>
   );
 });

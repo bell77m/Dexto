@@ -1,8 +1,18 @@
 import { component$, useStore, $, useOnWindow } from "@builder.io/qwik";
 import { Link } from "@builder.io/qwik-city";
+import { useUserStore } from "~/store/store";
+import { useNavigate } from "@builder.io/qwik-city"; 
 
 export const ForumHeader = component$(() => {
+  const { displayName, profilePictureUrl, logoutUser } = useUserStore(); 
+  const navigate = useNavigate(); 
   const state = useStore({ menuOpen: false });
+ 
+  const handleLogout = $(async () => {
+    console.log(`🔴 Logging out: ${displayName.value}`); 
+    await logoutUser();
+    navigate("/login");
+  });
 
   const toggleMenu = $(() => {
     state.menuOpen = !state.menuOpen;
@@ -56,13 +66,13 @@ export const ForumHeader = component$(() => {
           <div class="flex gap-4 text-base font-medium text-black rounded-full items-center">
             <img
               loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/39a8f244998f57adda168bb506962cdc51a4265a2566ebd51be7be71503ad577"
+              src={profilePictureUrl.value || "https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif"}
               alt="User avatar"
               width="32"
               height="32"
               class="w-8 h-8 rounded-full"
             />
-            <span>Jane Doe</span>
+            <span>{displayName.value || "Loading"}</span>
           </div>
 
           {/* Dropdown Menu */}
@@ -84,9 +94,12 @@ export const ForumHeader = component$(() => {
                 </Link>
                 </a>
                 <a href="#" class="block px-4 py-2 hover:bg-gray-100">
-                <Link href="/" class="flex shrink-0 items-center cursor-pointer">
-                  Logout
-                </Link>
+                <button
+                  class="flex shrink-0 items-center cursor-pointer"
+                  onClick$={handleLogout} 
+                >
+                   Logout
+                </button>
                 </a>
               </div>
             )}
