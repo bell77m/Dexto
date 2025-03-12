@@ -6,6 +6,7 @@ export default component$(() => {
   const posts = useSignal([]);
   const isLoading = useSignal(true);
   const comments = useSignal<{ [key: number]: any[] }>({});
+  const newComment = useSignal<{ [key: number]: string }>({});
 
   const loadPosts = $(async () => {
     isLoading.value = true;
@@ -45,6 +46,32 @@ export default component$(() => {
       console.error("Error loading posts", err);
       isLoading.value = false;
     }
+  });
+
+  const addComment = $(async (postId: number) => {
+    const commentText = newComment.value[postId]?.trim();
+    if (!commentText || commentText.length === 0) return alert("⚠️ Comment cannot be empty!");
+
+    await fetch("http://dexto.com:3000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `mutation {
+          addComment(userId: ${userId.value}, postId: ${postId}, content: """${commentText}""") {
+            id
+            userId
+            userName
+            userProfile
+            content
+            createdAt
+          }
+        }`
+      }),
+    });
+
+    newComment.value[postId] = "";
+    await loadPosts();
+    alert("✅ Comment added successfully!");
   });
 
   useVisibleTask$(() => {
@@ -89,14 +116,18 @@ export default component$(() => {
 
             <div class="mt-2">
               <input
-                class="w-full p-2 border rounded-md text-gray-900"
+                class="w-full p-2 border rounded-md text-gray-700 mt-2"
                 placeholder="Write a comment..."
+                value={newComment.value[post.id] || ""}
+                onInput$={(e) => (newComment.value[post.id] = (e.target as HTMLInputElement).value)}
               />
-              <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">💬 Comment</button>
+              <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded" onClick$={() => addComment(post.id)}>
+                💬 Comment
+              </button>
             </div>
           </div>
         ))
       )}
     </div>
-  );
+  );  
 });
