@@ -71,7 +71,6 @@ export default component$(() => {
 
     newComment.value[postId] = "";
     await loadPosts();
-    alert("✅ Comment added successfully!");
   });
 
   useVisibleTask$(() => {
