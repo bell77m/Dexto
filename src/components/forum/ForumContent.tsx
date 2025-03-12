@@ -1,52 +1,58 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
 
-export default component$(() => {
-  const { userId } = useUserStore();
-  const posts = useSignal([]);
-  const isLoading = useSignal(true);
-  const comments = useSignal<{ [key: number]: any[] }>({});
-  const newComment = useSignal<{ [key: number]: string }>({});
-
-  const loadPosts = $(async () => {
-    isLoading.value = true;
-    try {
-      const res = await fetch("http://dexto.com:3000/graphql", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: `query {
-            searchPosts(query: "") {
-              id 
-              userId
-              userName 
-              userProfile 
-              title 
-              content 
-              imageUrl 
-              tags 
-              likes 
-              createdAt
-              comments {
+  export default component$(() => {
+    const { userId } = useUserStore();
+    const posts = useSignal([]);
+    const isLoading = useSignal(true);
+    const comments = useSignal<{ [key: number]: any[] }>({});
+    const newComment = useSignal<{ [key: number]: string }>({});
+    const likedPosts = useSignal<{ [key: number]: boolean }>({});
+    const likeCounts = useSignal<{ [key: number]: number }>({});
+  
+    const loadPosts = $(async () => {
+      isLoading.value = true;
+      try {
+        const res = await fetch("http://dexto.com:3000/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: `query {
+              searchPosts(query: "") {
                 id 
-                userId 
+                userId
                 userName 
                 userProfile 
+                title 
                 content 
+                imageUrl 
+                tags 
+                likes 
                 createdAt
+                comments {
+                  id 
+                  userId 
+                  userName 
+                  userProfile 
+                  content 
+                  createdAt
+                }
               }
-            }
-          }`
-        }),
-      });
-      const result = await res.json();
-      posts.value = result.data?.searchPosts || [];
-      isLoading.value = false;
-    } catch (err) {
-      console.error("Error loading posts", err);
-      isLoading.value = false;
-    }
-  });
+            }`
+          }),
+        });
+        const result = await res.json();
+        posts.value = result.data?.searchPosts || [];
+        posts.value.forEach(post => {
+          likeCounts.value[post.id] = post.likes;
+          likedPosts.value[post.id] = false;
+        });
+        isLoading.value = false;
+      } catch (err) {
+        console.error("Error loading posts", err);
+        isLoading.value = false;
+      }
+    });
 
   const addComment = $(async (postId: number) => {
     const commentText = newComment.value[postId]?.trim();
@@ -73,6 +79,42 @@ export default component$(() => {
     await loadPosts();
   });
 
+  const deletePost = $(async (postId: number) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+    const response = await fetch("http://dexto.com:3000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `mutation { deletePost(userId: ${userId.value}, postId: ${postId}) }`,
+      }),
+    });
+    const result = await response.json();
+    if (result.data?.deletePost) {
+      posts.value = posts.value.filter(post => post.id !== postId);
+    } else {
+      alert("❌ Failed to delete post");
+    }
+  });
+
+  const likePost = $(async (postId: number, postUserId: number) => {
+    if (postUserId === userId.value) return alert("❌ You cannot like your own post.");
+    
+    const response = await fetch("http://dexto.com:3000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `mutation { likePost(userId: ${userId.value}, postId: ${postId}) { likes } }`,
+      }),
+    });
+    const result = await response.json();
+    if (result.data?.likePost) {
+      likedPosts.value[postId] = !likedPosts.value[postId];
+      likeCounts.value[postId] = result.data.likePost.likes;
+    } else {
+      alert("❌ Failed to like post");
+    }
+  });
+
   useVisibleTask$(() => {
     loadPosts();
   });
@@ -91,7 +133,7 @@ export default component$(() => {
 
             <div class="mt-2">
               {post.tags?.split(',').map((tag: string) => (
-                <span key={tag} class="px-2 py-1 bg-blue-600 text-white rounded mr-1">{tag}</span>
+                <span key={tag} class="px-2 py-1 bg-blue-600 text-white rounded mr-1">#{tag}</span>
               ))}
             </div>
 
@@ -123,6 +165,21 @@ export default component$(() => {
               <button class="mt-2 px-4 py-2 bg-blue-500 text-white rounded" onClick$={() => addComment(post.id)}>
                 💬 Comment
               </button>
+              
+              
+              <button
+                class={`px-4 py-2 rounded ${likedPosts.value[post.id] ? "bg-green-600" : "bg-gray-600"}`}
+                onClick$={() => likePost(post.id, post.userId)}
+              >
+                👍 {likeCounts.value[post.id] ?? 0} Likes
+              </button>
+
+              {post.userId === userId.value && (
+                <button class="px-4 py-2 bg-red-500 text-white rounded" onClick$={() => deletePost(post.id)}>
+                  🗑️ Delete
+                </button>
+              )}
+
             </div>
           </div>
         ))
