@@ -66,7 +66,7 @@ export default component$(() => {
 
   // ✅ เพิ่มคอมเมนต์ใหม่
   const addComment = $((postId: number) => {
-    if (!newComment.value[postId]?.trim()) return;
+    if (!newComment.value[postId]?.trim()) return alert("⚠️ Comment cannot be empty!");
     
     fetch("http://dexto.com:3000/graphql", {
       method: "POST",
@@ -81,21 +81,23 @@ export default component$(() => {
     });
   });
 
-  // ✅ ลบโพสต์ (เฉพาะเจ้าของโพสต์)
+  // ✅ ลบโพสต์ (เฉพาะเจ้าของโพสต์) พร้อม Confirm Alert
   const deletePost = $((postId: number, postUserId: number) => {
     if (postUserId !== userId.value) return alert("❌ You can only delete your own posts.");
     
-    fetch("http://dexto.com:3000/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `mutation { deletePost(userId: ${userId.value}, postId: ${postId}) }`
-      }),
-    })
-    .then(() => {
-      deletedPosts.value.add(postId); // ✅ ลบออกจาก UI
-      loadPosts(); // ✅ โหลดโพสต์ใหม่
-    });
+    if (confirm("⚠️ Are you sure you want to delete this post?")) {
+      fetch("http://dexto.com:3000/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `mutation { deletePost(userId: ${userId.value}, postId: ${postId}) }`
+        }),
+      })
+      .then(() => {
+        deletedPosts.value.add(postId); // ✅ ลบออกจาก UI
+        loadPosts();
+      });
+    }
   });
 
   useVisibleTask$(() => loadPosts()); // ✅ โหลดโพสต์เมื่อ Component ปรากฏบนหน้าเว็บ
