@@ -1,50 +1,41 @@
-import { component$, useSignal, $} from "@builder.io/qwik";
+import { component$, useSignal, $ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
 
 export default component$(() => {
-  const { userId } = useUserStore(); // ✅ ใช้ Store ดึง userId
+  const { userId } = useUserStore();
   const showModal = useSignal(false);
   const newPostTitle = useSignal("");
   const newPostContent = useSignal("");
   const newPostTags = useSignal("");
-  const newPostImage = useSignal<File | null>(null);
 
-  // ✅ เพิ่มโพสต์ใหม่
-  const addPost = $(() => {
-    let imageUrl = "";
-    if (newPostImage.value) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        imageUrl = reader.result as string;
-        savePost(imageUrl);
-      };
-      reader.readAsDataURL(newPostImage.value);
-    } else {
-      savePost(imageUrl);
-    }
-  });
-
-  // ✅ บันทึกโพสต์ลง Database
-  const savePost = $((imageUrl: string) => {
-    fetch("http://dexto.com:3000/graphql", {
+  const addPost = $(async () => {
+    const response = await fetch("http://dexto.com:3000/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `mutation { createPost(userId: ${userId.value}, title: "${newPostTitle.value}", content: "${newPostContent.value}", tags: "${newPostTags.value}", imageUrl: "${imageUrl}") }`
+        query: `mutation { createPost(userId: ${userId.value}, title: "${newPostTitle.value}", content: "${newPostContent.value}", tags: "${newPostTags.value}") { id } }`,
       }),
-    }).then(() => {
+    });
+
+    const result = await response.json();
+    if (result.data?.createPost) {
+      alert("✅ Post created successfully");
       newPostTitle.value = "";
       newPostContent.value = "";
       newPostTags.value = "";
-      newPostImage.value = null;
       showModal.value = false;
-      location.reload(); // ✅ รีเฟรชเพื่อโหลดโพสต์ใหม่
-    });
+      location.reload();
+    } else {
+      alert("❌ Failed to create post");
+    }
   });
 
   return (
     <div>
-      <button class="fixed bottom-5 right-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-5 rounded-full" onClick$={() => (showModal.value = true)}>
+      <button
+        class="fixed bottom-5 right-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-5 rounded-full"
+        onClick$={() => (showModal.value = true)}
+      >
         ➕ New Post
       </button>
 
@@ -52,13 +43,31 @@ export default component$(() => {
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div class="bg-white p-6 rounded-lg w-[500px]">
             <h3 class="text-lg font-bold">Create New Post</h3>
-            <input class="w-full p-2 border rounded-md" placeholder="Post Title..." bind:value={newPostTitle} />
-            <textarea class="w-full p-3 border rounded-md h-40 mt-2" placeholder="Write your post..." bind:value={newPostContent}></textarea>
-            <input class="w-full p-2 border rounded-md mt-2" placeholder="Tags (comma separated)..." bind:value={newPostTags} />
-            <input type="file" accept="image/*" class="w-full mt-2" onChange$={(e) => (newPostImage.value = (e.target as HTMLInputElement).files?.[0] || null)} />
+            <input
+              class="w-full p-2 border rounded-md"
+              placeholder="Post Title..."
+              bind:value={newPostTitle}
+            />
+            <textarea
+              class="w-full p-3 border rounded-md h-40 mt-2"
+              placeholder="Write your post..."
+              bind:value={newPostContent}
+            ></textarea>
+            <input
+              class="w-full p-2 border rounded-md mt-2"
+              placeholder="Tags (comma separated)..."
+              bind:value={newPostTags}
+            />
             <div class="flex justify-end gap-2 mt-4">
-              <button class="px-4 py-2 bg-blue-500 text-white rounded" onClick$={addPost}>📝 Post</button>
-              <button class="px-4 py-2 bg-gray-300 rounded" onClick$={() => (showModal.value = false)}>Cancel</button>
+              <button class="px-4 py-2 bg-blue-500 text-white rounded" onClick$={addPost}>
+                📝 Post
+              </button>
+              <button
+                class="px-4 py-2 bg-gray-300 rounded"
+                onClick$={() => (showModal.value = false)}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
