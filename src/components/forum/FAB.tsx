@@ -9,17 +9,22 @@ export default component$(() => {
   const newPostTags = useSignal("");
 
   const addPost = $(async () => {
+    const formattedTags = newPostTags.value
+      .split(" ")
+      .filter(tag => tag.startsWith("#"))
+      .map(tag => tag.substring(1))
+      .join(",");
+
     const response = await fetch("http://dexto.com:3000/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `mutation { createPost(userId: ${userId.value}, title: "${newPostTitle.value}", content: "${newPostContent.value}", tags: "${newPostTags.value}") { id } }`,
+        query: `mutation { createPost(userId: ${userId.value}, title: "${newPostTitle.value}", content: "${newPostContent.value}", tags: "${formattedTags}") { id } }`,
       }),
     });
 
     const result = await response.json();
     if (result.data?.createPost) {
-      alert("✅ Post created successfully");
       newPostTitle.value = "";
       newPostContent.value = "";
       newPostTags.value = "";
@@ -55,7 +60,7 @@ export default component$(() => {
             ></textarea>
             <input
               class="w-full p-2 border rounded-md mt-2"
-              placeholder="Tags (comma separated)..."
+              placeholder="Tags ( #your_tag )"
               bind:value={newPostTags}
             />
             <div class="flex justify-end gap-2 mt-4">
