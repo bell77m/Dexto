@@ -7,10 +7,10 @@ export const ForumFooter = component$(() => {
         <a href="/about" class="self-stretch my-auto">
           About
         </a>
-        <a href="/guides" class="self-stretch my-auto">
+        <a href="/guide" class="self-stretch my-auto">
           Guides
         </a>
-        <a href="/terms" class="self-stretch my-auto">
+        <a href="/termsOfservice" class="self-stretch my-auto">
           Terms of Services
         </a>
         <a href="/privacy" class="self-stretch my-auto w-[79px]">
