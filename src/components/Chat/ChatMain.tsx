@@ -4,11 +4,13 @@ import { useUserStore } from "~/store/store";
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
   const friends = useSignal([]);
+  const originalFriends = useSignal([]);
   const selectedFriend = useSignal(null);
   const messages = useSignal({});
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
+  const searchQuery = useSignal("");
 
   // Load friends and sort by latest message
   const loadFriends = $(() => {
@@ -28,6 +30,8 @@ export const ChatMain = component$(() => {
             return timestampB - timestampA;
           });
 
+          originalFriends.value = [...friends.value];
+
           // Load messages for all friends
           friends.value.forEach((friend) => {
             loadMessages(friend);
@@ -35,6 +39,19 @@ export const ChatMain = component$(() => {
         }
       })
       .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
+  });
+
+  // Search friends function
+  const searchFriends = $(() => {
+    if (!searchQuery.value.trim()) {
+      friends.value = originalFriends.value;
+      return;
+    }
+
+    const query = searchQuery.value.toLowerCase().trim();
+    friends.value = originalFriends.value.filter(friend => 
+      friend.displayName.toLowerCase().includes(query)
+    );
   });
 
   // Load messages for a given friend
@@ -126,6 +143,21 @@ export const ChatMain = component$(() => {
       {/* Sidebar รายชื่อเพื่อน */}
       <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
+        
+        {/* Friend Search Input */}
+        <div class="mb-4">
+          <input 
+            type="text" 
+            placeholder="ค้นหาเพื่อน..." 
+            value={searchQuery.value}
+            onInput$={(e) => {
+              searchQuery.value = (e.target as HTMLInputElement).value;
+              searchFriends();
+            }}
+            class="w-full p-2 bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
         <ul class="flex-1 overflow-y-auto">
           {friends.value.length === 0 ? (
             <p class="text-center text-gray-400">No friends found</p>
