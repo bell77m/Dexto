@@ -5,9 +5,11 @@ import { UserProfile } from '~/components/userProfile/UserProfile';
 
 export default component$(() => {
   return (
+    <div class="bg-gray-900">
     <div style={{ display: 'flex' }}>
       <Sidebar />
       <UserProfile/>
+    </div>
     </div>
   );
 });
