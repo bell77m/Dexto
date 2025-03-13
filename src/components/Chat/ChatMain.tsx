@@ -1,5 +1,7 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
@@ -9,10 +11,11 @@ export const ChatMain = component$(() => {
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null); // ✅ ใช้เพื่อให้ Scroll Auto
+  const navigate = useNavigate();
 
   // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
   const loadFriends = $(() => {
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -25,8 +28,11 @@ export const ChatMain = component$(() => {
           friends.value = [...result.data.getFriends];
         }
       })
-      .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Loading friends failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+    });
 
   // ✅ โหลดข้อความแชทของเพื่อนที่เลือก
   const loadMessages = $(() => {
@@ -42,8 +48,11 @@ export const ChatMain = component$(() => {
       .then((result) => {
         messages.value = result.data?.getChatMessages || [];
       })
-      .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Loading messages failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+   });
 
   // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
   useVisibleTask$(() => {
@@ -77,8 +86,11 @@ export const ChatMain = component$(() => {
         messageText.value = "";
         loadMessages();
       })
-      .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Sending message failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+   });
 
   // ✅ โหลดข้อความใหม่ทุก 2 วินาที (Real-time)
   useVisibleTask$(() => {

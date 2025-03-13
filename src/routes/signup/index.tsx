@@ -1,5 +1,6 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
+import API_URL from '~/configURL/config';
 
 export default component$(() => {
   const name = useSignal('');
@@ -10,7 +11,7 @@ export default component$(() => {
   const errorMessages = useSignal<string[]>([]);
   const isLoading = useSignal(false);
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://dexto.com:3000/graphql';
+  const API_URL = import.meta.env.VITE_API_URL || 'API_URL';
 
   const handleSubmit$ = $(async () => {
     errorMessages.value = [];

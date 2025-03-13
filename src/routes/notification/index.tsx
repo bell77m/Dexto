@@ -1,6 +1,7 @@
 import { component$, useSignal, useVisibleTask$, $ } from "@builder.io/qwik";
 import { Sidebar } from "~/components/sidebar/Sidebar";
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export default component$(() => {
   const { userId } = useUserStore();
@@ -10,7 +11,7 @@ export default component$(() => {
   const fetchFriendRequests = $(async () => {
     isLoading.value = true;
     try {
-      const response = await fetch("http://dexto.com:3000/graphql", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -50,7 +51,7 @@ export default component$(() => {
 
   const handleAccept = $(async (senderId: number) => {
     try {
-      const response = await fetch("http://dexto.com:3000/graphql", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +81,7 @@ export default component$(() => {
 
   const handleReject = $(async (senderId: number) => {
     try {
-      const response = await fetch("http://dexto.com:3000/graphql", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

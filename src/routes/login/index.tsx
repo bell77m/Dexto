@@ -1,6 +1,7 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from '~/store/store'; 
+import API_URL from '~/configURL/config';
 
 export default component$(() => {
   const email = useSignal('');
@@ -18,8 +19,12 @@ export default component$(() => {
     isLoading.value = true; 
 
     try {
-      const response = await fetch('http://dexto.com:3000/graphql', {  
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 วินาที
+     
+      const response = await fetch(API_URL, {  
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
@@ -39,32 +44,76 @@ export default component$(() => {
           variables: { email: email.value, password: password.value },
         }),
       });
-
+     
+      clearTimeout(timeoutId);
+     
+      // ตรวจสอบ HTTP status
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            errorMessage.value = 'Bad Request. Please check your input.';
+            break;
+          case 401:
+            errorMessage.value = 'Unauthorized. Invalid credentials.';
+            break;
+          case 403:
+            errorMessage.value = 'Forbidden. You do not have access.';
+            break;
+          case 404:
+            errorMessage.value = 'Service not found.';
+            break;
+          case 500:
+            errorMessage.value = 'Internal Server Error. Please try again later.';
+            break;
+          default:
+            errorMessage.value = 'An unexpected error occurred.';
+        }
+        isLoading.value = false;
+        return;
+      }
+     
       const result = await response.json();
       const loginData = result.data?.loginUser;
-
+     
+      // ตรวจสอบ GraphQL response
       if (!loginData?.success) {
         errorMessage.value = loginData?.message || 'Login failed!';
         isLoading.value = false;
         return;
       }
-
+     
       console.log('User Data:', loginData.user);
       
-    
       const { updateStore } = userStore;
       updateStore(
         loginData.user.displayName,
         loginData.user.id,
         loginData.user.profilePictureUrl
       );
-
-
-      console.log('Sidebar Display Name login :', userStore.displayName);
+     
+      console.log('Sidebar Display Name login:', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/home');  
-    } catch (error) {
-      errorMessage.value = 'Network error. Please try again!';
+      navigate('/home');
+     
+     } catch (error: unknown) {
+      // จัดการ error หลากหลายประเภท
+      if (error instanceof Error && error.name === 'AbortError') {
+        errorMessage.value = 'Request timed out. Please check your connection.';
+      } else if (error instanceof TypeError) {
+        // Network error
+        errorMessage.value = 'Network error. Please check your internet connection.';
+      } else if (error instanceof SyntaxError) {
+        // JSON parsing error
+        errorMessage.value = 'Error processing server response.';
+        navigate('/service-unavailable');
+      } else {
+        // Fallback for other unexpected errors
+        errorMessage.value = 'An unexpected error occurred. Please try again.';
+        navigate('/service-unavailable');
+      }
+    
+      // Log error for debugging
+      console.error('Login error:', error);
     } finally {
       isLoading.value = false;
     }
