@@ -6,13 +6,13 @@ import { Link } from "@builder.io/qwik-city";
 
 export default component$(() => {
   const { userId } = useUserStore();
-  const posts = useSignal([]); // เก็บโพสต์
-  const isLoading = useSignal(true); // สถานะการโหลดโพสต์
-  const searchQuery = useSignal("");  // เก็บคำค้นจาก Search Bar
-  const newComment = useSignal<{ [key: number]: string }>({}); // เก็บคอมเมนต์
+  const posts = useSignal([]); // Store posts
+  const isLoading = useSignal(true); // Loading status
+  const searchQuery = useSignal("");  // Search bar query
+  const newComment = useSignal<{ [key: number]: string }>({}); // Comments
   const navigate = useNavigate();
 
-  // ฟังก์ชันโหลดโพสต์ตามคำค้น
+  // Function to load posts based on search query
   const loadPosts = $(async () => {
     isLoading.value = true;
     try {
@@ -46,7 +46,7 @@ export default component$(() => {
       });
       const result = await res.json();
 
-      // ✅ เรียงโพสต์ใหม่ล่าสุดให้อยู่บนสุด
+      // Sort posts with newest first
       posts.value = (result.data?.searchPosts || []).sort(
         (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -59,12 +59,12 @@ export default component$(() => {
     }
   });
 
-  // ฟังก์ชันค้นหาจากคำค้น
+  // Function to handle search
   const handleSearch = $(async () => {
-    await loadPosts(); // เมื่อมีการค้นหาคำใหม่ ให้ส่งคำค้นไปยัง GraphQL API
+    await loadPosts(); // Send new search query to GraphQL API
   });
 
-  // ฟังก์ชันเพิ่มคอมเมนต์
+  // Function to add a comment
   const addComment = $(async (postId: number) => {
     const commentText = newComment.value[postId]?.trim();
     if (!commentText || commentText.length === 0) return alert("⚠️ Comment cannot be empty!");
@@ -86,11 +86,11 @@ export default component$(() => {
       }),
     });
 
-    newComment.value[postId] = ""; // รีเซ็ตค่า comment
+    newComment.value[postId] = ""; // Reset comment
     await loadPosts();
   });
 
-  // ฟังก์ชันลบโพสต์
+  // Function to delete a post
   const deletePost = $(async (postId: number) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
     const response = await fetch(API_URL, {
@@ -108,22 +108,39 @@ export default component$(() => {
     }
   });
 
-  // การตรวจสอบการขยายโพสต์และคอมเมนต์
+  // Expand post and comment management
   const postExpanded = useStore<{ [key: number]: boolean }>({});
   const commentExpanded = useStore<{ [key: number]: boolean }>({});
 
-  // ฟังก์ชัน toggle สำหรับขยายโพสต์
+  // Function to toggle post expansion
   const togglePostExpand = $(async (postId: number) => {
     postExpanded[postId] = !postExpanded[postId];
   });
 
-  // ฟังก์ชัน toggle สำหรับขยายคอมเมนต์
+  // Function to toggle comment expansion
   const toggleCommentExpand = $(async (commentId: number) => {
     commentExpanded[commentId] = !commentExpanded[commentId];
   });
 
+  // Function to format timestamp in a human-readable way
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHr = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHr / 24);
+
+    if (diffSec < 60) return `${diffSec} second${diffSec !== 1 ? 's' : ''} ago`;
+    if (diffMin < 60) return `${diffMin} minute${diffMin !== 1 ? 's' : ''} ago`;
+    if (diffHr < 24) return `${diffHr} hour${diffHr !== 1 ? 's' : ''} ago`;
+    if (diffDay < 7) return `${diffDay} day${diffDay !== 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
   useVisibleTask$(() => {
-    loadPosts(); // โหลดโพสต์เมื่อ component ถูกแสดง
+    loadPosts(); // Load posts when component is displayed
   });
 
   return (
@@ -157,12 +174,12 @@ export default component$(() => {
                 placeholder="Search..."
                 class="w-full bg-transparent border-none focus:outline-none"
                 value={searchQuery.value}
-                onInput$={(e) => searchQuery.value = (e.target as HTMLInputElement).value} // อัพเดตค่าเมื่อมีการพิมพ์
+                onInput$={(e) => searchQuery.value = (e.target as HTMLInputElement).value}
                 onKeyDown$={(event) => {
                   if (event.key === 'Enter') {
-                    handleSearch();  // เมื่อกด Enter ให้ทำการค้นหา
+                    handleSearch();
                   }
-                }}  // เมื่อกด Enter จะทำการค้นหา
+                }}
               />
             </div>
           </div>
@@ -170,7 +187,7 @@ export default component$(() => {
           {/* Search Button */}
           <button
             class="px-4 py-2 bg-blue-500 text-white rounded ml-2"
-            onClick$={handleSearch} // เมื่อคลิกปุ่มค้นหา
+            onClick$={handleSearch}
           >
             Search
           </button>
@@ -187,7 +204,7 @@ export default component$(() => {
           posts.value.map((post: any) => {
             return (
               <div key={post.id} class="relative bg-gray-800 p-4 rounded-lg mt-4 max-w-2xl w-full">
-                {/* หัวข้อโพสต์ + ปุ่ม Delete */}
+                {/* Post Header + Delete Button */}
                 <div class="flex justify-between items-start w-full">
                   <div class="max-w-[85%] break-words">
                     <h2 class="text-3xl font-bold text-left">
@@ -208,7 +225,7 @@ export default component$(() => {
                   )}
                 </div>
 
-                {/* ✅ ตัดเนื้อหาโพสต์ ถ้ายาวเกิน 300 ตัวอักษร */}
+                {/* Post Content */}
                 <div class="max-w break-words whitespace-pre-line overflow-wrap break-word mt-2">
                   <p class="text-left">
                     {postExpanded[post.id] || post.content.length <= 300
@@ -216,7 +233,7 @@ export default component$(() => {
                       : post.content.slice(0, 300) + "..."}
                   </p>
 
-                  {/* ปุ่ม Read More / Read Less */}
+                  {/* Read More / Read Less Button */}
                   {post.content.length > 300 && (
                     <button
                       class="text-blue-400 text-sm underline"
@@ -235,7 +252,7 @@ export default component$(() => {
                   ))}
                 </div>
 
-                {/* คอมเมนต์ */}
+                {/* Comments */}
                 <div class="mt-4 border-t pt-2">
                   <h3 class="text-lg font-semibold text-left">Comments:</h3>
                   {post.comments?.length > 0 ? (
@@ -244,14 +261,19 @@ export default component$(() => {
                         <div key={comment.id} class="ml-4 mt-2 flex items-start gap-2">
                           <img src={comment.userProfile || "/image/defaultProfile.svg"} class="w-8 h-8 rounded-full" />
                           <div class="max-w-[85%] break-words whitespace-pre-line overflow-wrap break-word">
-                            <span class="font-semibold">{comment.userName}</span>
+                            <div class="flex items-center gap-2">
+                              <span class="font-semibold">{comment.userName}</span>
+                              <span class="text-xs text-gray-400">
+                                {formatTimeAgo(comment.createdAt)}
+                              </span>
+                            </div>
                             <p class="text-left">
                               {commentExpanded[comment.id] || comment.content.length <= 100
                                 ? comment.content
                                 : comment.content.slice(0, 100) + "..."}
                             </p>
 
-                            {/* ปุ่ม Read More / Read Less */}
+                            {/* Read More / Read Less Button */}
                             {comment.content.length > 100 && (
                               <button
                                 class="text-blue-400 text-sm underline"
@@ -269,7 +291,7 @@ export default component$(() => {
                   )}
                 </div>
 
-                {/* ช่องพิมพ์คอมเมนต์ */}
+                {/* Comment Input */}
                 <div class="mt-2 flex items-center w-full max-w space-x-2">
                   <input
                     class="flex-1 p-2 border rounded-md text-gray-700"
