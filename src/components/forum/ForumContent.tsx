@@ -177,13 +177,11 @@ export default component$(() => {
         </nav>
       </header>
 
-      <div class="p-6 bg-gray-900 text-white min-h-screen flex flex-col items-center">
+      <div class="p-6 bg-gray-900 text-white flex flex-col items-center">
         {isLoading.value ? (
-          <p class="text-left text-gray-400 w-full max-w-2xl flex-grow">📢 Loading forum posts...</p>
+          <p class="text-left text-gray-400 w-full max-w-2xl">📢 Loading forum posts...</p>
         ) : posts.value.length === 0 ? (
-          <div class="flex-grow flex items-center justify-center w-full">
-            <p class="text-center text-gray-400 text-xl">🚫 No posts found</p>
-          </div>
+          <p class="text-left text-gray-400 w-full max-w-2xl">🚫 No posts found</p>
         ) : (
           posts.value.map((post: any) => {
             return (
