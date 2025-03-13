@@ -146,17 +146,18 @@ export default component$(() => {
 
           {errorMessage.value && <p class="text-red-500 mb-4">{errorMessage.value}</p>}
 
-          <div class="flex items-center mb-4">
+          {/* <div class="flex items-center mb-4">
             <input
               type="checkbox"
               class="mr-2"
               onChange$={(e) => (agree.value = (e.target as HTMLInputElement).checked)}
             />
             <span>Remember me</span>
-          </div>
+          </div> */}
+          
           <button
             type="submit"
-            class="w-full bg-black text-white py-2 rounded disabled:opacity-50"
+            class="w-full bg-black text-white mt-10 py-2 rounded disabled:opacity-50"
             disabled={!email.value || !password.value || isLoading.value}
           >
             {isLoading.value ? 'Logging in...' : 'Sign in'}

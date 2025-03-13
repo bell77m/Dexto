@@ -21,7 +21,7 @@ export const CollaborationHero = component$((props: CollaborationHeroProps) => {
         </h1>
         <Link 
           href="/guide"
-          class="flex z-0 self-center mt-20 max-w-full bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] min-h-[71px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[281px] max-md:mt-10 text-center flex items-center justify-center text-2xl font-medium text-white"
+          class="flex z-0 self-center mt-20 max-w-full bg-orange-600 rounded-3xl border-orange-600 border-solid border-[3px] min-h-[71px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] w-[281px] max-md:mt-10 text-center items-center justify-center text-2xl font-medium text-white"
           aria-label={props.buttonText}
           tabIndex={0}
         >

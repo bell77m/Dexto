@@ -53,7 +53,7 @@ export default component$(() => {
 
   const sendFriendRequest = $(async (friendId: number) => {
     try {
-      const response = await fetch('http://dexto.com:3000/graphql', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
