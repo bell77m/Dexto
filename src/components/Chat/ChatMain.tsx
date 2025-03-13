@@ -1,4 +1,4 @@
-import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, $, useVisibleTask$, useComputed$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
 
 export const ChatMain = component$(() => {
@@ -8,6 +8,15 @@ export const ChatMain = component$(() => {
   const messages = useSignal({});
   const messageText = useSignal("");
   const searchQuery = useSignal("");  // คำค้นหาจากผู้ใช้
+
+  // Computed property to filter friends based on search query
+  const filteredFriends = useComputed$(() => {
+    if (!searchQuery.value) return friends.value;
+    return friends.value.filter(friend => 
+      friend.displayName.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  });
+
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
 
@@ -137,18 +146,21 @@ export const ChatMain = component$(() => {
             value={searchQuery.value}
             onInput$={(e) => { 
               searchQuery.value = (e.target as HTMLInputElement).value;
-              // กรองเพื่อนที่พิมพ์ในแถบค้นหา
             }}
           />
         </div>
 
         {/* แสดงรายชื่อเพื่อนทั้งหมด */}
         <ul class="flex-1 overflow-y-auto">
-          {friends.value.length === 0 ? (
+          {filteredFriends.value.length === 0 ? (
             <p class="text-center text-gray-400">No friends found</p>
           ) : (
-            friends.value.map((friend) => (
-              <li key={friend.id} class={`p-4 cursor-pointer rounded-md flex items-center gap-4 ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : "hover:bg-gray-700"}`} onClick$={() => { selectedFriend.value = friend; }}>
+            filteredFriends.value.map((friend) => (
+              <li 
+                key={friend.id} 
+                class={`p-4 cursor-pointer rounded-md flex items-center gap-4 ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : "hover:bg-gray-700"}`} 
+                onClick$={() => { selectedFriend.value = friend; }}
+              >
                 <img src={friend.profilePictureUrl || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
@@ -174,24 +186,39 @@ export const ChatMain = component$(() => {
         <h2 class="text-lg font-semibold border-b border-gray-700 pb-2">{selectedFriend.value?.displayName || "Select a friend to start chat"}</h2>
 
         {/* Messages */}
-        <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-3">
-          {selectedFriend.value && messages.value[selectedFriend.value.id]?.map((msg, index) => {
-            const isUserMessage = msg.senderId === userId.value;
-            return (
-              <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
-                <div class="max-w-[70%] relative">
-                  <div class={`relative p-3 rounded-xl break-words whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
-                    {msg.message}
-                  </div>
-                  <div class={`absolute bottom-1 ${isUserMessage ? "left-[-45px]" : "right-[-45px]"}`}>
-                    <span class="text-xs text-gray-400">
+        <div 
+          ref={scrollContainerRef} 
+          class="flex-1 overflow-y-auto p-4 space-y-3 relative"
+          style="max-height: calc(100vh - 250px); height: calc(100vh - 250px);"
+        >
+          <div class="absolute inset-0 overflow-y-auto">
+            {selectedFriend.value && messages.value[selectedFriend.value.id]?.map((msg, index) => {
+              const isUserMessage = msg.senderId === userId.value;
+              return (
+                <div 
+                  key={index} 
+                  class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}
+                >
+                  <div class="max-w-[70%]">
+                    <div 
+                      class={`p-3 rounded-xl break-words whitespace-pre-wrap ${
+                        isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"
+                      }`}
+                    >
+                      {msg.message}
+                    </div>
+                    <div 
+                      class={`text-xs text-gray-400 mt-1 ${
+                        isUserMessage ? "text-right" : "text-left"
+                      }`}
+                    >
                       {formatMessageTime(msg.sentAt)}
-                    </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Input */}
