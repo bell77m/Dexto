@@ -1,5 +1,6 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Sidebar } from '~/components/sidebar/Sidebar';
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from '~/store/store';
 import API_URL from '~/configURL/config';
 
@@ -9,6 +10,7 @@ export default component$(() => {
   const searchResults = useSignal([]);
   const hasSearched = useSignal(false);
   const { userId } = useUserStore();
+  const navigate = useNavigate();
 
   const handleSearch = $(async () => {
     if (!searchQuery.value.trim()) return;
@@ -43,14 +45,15 @@ export default component$(() => {
       }
     } catch (error) {
       console.error("❌ Failed to search users:", error);
-    } finally {
+      navigate('/service-unavailable');
+     } finally {
       isSearching.value = false;
-    }
+     }
   });
 
   const sendFriendRequest = $(async (friendId: number) => {
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch('http://dexto.com:3000/graphql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,9 +76,11 @@ export default component$(() => {
         );
       } else {
         console.error("❌ Failed to send friend request");
+        navigate('/service-unavailable');
       }
     } catch (error) {
       console.error("❌ Error sending friend request:", error);
+      navigate('/service-unavailable');
     }
   });
 

@@ -1,4 +1,3 @@
-// home.tsx
 import { component$ } from '@builder.io/qwik';
 import { Sidebar } from '~/components/sidebar/Sidebar';
 import { useUserStore } from '~/store/store';  
