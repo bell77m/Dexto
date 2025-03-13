@@ -1,5 +1,6 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
@@ -62,7 +63,7 @@ export const ChatMain = component$(() => {
 
   // Mark messages as read
   const markMessagesAsRead = $((friendId) => {
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -78,7 +79,7 @@ export const ChatMain = component$(() => {
 
   // Load friends and sort by latest message
   const loadFriends = $(() => {
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -120,7 +121,7 @@ export const ChatMain = component$(() => {
 
   // Load messages for a given friend
   const loadMessages = $((friend) => {
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -205,7 +206,7 @@ export const ChatMain = component$(() => {
   const sendMessage = $(() => {
     if (!messageText.value.trim() || !selectedFriend.value) return;
 
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

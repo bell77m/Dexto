@@ -1,5 +1,6 @@
 import { useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 import { useNavigate } from '@builder.io/qwik-city';
+import API_URL from '~/configURL/config';
 
 const STORAGE_KEY = 'userStore';
 
@@ -48,7 +49,7 @@ export const useUserStore = () => {
     console.log(`Logging out: ${displayName.value} (ID: ${userId.value})`);
 
     try {
-      const response = await fetch('http://dexto.com:3000/graphql', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
