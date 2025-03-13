@@ -59,7 +59,7 @@ import API_URL from "~/configURL/config";
     const commentText = newComment.value[postId]?.trim();
     if (!commentText || commentText.length === 0) return alert("⚠️ Comment cannot be empty!");
 
-    await fetch("http://dexto.com:3000/graphql", {
+    await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -82,7 +82,7 @@ import API_URL from "~/configURL/config";
 
   const deletePost = $(async (postId: number) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
-    const response = await fetch("http://dexto.com:3000/graphql", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -100,7 +100,7 @@ import API_URL from "~/configURL/config";
   const likePost = $(async (postId: number, postUserId: number) => {
     if (postUserId === userId.value) return alert("❌ You cannot like your own post.");
     
-    const response = await fetch("http://dexto.com:3000/graphql", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
