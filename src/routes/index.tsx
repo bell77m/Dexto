@@ -14,7 +14,7 @@ import {
 // Server function to call the FastAPI backend
 export const runCode = server$(async (files: Record<string, string>, language: string, mainFile: string) => {
     try {
-        const response = await fetch('http://localhost:8080/run', {
+        const response = await fetch('http://localhost:12345/run', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,7 +38,99 @@ export const runCode = server$(async (files: Record<string, string>, language: s
     }
 });
 
+// Server function to upload files to backend
+export const uploadFilesToServer = server$(async (files: File[], folder?: string) => {
+    try {
+        const formData = new FormData();
 
+        // Add each file to the form data
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        // Add folder if specified
+        if (folder) {
+            formData.append('folder', folder);
+        }
+
+        const response = await fetch('http://localhost:12345/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        throw error;
+    }
+});
+
+// Server function to list files from backend
+export const listFilesFromServer = server$(async () => {
+    try {
+        const response = await fetch('http://localhost:12345/files');
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.files;
+    } catch (error) {
+        console.error('Error listing files:', error);
+        return [];
+    }
+});
+
+// Server function to move files on backend
+export const moveFileOnServer = server$(async (source: string, destination: string) => {
+    try {
+        const response = await fetch('http://localhost:12345/move', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                source,
+                destination,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error moving file:', error);
+        throw error;
+    }
+});
+
+// Server function to delete files from backend
+export const deleteFileFromServer = server$(async (filePath: string) => {
+    try {
+        const response = await fetch(`http://localhost:12345/files/${filePath}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        throw error;
+    }
+});
 
 export default component$(() => {
     // Use useStore for complex state to prevent unnecessary re-renders
@@ -49,6 +141,7 @@ export default component$(() => {
         isRunning: false,
         output: '',
         isSaved: true,
+        serverSync: false, // Flag to indicate if we should sync with server
     });
 
     // Use separate signals for input elements to avoid blinking
@@ -66,13 +159,22 @@ export default component$(() => {
     const selectedFiles = useSignal<Set<string>>(new Set());
     const showMultiSelectMode = useSignal<boolean>(false);
 
+    // New signals for drag and drop and file import
+    const draggingFile = useSignal<string | null>(null);
+    const dragOverFolder = useSignal<string | null>(null);
+    const fileInputRef = useSignal<HTMLInputElement | null>(null);
+    const isUploading = useSignal<boolean>(false);
+    const uploadProgress = useSignal<number>(0);
+
     // Load saved files from localStorage
     useVisibleTask$(({ track }) => {
         // Load files, main file, and language from localStorage
         const savedFiles = localStorage.getItem(STORAGE_KEY_FILES);
         const savedMainFile = localStorage.getItem(STORAGE_KEY_MAIN_FILE);
         const savedLanguage = localStorage.getItem(STORAGE_KEY_LANGUAGE);
+        const serverSyncFlag = localStorage.getItem('server-sync');
 
+        // Initialize state
         if (savedFiles) {
             try {
                 state.files = JSON.parse(savedFiles);
@@ -90,6 +192,14 @@ export default component$(() => {
         if (savedLanguage) {
             state.language = savedLanguage;
         }
+
+        // Set server sync flag
+        state.serverSync = serverSyncFlag === 'true';
+
+        // If server sync is enabled, load files from server
+        if (state.serverSync) {
+            loadFilesFromServer();
+        }
     }, { strategy: 'document-ready' });
 
     // Save files to localStorage whenever they change
@@ -97,13 +207,97 @@ export default component$(() => {
         track(() => state.files);
         track(() => state.mainFile);
         track(() => state.language);
+        track(() => state.serverSync);
 
         // Save current state to localStorage
         localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(state.files));
         localStorage.setItem(STORAGE_KEY_MAIN_FILE, state.mainFile);
         localStorage.setItem(STORAGE_KEY_LANGUAGE, state.language);
+        localStorage.setItem('server-sync', state.serverSync.toString());
 
         state.isSaved = true;
+    });
+
+    // Load files from server
+    const loadFilesFromServer = $(async () => {
+        if (!state.serverSync) return;
+
+        try {
+            const serverFiles = await listFilesFromServer();
+
+            // Convert server files to our format
+            const newFiles: Record<string, string> = {};
+
+            // First add folder entries
+            const folders = new Set<string>();
+
+            serverFiles.forEach((file: string) => {
+                if (file.includes('/')) {
+                    // Add all parent folders
+                    const parts = file.split('/');
+                    for (let i = 1; i < parts.length; i++) {
+                        const folderPath = parts.slice(0, i).join('/');
+                        folders.add(folderPath);
+                    }
+                }
+            });
+
+            // Add folder markers
+            folders.forEach(folder => {
+                newFiles[folder] = FOLDER_MARKER;
+            });
+
+            // Now fetch each file's content
+            for (const file of serverFiles) {
+                try {
+                    const response = await fetch(`http://localhost:12345/files/${file}`);
+                    if (response.ok) {
+                        const content = await response.text();
+                        newFiles[file] = content;
+                    }
+                } catch (error) {
+                    console.error(`Failed to load file ${file}:`, error);
+                }
+            }
+
+            // Update state if we got files
+            if (Object.keys(newFiles).length > 0) {
+                state.files = newFiles;
+
+                // If we don't have a main file or it doesn't exist, set one
+                if (!state.mainFile || !newFiles[state.mainFile]) {
+                    const firstRegularFile = Object.keys(newFiles).find(
+                        file => newFiles[file] !== FOLDER_MARKER
+                    );
+
+                    if (firstRegularFile) {
+                        state.mainFile = firstRegularFile;
+
+                        // Update language based on file extension
+                        const ext = firstRegularFile.split('.').pop()?.toLowerCase() || '';
+                        switch (ext) {
+                            case 'py':
+                                state.language = 'python';
+                                break;
+                            case 'js':
+                                state.language = 'javascript';
+                                break;
+                            case 'go':
+                                state.language = 'go';
+                                break;
+                        }
+                    }
+                }
+
+                // Update editor content
+                if (editorInstance.value && state.mainFile) {
+                    editorInstance.value.setValue(state.files[state.mainFile] || '');
+                    monaco.editor.setModelLanguage(editorInstance.value.getModel(), state.language);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load files from server:', error);
+        }
     });
 
     // Generate file tree structure
@@ -203,7 +397,7 @@ export default component$(() => {
     });
 
     // Create a new file
-    const createNewFile = $(() => {
+    const createNewFile = $(async () => {
         if (!fileName.value) return;
 
         // Determine the full path (with folder if needed)
@@ -225,16 +419,37 @@ export default component$(() => {
         }
 
         // Create the file with empty content or provided content
+        const content = fileContent.value || '';
         state.files = {
             ...state.files,
-            [fullPath]: fileContent.value || ''
+            [fullPath]: content
         };
+
+        // Upload to server if server sync is enabled
+        if (state.serverSync) {
+            try {
+                // Create a Blob from the content
+                const fileBlob = new Blob([content], { type: 'text/plain' });
+
+                // Create a File object
+                const fileObj = new File([fileBlob], fileName.value, { type: 'text/plain' });
+
+                // Determine folder path for server
+                const folder = folderPath.value && showCreateFolder.value ? folderPath.value : '';
+
+                // Upload to server
+                await uploadFilesToServer([fileObj], folder);
+            } catch (error) {
+                console.error('Failed to upload new file to server:', error);
+                alert(`File created locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
 
         // Set current file
         state.mainFile = fullPath;
 
         // Determine language based on file extension
-        const ext = fullPath.split('.').pop() || '';
+        const ext = fullPath.split('.').pop()?.toLowerCase() || '';
         switch (ext) {
             case 'py':
                 state.language = 'python';
@@ -251,7 +466,7 @@ export default component$(() => {
 
         // Update editor if it exists
         if (editorInstance.value) {
-            editorInstance.value.setValue(fileContent.value || '');
+            editorInstance.value.setValue(content);
             monaco.editor.setModelLanguage(editorInstance.value.getModel(), state.language);
         }
 
@@ -263,7 +478,7 @@ export default component$(() => {
     });
 
     // Create a new folder
-    const createNewFolder = $(() => {
+    const createNewFolder = $(async () => {
         if (!newFolderName.value) return;
 
         // Determine the full path
@@ -289,6 +504,29 @@ export default component$(() => {
             [fullPath]: FOLDER_MARKER
         };
 
+        // Create a placeholder file in the folder for server sync
+        if (state.serverSync) {
+            try {
+                // Create a placeholder file to create the folder on server
+                const placeholderFile = new File(
+                    ['.folder'],
+                    '.folder',
+                    { type: 'text/plain' }
+                );
+
+                // Upload to server with the folder path
+                await uploadFilesToServer([placeholderFile], fullPath);
+
+                // Delete the placeholder file from local state
+                const newFiles = { ...state.files };
+                delete newFiles[`${fullPath}/.folder`];
+                state.files = newFiles;
+            } catch (error) {
+                console.error('Failed to create folder on server:', error);
+                alert(`Folder created locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+
         // Clear the inputs
         newFolderName.value = '';
         folderPath.value = '';
@@ -296,7 +534,7 @@ export default component$(() => {
     });
 
     // Delete a file or folder
-    const deleteFile = $((path: string) => {
+    const deleteFile = $(async (path: string) => {
         const isFolder = state.files[path] === FOLDER_MARKER || fileTree.value.find(entry => entry.path === path)?.isFolder;
 
         if (isFolder) {
@@ -313,6 +551,16 @@ export default component$(() => {
                         delete newFiles[file];
                     }
                 });
+
+                // Delete from server if server sync is enabled
+                if (state.serverSync) {
+                    try {
+                        await deleteFileFromServer(path);
+                    } catch (error) {
+                        console.error(`Failed to delete folder ${path} from server:`, error);
+                        alert(`Folder deleted locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+                    }
+                }
 
                 state.files = newFiles;
 
@@ -334,6 +582,17 @@ export default component$(() => {
                 // Create a copy of the files object without the file to delete
                 const newFiles = { ...state.files };
                 delete newFiles[path];
+
+                // Delete from server if server sync is enabled
+                if (state.serverSync) {
+                    try {
+                        await deleteFileFromServer(path);
+                    } catch (error) {
+                        console.error(`Failed to delete file ${path} from server:`, error);
+                        alert(`File deleted locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+                    }
+                }
+
                 state.files = newFiles;
 
                 // If we deleted the current file, select another one
@@ -346,7 +605,7 @@ export default component$(() => {
                         editorInstance.value.setValue(state.files[state.mainFile] || '');
 
                         // Update language based on new main file
-                        const ext = state.mainFile.split('.').pop() || '';
+                        const ext = state.mainFile.split('.').pop()?.toLowerCase() || '';
                         switch (ext) {
                             case 'py':
                                 state.language = 'python';
@@ -378,7 +637,7 @@ export default component$(() => {
         state.mainFile = file;
 
         // Determine language based on file extension
-        const ext = file.split('.').pop() || '';
+        const ext = file.split('.').pop()?.toLowerCase() || '';
         switch (ext) {
             case 'py':
                 state.language = 'python';
@@ -412,6 +671,12 @@ export default component$(() => {
                 editorInstance.value.setValue(state.files[state.mainFile] || '');
                 monaco.editor.setModelLanguage(editorInstance.value.getModel(), state.language);
             }
+
+            // Upload to server if server sync is enabled
+            if (state.serverSync) {
+                // Clear the uploads first
+                alert("Server sync is enabled. The examples will be loaded locally but not synced to the server. To upload these files to the server, you'll need to do it manually.");
+            }
         }
     });
 
@@ -439,7 +704,7 @@ export default component$(() => {
     });
 
     // Handle moving files between folders
-    const moveFile = $(() => {
+    const moveFile = $(async () => {
         if (!fileToMove.value || targetFolder.value === undefined) return;
 
         // Get the filename without path
@@ -465,6 +730,16 @@ export default component$(() => {
         // Delete the old file
         delete newFiles[fileToMove.value];
 
+        // Move file on server if server sync is enabled
+        if (state.serverSync) {
+            try {
+                await moveFileOnServer(fileToMove.value, newPath);
+            } catch (error) {
+                console.error(`Failed to move file from ${fileToMove.value} to ${newPath} on server:`, error);
+                alert(`File moved locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+
         // Update the files object
         state.files = newFiles;
 
@@ -485,7 +760,7 @@ export default component$(() => {
     });
 
     // Enhanced moveFile function to support multiple files
-    const moveFiles = $(() => {
+    const moveFiles = $(async () => {
         if (!targetFolder.value || selectedFiles.value.size === 0) return;
 
         // Create a copy of the files object
@@ -519,6 +794,17 @@ export default component$(() => {
 
             // Delete the old file
             delete newFiles[filePath];
+
+            // Move file on server if server sync is enabled
+            if (state.serverSync) {
+                try {
+                    await moveFileOnServer(filePath, newPath);
+                } catch (error) {
+                    console.error(`Failed to move file from ${filePath} to ${newPath} on server:`, error);
+                    console.warn(`File moved locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+                    // Continue with other files
+                }
+            }
 
             // If we moved the current file, update our tracking
             if (filePath === state.mainFile) {
@@ -556,6 +842,242 @@ export default component$(() => {
 
         fileToMove.value = file;
         showMoveFileDialog.value = true;
+    });
+
+    // Handle drag start
+    const handleDragStart = $((event: DragEvent, filePath: string) => {
+        // Don't allow dragging folders
+        if (state.files[filePath] === FOLDER_MARKER || fileTree.value.find(entry => entry.path === filePath)?.isFolder) {
+            event.preventDefault();
+            return;
+        }
+
+        draggingFile.value = filePath;
+
+        // Set drag data
+        if (event.dataTransfer) {
+            event.dataTransfer.setData('text/plain', filePath);
+            event.dataTransfer.effectAllowed = 'move';
+        }
+    });
+
+    // Handle drag over
+    const handleDragOver = $((event: DragEvent, folderPath: string | null = null) => {
+        event.preventDefault();
+        dragOverFolder.value = folderPath;
+
+        if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = 'move';
+        }
+    });
+
+    // Handle drag end
+    const handleDragEnd = $(() => {
+        draggingFile.value = null;
+        dragOverFolder.value = null;
+    });
+
+    // Handle drop
+    const handleDrop = $(async (event: DragEvent, targetFolder: string | null = null) => {
+        event.preventDefault();
+
+        // Handle file being dragged from within the app
+        if (draggingFile.value) {
+            // Get the filename without path
+            const fileName = draggingFile.value.includes('/')
+                ? draggingFile.value.substring(draggingFile.value.lastIndexOf('/') + 1)
+                : draggingFile.value;
+
+            // Create the new path
+            const newPath = targetFolder ? `${targetFolder}/${fileName}` : fileName;
+
+            // Don't do anything if dropped in the same location
+            if (newPath === draggingFile.value) {
+                draggingFile.value = null;
+                dragOverFolder.value = null;
+                return;
+            }
+
+            // Check if target file already exists
+            if (state.files[newPath]) {
+                alert(`A file named ${fileName} already exists in the target folder.`);
+                draggingFile.value = null;
+                dragOverFolder.value = null;
+                return;
+            }
+
+            // Create a copy of the files object
+            const newFiles = { ...state.files };
+
+            // Copy the file content to the new location
+            newFiles[newPath] = newFiles[draggingFile.value];
+
+            // Delete the old file
+            delete newFiles[draggingFile.value];
+
+            // Move file on server if server sync is enabled
+            if (state.serverSync) {
+                try {
+                    await moveFileOnServer(draggingFile.value, newPath);
+                } catch (error) {
+                    console.error(`Failed to move file from ${draggingFile.value} to ${newPath} on server:`, error);
+                    alert(`File moved locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
+
+            // Update the files object
+            state.files = newFiles;
+
+            // If we moved the current file, update mainFile
+            if (draggingFile.value === state.mainFile) {
+                state.mainFile = newPath;
+
+                // Update editor if it exists
+                if (editorInstance.value) {
+                    editorInstance.value.setValue(state.files[newPath] || '');
+                }
+            }
+        }
+        // Handle files being imported from the user's computer
+        else if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+            await handleFileImport(event.dataTransfer.files, targetFolder);
+        }
+
+        // Reset drag state
+        draggingFile.value = null;
+        dragOverFolder.value = null;
+    });
+
+    // Helper function to read a file as text
+    const readFileAsText = $(async (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsText(file);
+        });
+    });
+
+    // Handle file import from system
+    const handleFileImport = $(async (files: FileList, targetFolder: string | null = null) => {
+        if (files.length === 0) return;
+
+        // Set uploading state
+        isUploading.value = true;
+        uploadProgress.value = 0;
+
+        const totalFiles = files.length;
+
+        let importedCount = 0;
+        const readFile = async (file: File): Promise<string> => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        };
+        // Process each file
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // Create the file path
+            const filePath = targetFolder ? `${targetFolder}/${file.name}` : file.name;
+
+            // Check if file already exists
+            if (state.files[filePath]) {
+                if (!confirm(`File ${filePath} already exists. Overwrite?`)) {
+                    // Skip this file
+                    importedCount++;
+                    uploadProgress.value = Math.floor((importedCount / totalFiles) * 100);
+                    continue;
+                }
+            }
+
+            try {
+                // Read the file content
+                const content = await readFileAsText(file);
+
+                // Add to local files
+                state.files = {
+                    ...state.files,
+                    [filePath]: content
+                };
+
+                // Upload to server if server sync is enabled
+                if (state.serverSync) {
+                    try {
+                        await uploadFilesToServer([file], targetFolder || undefined);
+                    } catch (error) {
+                        console.error(`Failed to upload file ${file.name} to server:`, error);
+                        alert(`File imported locally but failed to sync with server: ${error instanceof Error ? error.message : String(error)}`);
+                    }
+                }
+
+                // If this is the first file, set as main
+                if (Object.keys(state.files).filter(f => state.files[f] !== FOLDER_MARKER).length === 1) {
+                    state.mainFile = filePath;
+
+                    // Determine language based on file extension
+                    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+                    switch (ext) {
+                        case 'py':
+                            state.language = 'python';
+                            break;
+                        case 'js':
+                            state.language = 'javascript';
+                            break;
+                        case 'go':
+                            state.language = 'go';
+                            break;
+                        default:
+                            state.language = 'javascript';
+                    }
+
+                    // Update editor if it exists
+                    if (editorInstance.value) {
+                        editorInstance.value.setValue(content);
+                        monaco.editor.setModelLanguage(editorInstance.value.getModel(), state.language);
+                    }
+                }
+            } catch (error) {
+                console.error(`Error reading file ${file.name}:`, error);
+                alert(`Failed to import ${file.name}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+
+            // Update progress
+            importedCount++;
+            uploadProgress.value = Math.floor((importedCount / totalFiles) * 100);
+        }
+
+        // Reset uploading state
+        isUploading.value = false;
+    });
+    const handleFileSelect = $(async (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+            await handleFileImport(target.files);
+            // Reset the input value so the same file can be selected again
+            target.value = '';
+        }
+    });
+    // Open file picker dialog
+    const openFilePicker = $(() => {
+        if (fileInputRef.value) {
+            fileInputRef.value.click();
+        }
+    });
+
+
+
+    // Toggle server sync mode
+    const toggleServerSync = $(() => {
+        state.serverSync = !state.serverSync;
+
+        if (state.serverSync) {
+            // If enabling server sync, load files from server
+            loadFilesFromServer();
+        }
     });
 
     // Run the code
@@ -654,7 +1176,16 @@ export default component$(() => {
     });
 
     return (
-        <div class="flex flex-col h-screen bg-gray-900 text-white">
+        <div
+            class="flex flex-col h-screen bg-gray-900 text-white"
+            onDragOver$={(e) => e.preventDefault()}
+            onDrop$={(e) => {
+                e.preventDefault();
+                if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                    handleFileImport(e.dataTransfer.files);
+                }
+            }}
+        >
             <header class="bg-gray-800 p-4 flex items-center justify-between">
                 <h1 class="text-xl font-bold">Qwik Code Editor</h1>
                 <div class="flex items-center gap-2">
@@ -673,6 +1204,20 @@ export default component$(() => {
                         title="Load example files with imports"
                     >
                         Load Examples
+                    </button>
+                    <button
+                        onClick$={openFilePicker}
+                        class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded"
+                        title="Import files from computer"
+                    >
+                        Import Files
+                    </button>
+                    <button
+                        onClick$={toggleServerSync}
+                        class={`px-4 py-2 rounded ${state.serverSync ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
+                        title={state.serverSync ? "Server sync enabled" : "Server sync disabled"}
+                    >
+                        {state.serverSync ? "Sync: On" : "Sync: Off"}
                     </button>
                     <button
                         onClick$={runCurrentCode}
@@ -784,16 +1329,58 @@ export default component$(() => {
                             />
                         )}
                     </div>
+
+                    {/* Add hidden file input */}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange$={handleFileSelect}
+                        multiple
+                        class="hidden"
+                    />
+
+                    {/* Upload progress indicator */}
+                    {isUploading.value && (
+                        <div class="mb-2">
+                            <div class="text-sm mb-1">Uploading files: {uploadProgress.value}%</div>
+                            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                <div
+                                    class="bg-blue-600 h-2.5 rounded-full"
+                                    style={{ width: `${uploadProgress.value}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Droppable area for root folder */}
+                    <div
+                        class={`p-2 mb-2 border-2 border-dashed rounded text-center
+                        ${dragOverFolder.value === '' ? 'border-blue-500 bg-blue-800 bg-opacity-30' : 'border-gray-600'}`}
+                        onDragOver$={(e) => handleDragOver(e, '')}
+                        onDrop$={(e) => handleDrop(e, '')}
+                    >
+                        Drop here to move to root folder
+                    </div>
+
                     <div class="flex-1 overflow-y-auto">
                         <ul>
                             {fileTree.value.map((file) => (
                                 <li
                                     key={file.path}
-                                    class={`p-2 mb-1 cursor-pointer hover:bg-gray-700 rounded flex justify-between items-center
+                                    class={`p-2 mb-1 cursor-pointer rounded flex justify-between items-center
                                     ${file.path === state.mainFile ? 'bg-gray-700' : ''}
                                     ${file.isFolder ? 'text-blue-300 font-semibold' : ''}
-                                    ${selectedFiles.value.has(file.path) ? 'border border-blue-500' : ''}`}
+                                    ${selectedFiles.value.has(file.path) ? 'border border-blue-500' : ''}
+                                    ${!file.isFolder && draggingFile.value === file.path ? 'opacity-50' : ''}
+                                    ${file.isFolder && dragOverFolder.value === file.path ? 'bg-blue-800' : ''}
+                                    ${dragOverFolder.value === '' && file.isFolder === false ? 'bg-blue-800' : ''}
+                                    hover:bg-gray-700`}
                                     style={{ marginLeft: `${file.depth * 12}px` }}
+                                    draggable={!file.isFolder}
+                                    onDragStart$={(e) => handleDragStart(e, file.path)}
+                                    onDragOver$={(e) => file.isFolder ? handleDragOver(e, file.path) : undefined}
+                                    onDragEnd$={handleDragEnd}
+                                    onDrop$={(e) => file.isFolder ? handleDrop(e, file.path) : undefined}
                                 >
                                     <span
                                         class="flex-grow flex items-center"
