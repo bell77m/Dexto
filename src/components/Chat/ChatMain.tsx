@@ -11,6 +11,28 @@ export const ChatMain = component$(() => {
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
   const searchQuery = useSignal("");
+  const unreadMessages = useSignal({});
+
+  // Request notification permission
+  const requestNotificationPermission = $(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted');
+        }
+      });
+    }
+  });
+
+  // Send browser notification
+  const sendBrowserNotification = $((friend, message) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(`New message from ${friend.displayName}`, {
+        body: message.length > 50 ? message.substring(0, 50) + '...' : message,
+        icon: friend.profilePictureUrl || "/image/defaultProfile.svg"
+      });
+    }
+  });
 
   // Load friends and sort by latest message
   const loadFriends = $(() => {
@@ -65,10 +87,29 @@ export const ChatMain = component$(() => {
     })
       .then((response) => response.json())
       .then((result) => {
-        messages.value[friend.id] = result.data?.getChatMessages || [];
+        const newMessages = result.data?.getChatMessages || [];
+        const previousMessages = messages.value[friend.id] || [];
+
+        // Check for new messages
+        const newUnreadMessages = newMessages.filter(
+          msg => msg.senderId !== userId.value && 
+          !previousMessages.some(prevMsg => prevMsg.id === msg.id)
+        );
+
+        // Update unread messages
+        if (newUnreadMessages.length > 0) {
+          unreadMessages.value[friend.id] = (unreadMessages.value[friend.id] || 0) + newUnreadMessages.length;
+          
+          // Send browser notification for the first new message
+          if (selectedFriend.value?.id !== friend.id) {
+            sendBrowserNotification(friend, newUnreadMessages[0].message);
+          }
+        }
+
+        messages.value[friend.id] = newMessages;
 
         // Update latest message for friend
-        const latestMessage = result.data?.getChatMessages?.[result.data.getChatMessages.length - 1];
+        const latestMessage = newMessages[newMessages.length - 1];
         if (latestMessage) {
           friend.latestMessage = latestMessage.message;
           friend.latestMessageTime = latestMessage.sentAt;
@@ -82,6 +123,13 @@ export const ChatMain = component$(() => {
         }
       })
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
+  });
+
+  // Clear unread messages when a friend is selected
+  const clearUnreadMessages = $((friend) => {
+    if (unreadMessages.value[friend.id]) {
+      unreadMessages.value[friend.id] = 0;
+    }
   });
 
   // Format message timestamp
@@ -126,6 +174,9 @@ export const ChatMain = component$(() => {
 
   // Load new messages every 2 seconds (Real-time) for all friends
   useVisibleTask$(() => {
+    // Request notification permission on component mount
+    requestNotificationPermission();
+
     const interval = setInterval(() => {
       friends.value.forEach((friend) => {
         loadMessages(friend);
@@ -163,7 +214,14 @@ export const ChatMain = component$(() => {
             <p class="text-center text-gray-400">No friends found</p>
           ) : (
             friends.value.map((friend) => (
-              <li key={friend.id} class={`p-4 cursor-pointer rounded-md flex items-center gap-4 ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : "hover:bg-gray-700"}`} onClick$={() => { selectedFriend.value = friend; }}>
+              <li 
+                key={friend.id} 
+                class={`p-4 cursor-pointer rounded-md flex items-center gap-4 relative ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : "hover:bg-gray-700"}`} 
+                onClick$={() => { 
+                  selectedFriend.value = friend; 
+                  clearUnreadMessages(friend);
+                }}
+              >
                 <img src={friend.profilePictureUrl || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
@@ -178,6 +236,12 @@ export const ChatMain = component$(() => {
                     </div>
                   )}
                 </div>
+                {/* Unread message indicator */}
+                {unreadMessages.value[friend.id] > 0 && (
+                  <div class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {unreadMessages.value[friend.id]}
+                  </div>
+                )}
               </li>
             ))
           )}
