@@ -56,13 +56,13 @@ export default component$(() => {
   const addComment = $(async (postId: number) => {
     const commentText = newComment.value[postId]?.trim();
     if (!commentText || commentText.length === 0) return alert("⚠️ Comment cannot be empty!");
-
+  
     await fetch("http://dexto.com:3000/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: `mutation {
-          addComment(userId: ${userId.value}, postId: ${postId}, content: """${commentText}""") {
+          addComment(userId: ${userId.value}, postId: ${postId}, content: """${commentText.replace(/\n/g, "\\n")}""") {
             id
             userId
             userName
@@ -73,10 +73,11 @@ export default component$(() => {
         }`
       }),
     });
-
+  
     newComment.value[postId] = "";
     await loadPosts();
   });
+  
 
   const deletePost = $(async (postId: number) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
@@ -157,7 +158,7 @@ export default component$(() => {
                 #{tag}
                 </span>
                  ))}
-              </div>
+            </div>
 
 
               {/* คอมเมนต์ */}
