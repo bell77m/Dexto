@@ -215,7 +215,7 @@ export const ChatMain = component$(() => {
         <div class="mb-4">
           <input 
             type="text" 
-            placeholder="ค้นหาเพื่อน..." 
+            placeholder="Search ..." 
             value={searchQuery.value}
             onInput$={(e) => {
               searchQuery.value = (e.target as HTMLInputElement).value;
