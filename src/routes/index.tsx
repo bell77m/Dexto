@@ -9,128 +9,12 @@ import {
     STORAGE_KEY_FILES,
     STORAGE_KEY_LANGUAGE,
     STORAGE_KEY_MAIN_FILE
-} from "~/routes/constants";
+} from "~/Var_and_Func/constants";
+import {runCode} from "~/Var_and_Func/runcode";
+import "../Var_and_Func/index";
 
-// Server function to call the FastAPI backend
-export const runCode = server$(async (files: Record<string, string>, language: string, mainFile: string) => {
-    try {
-        const response = await fetch('http://localhost:12345/run', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                files,
-                language,
-                main_file: mainFile,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.output;
-    } catch (error) {
-        console.error('Error running code:', error);
-        return `Error: ${error instanceof Error ? error.message : String(error)}`;
-    }
-});
-
-// Server function to upload files to backend
-export const uploadFilesToServer = server$(async (files: File[], folder?: string) => {
-    try {
-        const formData = new FormData();
-
-        // Add each file to the form data
-        files.forEach(file => {
-            formData.append('files', file);
-        });
-
-        // Add folder if specified
-        if (folder) {
-            formData.append('folder', folder);
-        }
-
-        const response = await fetch('http://localhost:12345/upload', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error uploading files:', error);
-        throw error;
-    }
-});
-
-// Server function to list files from backend
-export const listFilesFromServer = server$(async () => {
-    try {
-        const response = await fetch('http://localhost:12345/files');
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.files;
-    } catch (error) {
-        console.error('Error listing files:', error);
-        return [];
-    }
-});
-
-// Server function to move files on backend
-export const moveFileOnServer = server$(async (source: string, destination: string) => {
-    try {
-        const response = await fetch('http://localhost:12345/move', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                source,
-                destination,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error moving file:', error);
-        throw error;
-    }
-});
-
-// Server function to delete files from backend
-export const deleteFileFromServer = server$(async (filePath: string) => {
-    try {
-        const response = await fetch(`http://localhost:12345/files/${filePath}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error deleting file:', error);
-        throw error;
-    }
-});
+import { VCManager } from "../../public/imported_rtc/vc";
+import VoiceChat from "../components/VoiceChat/VoiceChat";
 
 export default component$(() => {
     // Use useStore for complex state to prevent unnecessary re-renders
@@ -165,6 +49,15 @@ export default component$(() => {
     const fileInputRef = useSignal<HTMLInputElement | null>(null);
     const isUploading = useSignal<boolean>(false);
     const uploadProgress = useSignal<number>(0);
+
+    // Add these new signals after your existing signals
+    const showSessionModal = useSignal<boolean>(false);
+    const sessionId = useSignal<string>('');
+    const isInSession = useSignal<boolean>(false);
+    const sessionMode = useSignal<'create' | 'join'>('create');
+    const isVoiceChatActive = useSignal<boolean>(false);
+
+    const vcManager = useSignal<VCManager | null>(null);
 
     // Load saved files from localStorage
     useVisibleTask$(({ track }) => {
@@ -201,6 +94,38 @@ export default component$(() => {
             loadFilesFromServer();
         }
     }, { strategy: 'document-ready' });
+    // Add these new functions before the return statement
+// Create a new collaboration session
+    const createSession = $(async () => {
+        // Generate a random session ID if none is provided
+        if (!sessionId.value) {
+            sessionId.value = Math.random().toString(36).substring(2, 10);
+        }
+
+        // Here you would implement actual session creation logic
+        // For now, we'll just set the state
+        isInSession.value = true;
+        showSessionModal.value = false;
+
+        // Show session ID to user
+        alert(`Session created! Share this ID with others: ${sessionId.value}`);
+    });
+
+// Join an existing session
+    const joinSession = $(async () => {
+        if (!sessionId.value) {
+            alert('Please enter a session ID to join.');
+            return;
+        }
+
+        // Here you would implement actual session joining logic
+        // For now, we'll just set the state
+        isInSession.value = true;
+        showSessionModal.value = false;
+
+        alert(`Joined session: ${sessionId.value}`);
+    });
+
 
     // Save files to localStorage whenever they change
     useVisibleTask$(({ track }) => {
@@ -394,6 +319,17 @@ export default component$(() => {
             if (b === '') return 1;
             return a.localeCompare(b);
         });
+    });
+
+    // Replace your existing toggleVoiceChat function with this:
+    const toggleVoiceChat = $(() => {
+        // If voice chat is not active yet, show the VoiceChat component and let it handle the call
+        if (!isVoiceChatActive.value) {
+            isVoiceChatActive.value = true;
+        } else {
+            // If voice chat is already active, hide the component (which will clean up and end the call)
+            isVoiceChatActive.value = false;
+        }
     });
 
     // Create a new file
@@ -1175,9 +1111,10 @@ export default component$(() => {
         }
     });
 
+
     return (
         <div
-            class="flex flex-col h-screen bg-gray-900 text-white"
+            className="flex h-screen flex-col bg-gray-900 text-white"
             onDragOver$={(e) => e.preventDefault()}
             onDrop$={(e) => {
                 e.preventDefault();
@@ -1186,13 +1123,15 @@ export default component$(() => {
                 }
             }}
         >
-            <header class="bg-gray-800 p-4 flex items-center justify-between">
+            <header class="flex items-center justify-between bg-gray-800 p-4">
                 <h1 class="text-xl font-bold">Qwik Code Editor</h1>
-                <div class="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                     <select
                         value={state.language}
-                        onChange$={(e) => state.language = (e.target as HTMLSelectElement).value}
-                        class="bg-gray-700 text-white p-2 rounded"
+                        onChange$={(e) =>
+                            (state.language = (e.target as HTMLSelectElement).value)
+                        }
+                        class="rounded bg-gray-700 p-2 text-white"
                     >
                         <option value="javascript">JavaScript</option>
                         <option value="python">Python</option>
@@ -1200,58 +1139,182 @@ export default component$(() => {
                     </select>
                     <button
                         onClick$={loadExampleFiles}
-                        class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
+                        class="rounded bg-purple-600 px-4 py-2 hover:bg-purple-700"
                         title="Load example files with imports"
                     >
                         Load Examples
                     </button>
                     <button
                         onClick$={openFilePicker}
-                        class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded"
+                        class="rounded bg-indigo-600 px-4 py-2 hover:bg-indigo-700"
                         title="Import files from computer"
                     >
                         Import Files
                     </button>
+
+
                     <button
                         onClick$={toggleServerSync}
-                        class={`px-4 py-2 rounded ${state.serverSync ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
-                        title={state.serverSync ? "Server sync enabled" : "Server sync disabled"}
+                        class={`rounded px-4 py-2 ${state.serverSync ? "bg-green-600 hover:bg-green-700" : "bg-gray-600 hover:bg-gray-700"}`}
+                        title={
+                            state.serverSync
+                                ? "Server sync enabled"
+                                : "Server sync disabled"
+                        }
                     >
                         {state.serverSync ? "Sync: On" : "Sync: Off"}
                     </button>
+
+                    {/* Session Modal */}
+                    {showSessionModal.value && (
+                        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+                            <div className="w-96 rounded-lg bg-gray-800 p-6 shadow-lg">
+                                <h3 class="mb-4 text-lg font-bold">Collaboration Session</h3>
+
+                                <div className="mb-4">
+                                    <div className="mb-3 flex gap-2">
+                                        <button
+                                            onClick$={() => (sessionMode.value = "create")}
+                                            class={`flex-1 rounded py-2 ${sessionMode.value === "create" ? "bg-blue-600" : "bg-gray-600"}`}
+                                        >
+                                            Create Session
+                                        </button>
+                                        <button
+                                            onClick$={() => (sessionMode.value = "join")}
+                                            class={`flex-1 rounded py-2 ${sessionMode.value === "join" ? "bg-blue-600" : "bg-gray-600"}`}
+                                        >
+                                            Join Session
+                                        </button>
+                                    </div>
+
+                                    {sessionMode.value === "create" ? (
+                                        <div>
+                                            <p class="mb-2">
+                                                Create a new session to collaborate with others.
+                                            </p>
+                                            <input
+                                                type="text"
+                                                value={sessionId.value}
+                                                onChange$={(e) =>
+                                                    (sessionId.value = (
+                                                        e.target as HTMLInputElement
+                                                    ).value)
+                                                }
+                                                placeholder="Session ID (optional)"
+                                                class="mb-2 w-full rounded bg-gray-700 p-2 text-white"
+                                            />
+                                            <p class="text-xs text-gray-400">
+                                                Leave empty to generate a random ID
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p class="mb-2">Enter the session ID to join.</p>
+                                            <input
+                                                type="text"
+                                                value={sessionId.value}
+                                                onChange$={(e) =>
+                                                    (sessionId.value = (
+                                                        e.target as HTMLInputElement
+                                                    ).value)
+                                                }
+                                                placeholder="Enter Session ID"
+                                                class="w-full rounded bg-gray-700 p-2 text-white"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick$={() => (showSessionModal.value = false)}
+                                        class="rounded bg-gray-600 px-4 py-2 hover:bg-gray-700"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick$={
+                                            sessionMode.value === "create"
+                                                ? createSession
+                                                : joinSession
+                                        }
+                                        class="rounded bg-blue-600 px-4 py-2 hover:bg-blue-700"
+                                    >
+                                        {sessionMode.value === "create" ? "Create" : "Join"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <button
                         onClick$={runCurrentCode}
                         disabled={state.isRunning}
-                        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded disabled:opacity-50"
+                        class="rounded bg-green-600 px-4 py-2 hover:bg-green-700 disabled:opacity-50"
                     >
-                        {state.isRunning ? 'Running...' : 'Run'}
+                        {state.isRunning ? "Running..." : "Run"}
                     </button>
-                    <div class="text-xs ml-2">
-                        {state.isSaved ?
-                            <span class="text-green-400">Saved</span> :
-                            <span class="text-yellow-400">Unsaved changes</span>
+                    {/* Add these buttons to the header next to the Run button */}
+                    <button
+                        onClick$={() => (showSessionModal.value = true)}
+                        class="rounded bg-blue-600 px-4 py-2 hover:bg-blue-700"
+                        title={
+                            isInSession.value
+                                ? "Session active"
+                                : "Create or join a session"
                         }
+                    >
+                        {isInSession.value
+                            ? `Session: ${sessionId.value}`
+                            : "Collaborate"}
+                    </button>
+
+                    {isInSession.value && (
+                        <button
+                            onClick$={toggleVoiceChat}
+                            class={`px-4 py-2 rounded ${isVoiceChatActive.value ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'}`}
+                            title={isVoiceChatActive.value ? "Disable voice chat" : "Enable voice chat"}
+                        >
+                            {isVoiceChatActive.value ? "End call" : "Start call"}
+                        </button>
+                    )}
+                    {isInSession.value && isVoiceChatActive.value && (
+                        <div class="fixed bottom-4 right-4 w-80 z-50">
+                            <VoiceChat autoStart={true} />
+                        </div>
+                    )}
+
+                    <div className="ml-2 text-xs">
+                        {state.isSaved ? (
+                            <span class="text-green-400">Saved</span>
+                        ) : (
+                            <span class="text-yellow-400">Unsaved changes</span>
+                        )}
                     </div>
                 </div>
             </header>
 
-            <div class="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden">
                 {/* File explorer */}
-                <div class="w-64 bg-gray-800 p-4 flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
+                <div className="flex w-64 flex-col bg-gray-800 p-4">
+                    <div className="mb-2 flex items-center justify-between">
                         <h2 class="text-lg font-bold">Files</h2>
-                        <div class="flex gap-1">
+                        <div className="flex gap-1">
                             <button
-                                onClick$={() => showMultiSelectMode.value = !showMultiSelectMode.value}
-                                class={`text-xs px-2 py-1 rounded ${showMultiSelectMode.value ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                onClick$={() =>
+                                    (showMultiSelectMode.value = !showMultiSelectMode.value)
+                                }
+                                class={`rounded px-2 py-1 text-xs ${showMultiSelectMode.value ? "bg-blue-600" : "bg-gray-600"}`}
                                 title="Toggle multi-select mode"
                             >
-                                {showMultiSelectMode.value ? "Exit Multi-Select" : "Multi-Select"}
+                                {showMultiSelectMode.value
+                                    ? "Exit Multi-Select"
+                                    : "Multi-Select"}
                             </button>
                             {showMultiSelectMode.value && selectedFiles.value.size > 0 && (
                                 <button
                                     onClick$={initiateMultiFileMoveDialog}
-                                    class="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded"
+                                    class="rounded bg-yellow-600 px-2 py-1 text-xs hover:bg-yellow-700"
                                     title="Move selected files"
                                 >
                                     Move ({selectedFiles.value.size})
@@ -1259,19 +1322,21 @@ export default component$(() => {
                             )}
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2 mb-4">
+                    <div className="mb-4 flex flex-col gap-2">
                         {/* File creation UI */}
-                        <div class="flex gap-2">
+                        <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={fileName.value}
-                                onChange$={(e) => fileName.value = (e.target as HTMLInputElement).value}
+                                onChange$={(e) =>
+                                    (fileName.value = (e.target as HTMLInputElement).value)
+                                }
                                 placeholder="filename.js"
-                                class="bg-gray-700 text-white p-2 rounded flex-1"
+                                class="flex-1 rounded bg-gray-700 p-2 text-white"
                             />
                             <button
                                 onClick$={createNewFile}
-                                class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded"
+                                class="rounded bg-blue-600 px-2 py-1 hover:bg-blue-700"
                                 title="Create new file"
                             >
                                 +
@@ -1279,10 +1344,12 @@ export default component$(() => {
                         </div>
 
                         {/* Folder creation UI */}
-                        <div class="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                             <button
-                                onClick$={() => showNewFolderInput.value = !showNewFolderInput.value}
-                                class="bg-teal-600 hover:bg-teal-700 px-2 py-1 rounded text-xs"
+                                onClick$={() =>
+                                    (showNewFolderInput.value = !showNewFolderInput.value)
+                                }
+                                class="rounded bg-teal-600 px-2 py-1 text-xs hover:bg-teal-700"
                                 title="Create new folder"
                             >
                                 New Folder
@@ -1290,18 +1357,22 @@ export default component$(() => {
                         </div>
 
                         {showNewFolderInput.value && (
-                            <div class="flex flex-col gap-2 border border-gray-600 p-2 rounded">
-                                <div class="flex gap-2">
+                            <div className="flex flex-col gap-2 rounded border border-gray-600 p-2">
+                                <div className="flex gap-2">
                                     <input
                                         type="text"
                                         value={newFolderName.value}
-                                        onChange$={(e) => newFolderName.value = (e.target as HTMLInputElement).value}
+                                        onChange$={(e) =>
+                                            (newFolderName.value = (
+                                                e.target as HTMLInputElement
+                                            ).value)
+                                        }
                                         placeholder="folder name"
-                                        class="bg-gray-700 text-white p-2 rounded flex-1"
+                                        class="flex-1 rounded bg-gray-700 p-2 text-white"
                                     />
                                     <button
                                         onClick$={createNewFolder}
-                                        class="bg-teal-600 hover:bg-teal-700 px-2 py-1 rounded"
+                                        class="rounded bg-teal-600 px-2 py-1 hover:bg-teal-700"
                                         title="Create folder"
                                     >
                                         +
@@ -1311,9 +1382,13 @@ export default component$(() => {
                                     <input
                                         type="text"
                                         value={folderPath.value}
-                                        onChange$={(e) => folderPath.value = (e.target as HTMLInputElement).value}
+                                        onChange$={(e) =>
+                                            (folderPath.value = (
+                                                e.target as HTMLInputElement
+                                            ).value)
+                                        }
                                         placeholder="parent folder path"
-                                        class="bg-gray-700 text-white p-2 rounded w-full"
+                                        class="w-full rounded bg-gray-700 p-2 text-white"
                                     />
                                 )}
                             </div>
@@ -1323,9 +1398,11 @@ export default component$(() => {
                             <input
                                 type="text"
                                 value={folderPath.value}
-                                onChange$={(e) => folderPath.value = (e.target as HTMLInputElement).value}
+                                onChange$={(e) =>
+                                    (folderPath.value = (e.target as HTMLInputElement).value)
+                                }
                                 placeholder="folder/subfolder"
-                                class="bg-gray-700 text-white p-2 rounded w-full"
+                                class="w-full rounded bg-gray-700 p-2 text-white"
                             />
                         )}
                     </div>
@@ -1341,12 +1418,14 @@ export default component$(() => {
 
                     {/* Upload progress indicator */}
                     {isUploading.value && (
-                        <div class="mb-2">
-                            <div class="text-sm mb-1">Uploading files: {uploadProgress.value}%</div>
-                            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                        <div className="mb-2">
+                            <div className="mb-1 text-sm">
+                                Uploading files: {uploadProgress.value}%
+                            </div>
+                            <div className="h-2.5 w-full rounded-full bg-gray-700">
                                 <div
-                                    class="bg-blue-600 h-2.5 rounded-full"
-                                    style={{ width: `${uploadProgress.value}%` }}
+                                    className="h-2.5 rounded-full bg-blue-600"
+                                    style={{width: `${uploadProgress.value}%`}}
                                 ></div>
                             </div>
                         </div>
@@ -1354,53 +1433,54 @@ export default component$(() => {
 
                     {/* Droppable area for root folder */}
                     <div
-                        class={`p-2 mb-2 border-2 border-dashed rounded text-center
-                        ${dragOverFolder.value === '' ? 'border-blue-500 bg-blue-800 bg-opacity-30' : 'border-gray-600'}`}
-                        onDragOver$={(e) => handleDragOver(e, '')}
-                        onDrop$={(e) => handleDrop(e, '')}
+                        className={`mb-2 rounded border-2 border-dashed p-2 text-center ${dragOverFolder.value === "" ? "bg-opacity-30 border-blue-500 bg-blue-800" : "border-gray-600"}`}
+                        onDragOver$={(e) => handleDragOver(e, "")}
+                        onDrop$={(e) => handleDrop(e, "")}
                     >
                         Drop here to move to root folder
                     </div>
 
-                    <div class="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto">
                         <ul>
                             {fileTree.value.map((file) => (
                                 <li
                                     key={file.path}
-                                    class={`p-2 mb-1 cursor-pointer rounded flex justify-between items-center
-                                    ${file.path === state.mainFile ? 'bg-gray-700' : ''}
-                                    ${file.isFolder ? 'text-blue-300 font-semibold' : ''}
-                                    ${selectedFiles.value.has(file.path) ? 'border border-blue-500' : ''}
-                                    ${!file.isFolder && draggingFile.value === file.path ? 'opacity-50' : ''}
-                                    ${file.isFolder && dragOverFolder.value === file.path ? 'bg-blue-800' : ''}
-                                    ${dragOverFolder.value === '' && file.isFolder === false ? 'bg-blue-800' : ''}
-                                    hover:bg-gray-700`}
-                                    style={{ marginLeft: `${file.depth * 12}px` }}
+                                    class={`mb-1 flex cursor-pointer items-center justify-between rounded p-2 ${file.path === state.mainFile ? "bg-gray-700" : ""} ${file.isFolder ? "font-semibold text-blue-300" : ""} ${selectedFiles.value.has(file.path) ? "border border-blue-500" : ""} ${!file.isFolder && draggingFile.value === file.path ? "opacity-50" : ""} ${file.isFolder && dragOverFolder.value === file.path ? "bg-blue-800" : ""} ${dragOverFolder.value === "" && file.isFolder === false ? "bg-blue-800" : ""} hover:bg-gray-700`}
+                                    style={{marginLeft: `${file.depth * 12}px`}}
                                     draggable={!file.isFolder}
                                     onDragStart$={(e) => handleDragStart(e, file.path)}
-                                    onDragOver$={(e) => file.isFolder ? handleDragOver(e, file.path) : undefined}
+                                    onDragOver$={(e) =>
+                                        file.isFolder ? handleDragOver(e, file.path) : undefined
+                                    }
                                     onDragEnd$={handleDragEnd}
-                                    onDrop$={(e) => file.isFolder ? handleDrop(e, file.path) : undefined}
+                                    onDrop$={(e) =>
+                                        file.isFolder ? handleDrop(e, file.path) : undefined
+                                    }
                                 >
-                                    <span
-                                        class="flex-grow flex items-center"
-                                        onClick$={() => showMultiSelectMode.value ? toggleFileSelection(file.path) : selectFile(file.path)}
-                                    >
-                                        {showMultiSelectMode.value && !file.isFolder && (
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedFiles.value.has(file.path)}
-                                                onChange$={() => toggleFileSelection(file.path)}
-                                                class="mr-1"
-                                            />
-                                        )}
-                                        {file.isFolder ? '📁 ' : '📄 '}{file.name}
-                                    </span>
-                                    <div class="flex">
+                    <span
+                        class="flex flex-grow items-center"
+                        onClick$={() =>
+                            showMultiSelectMode.value
+                                ? toggleFileSelection(file.path)
+                                : selectFile(file.path)
+                        }
+                    >
+                      {showMultiSelectMode.value && !file.isFolder && (
+                          <input
+                              type="checkbox"
+                              checked={selectedFiles.value.has(file.path)}
+                              onChange$={() => toggleFileSelection(file.path)}
+                              class="mr-1"
+                          />
+                      )}
+                        {file.isFolder ? "📁 " : "📄 "}
+                        {file.name}
+                    </span>
+                                    <div className="flex">
                                         {!file.isFolder && !showMultiSelectMode.value && (
                                             <button
                                                 onClick$={() => initiateFileMoveDialog(file.path)}
-                                                class="text-yellow-400 hover:text-yellow-600 px-1"
+                                                class="px-1 text-yellow-400 hover:text-yellow-600"
                                                 title="Move file"
                                             >
                                                 📂
@@ -1408,8 +1488,12 @@ export default component$(() => {
                                         )}
                                         <button
                                             onClick$={() => deleteFile(file.path)}
-                                            class="text-red-400 hover:text-red-600 px-1"
-                                            title={file.isFolder ? "Delete folder and contents" : "Delete file"}
+                                            class="px-1 text-red-400 hover:text-red-600"
+                                            title={
+                                                file.isFolder
+                                                    ? "Delete folder and contents"
+                                                    : "Delete file"
+                                            }
                                         >
                                             ×
                                         </button>
@@ -1421,12 +1505,12 @@ export default component$(() => {
                 </div>
 
                 {/* Editor */}
-                <div class="flex-1 flex flex-col">
-                    <div ref={editorContainerRef} class="flex-1"></div>
+                <div className="flex flex-1 flex-col">
+                    <div ref={editorContainerRef} className="flex-1"></div>
 
                     {/* Output */}
-                    <div class="h-1/3 bg-black overflow-auto p-4">
-                        <h2 class="text-lg font-bold mb-2">Output</h2>
+                    <div className="h-1/3 overflow-auto bg-black p-4">
+                        <h2 class="mb-2 text-lg font-bold">Output</h2>
                         <pre class="font-mono whitespace-pre-wrap">{state.output}</pre>
                     </div>
                 </div>
@@ -1434,53 +1518,66 @@ export default component$(() => {
 
             {/* Move File Dialog */}
             {showMoveFileDialog.value && (
-                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-                        <h3 class="text-lg font-bold mb-4">Move File{selectedFiles.value.size > 1 ? 's' : ''}</h3>
+                <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+                    <div className="w-96 rounded-lg bg-gray-800 p-6 shadow-lg">
+                        <h3 class="mb-4 text-lg font-bold">
+                            Move File{selectedFiles.value.size > 1 ? "s" : ""}
+                        </h3>
 
                         {selectedFiles.value.size > 0 ? (
-                            <div class="mb-4">
-                                <p>Moving {selectedFiles.value.size} file{selectedFiles.value.size > 1 ? 's' : ''}:</p>
-                                <div class="max-h-32 overflow-y-auto mt-2 bg-gray-700 rounded p-2">
-                                    {Array.from(selectedFiles.value).map(file => (
-                                        <div key={file} class="text-sm font-mono truncate">{file}</div>
+                            <div className="mb-4">
+                                <p>
+                                    Moving {selectedFiles.value.size} file
+                                    {selectedFiles.value.size > 1 ? "s" : ""}:
+                                </p>
+                                <div className="mt-2 max-h-32 overflow-y-auto rounded bg-gray-700 p-2">
+                                    {Array.from(selectedFiles.value).map((file) => (
+                                        <div key={file} className="truncate font-mono text-sm">
+                                            {file}
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         ) : (
-                            <p class="mb-4">Moving: <span class="font-mono">{fileToMove.value}</span></p>
+                            <p class="mb-4">
+                                Moving: <span class="font-mono">{fileToMove.value}</span>
+                            </p>
                         )}
 
-                        <div class="mb-4">
-                            <label class="block mb-2">Select destination folder:</label>
+                        <div className="mb-4">
+                            <label class="mb-2 block">Select destination folder:</label>
                             <select
                                 value={targetFolder.value}
-                                onChange$={(e) => targetFolder.value = (e.target as HTMLSelectElement).value}
-                                class="bg-gray-700 text-white p-2 rounded w-full"
+                                onChange$={(e) =>
+                                    (targetFolder.value = (e.target as HTMLSelectElement).value)
+                                }
+                                class="w-full rounded bg-gray-700 p-2 text-white"
                             >
                                 <option value="">Root (project root)</option>
-                                {availableFolders.value.filter(folder => folder !== '').map((folder) => (
-                                    <option key={folder} value={folder}>
-                                        {folder}
-                                    </option>
-                                ))}
+                                {availableFolders.value
+                                    .filter((folder) => folder !== "")
+                                    .map((folder) => (
+                                        <option key={folder} value={folder}>
+                                            {folder}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
 
-                        <div class="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2">
                             <button
                                 onClick$={() => {
                                     showMoveFileDialog.value = false;
-                                    fileToMove.value = '';
-                                    targetFolder.value = '';
+                                    fileToMove.value = "";
+                                    targetFolder.value = "";
                                 }}
-                                class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+                                class="rounded bg-gray-600 px-4 py-2 hover:bg-gray-700"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick$={selectedFiles.value.size > 0 ? moveFiles : moveFile}
-                                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+                                class="rounded bg-blue-600 px-4 py-2 hover:bg-blue-700"
                             >
                                 Move
                             </button>
@@ -1488,6 +1585,10 @@ export default component$(() => {
                     </div>
                 </div>
             )}
+
+
+
+
         </div>
     );
 });
