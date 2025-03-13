@@ -122,7 +122,7 @@ export const ChatMain = component$(() => {
   useVisibleTask$(() => loadFriends());
 
   return (
-    <div class="flex h-screen w-[1421px] bg-gray-900 text-white">
+    <div class="flex h-screen w-[1410px] bg-gray-900 text-white">
       {/* Sidebar รายชื่อเพื่อน */}
       <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
@@ -136,8 +136,12 @@ export const ChatMain = component$(() => {
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
                   {friend.latestMessage && (
-                    <div class="text-xs text-gray-400 truncate flex items-center gap-2">
-                      <p class="flex-1">{friend.latestMessage}</p>
+                    <div class="text-xs text-gray-400 flex items-center gap-2">
+                      <p class="flex-1 truncate max-w-[calc(100%-50px)]">
+                        {friend.latestMessage.length > 30 
+                          ? friend.latestMessage.slice(0, 30) + '...' 
+                          : friend.latestMessage}
+                      </p>
                       <p>{friend.latestMessageTime && formatMessageTime(friend.latestMessageTime)}</p>
                     </div>
                   )}
@@ -160,7 +164,7 @@ export const ChatMain = component$(() => {
               <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
                 <div class="max-w-[70%] relative">
                   {/* Message content */}
-                  <div class={`relative p-3 rounded-xl ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
+                  <div class={`relative p-3 rounded-xl break-words whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
                     {msg.message}
                   </div>
                   
@@ -178,15 +182,19 @@ export const ChatMain = component$(() => {
 
         {/* Input */}
         <div class="flex gap-2 border-t border-gray-700 p-2 mt-3">
-          <input
-            bind:value={messageText}
-            class="flex-1 p-2 bg-gray-800 rounded-lg focus:outline-none focus:border-blue-500 border border-gray-700"
+          <textarea
+            value={messageText.value}
+            onInput$={(e) => { messageText.value = (e.target as HTMLTextAreaElement).value; }}
+            class="flex-1 p-2 bg-gray-800 rounded-lg focus:outline-none focus:border-blue-500 border border-gray-700 resize-none h-12"
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); 
                 sendMessage(); 
-              } 
+              } else if (e.key === 'Enter' && e.shiftKey) {
+                // Allow new line on Shift + Enter
+                messageText.value += '\n';
+              }
             }}
           />
           <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick$={() => sendMessage()}>Send</button>
