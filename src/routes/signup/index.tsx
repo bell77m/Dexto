@@ -11,7 +11,7 @@ export default component$(() => {
   const errorMessages = useSignal<string[]>([]);
   const isLoading = useSignal(false);
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || 'API_URL';
+  const API_URLL = import.meta.env.VITE_API_URL || API_URL;
 
   const handleSubmit$ = $(async () => {
     errorMessages.value = [];
@@ -29,7 +29,7 @@ export default component$(() => {
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(API_URLL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
