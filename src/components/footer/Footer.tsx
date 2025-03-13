@@ -10,7 +10,7 @@ export const Footer = component$(() => {
       links: [
         { text: "About", href: "/about" },
         { text: "Guides", href: "/guide" },
-        { text: "Forum", href: "/forum" }
+        { text: "Forum", href: "/login" }
       ]
     },
     {
