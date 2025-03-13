@@ -1,7 +1,5 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
-import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
-import API_URL from "~/configURL/config";
 
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
@@ -11,11 +9,10 @@ export const ChatMain = component$(() => {
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null); // ✅ ใช้เพื่อให้ Scroll Auto
-  const navigate = useNavigate();
 
   // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
   const loadFriends = $(() => {
-    fetch(API_URL, {
+    fetch("http://dexto.com:3000/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -28,11 +25,8 @@ export const ChatMain = component$(() => {
           friends.value = [...result.data.getFriends];
         }
       })
-      .catch((error) => {
-        console.error("❌ ERROR: Loading friends failed!", error);
-        navigate('/service-unavailable'); // เพิ่มการ route
-      });
-    });
+      .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
+  });
 
   // ✅ โหลดข้อความแชทของเพื่อนที่เลือก
   const loadMessages = $(() => {
@@ -49,6 +43,18 @@ export const ChatMain = component$(() => {
         messages.value = result.data?.getChatMessages || [];
       })
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
+  });
+
+  // ✅ ฟังก์ชันสำหรับจัดรูปแบบเวลา
+  const formatMessageTime = $((timestamp: string) => {
+    if (!timestamp) return "";
+    
+    const date = new Date(timestamp);
+    
+    // จัดรูปแบบเวลา (HH:MM)
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   });
 
   // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
@@ -83,11 +89,8 @@ export const ChatMain = component$(() => {
         messageText.value = "";
         loadMessages();
       })
-      .catch((error) => {
-        console.error("❌ ERROR: Sending message failed!", error);
-        navigate('/service-unavailable'); // เพิ่มการ route
-      });
-   });
+      .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
+  });
 
   // ✅ โหลดข้อความใหม่ทุก 2 วินาที (Real-time)
   useVisibleTask$(() => {
@@ -153,19 +156,19 @@ export const ChatMain = component$(() => {
         </div>
 
         {/* Input */}
-        <div class="flex gap-2 border-t p-2">
+        <div class="flex gap-2 border-t border-gray-700 p-2 mt-3">
           <input
             bind:value={messageText}
-            class="flex-1 p-2 bg-gray-800 rounded-md"
+            class="flex-1 p-2 bg-gray-800 rounded-lg focus:outline-none focus:border-blue-500 border border-gray-700"
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); // ป้องกันขึ้นบรรทัดใหม่
                 sendMessage(); 
               } 
-            }} // ✅ เพิ่มให้กด Enter เพื่อส่งข้อความ
+            }}
           />
-          <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={() => sendMessage()}>Send</button>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick$={() => sendMessage()}>Send</button>
         </div>
       </section>
     </div>
