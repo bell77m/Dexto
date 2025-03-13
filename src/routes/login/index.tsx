@@ -9,8 +9,6 @@ export default component$(() => {
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
   const navigate = useNavigate();
-
-  
   const userStore = useUserStore();  
 
   const handleLogin$ = $(async () => {
@@ -51,14 +49,12 @@ export default component$(() => {
 
       console.log('User Data:', loginData.user);
       
-    
       const { updateStore } = userStore;
       updateStore(
         loginData.user.displayName,
         loginData.user.id,
         loginData.user.profilePictureUrl
       );
-
 
       console.log('Sidebar Display Name login :', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
@@ -79,7 +75,12 @@ export default component$(() => {
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
         </Link>
         <h1 class="text-3xl font-bold mb-1">Welcome back!</h1>
-        <form class="w-full max-w-sm" preventdefault:submit onSubmit$={handleLogin$}>
+        <form 
+          class="w-full max-w-sm" 
+          preventdefault:submit 
+          onSubmit$={handleLogin$}
+          onKeyDown$={(e) => { if (e.key === 'Enter') handleLogin$(); }} // ✅ กด Enter เพื่อ Login
+        >
           <label class="block mb-2">Email address</label>
           <input
             type="email"
