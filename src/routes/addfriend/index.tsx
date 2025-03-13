@@ -97,7 +97,9 @@ export default component$(() => {
                 type="text" 
                 class="w-full p-3 pl-6 pr-12 text-black rounded-xl" 
                 placeholder="Search User"
-                bind:value={searchQuery}
+                value={searchQuery.value}
+                onInput$={(e) => searchQuery.value = (e.target as HTMLInputElement).value}
+                onKeyDown$={(e) => e.key === 'Enter' && handleSearch()} // ✅ เพิ่มให้กด Enter เพื่อค้นหา
               />
               <img src="/image/search-icon.svg" width="30" height="30" 
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer" 
