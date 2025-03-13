@@ -1,6 +1,7 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
@@ -14,7 +15,7 @@ export const ChatMain = component$(() => {
 
   // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
   const loadFriends = $(() => {
-    fetch("http://dexto.com:3000/graphql", {
+    fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

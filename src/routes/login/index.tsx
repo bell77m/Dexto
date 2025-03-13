@@ -1,6 +1,7 @@
 import { component$, useSignal, $ } from '@builder.io/qwik';
 import { Link, useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from '~/store/store'; 
+import API_URL from '~/configURL/config';
 
 export default component$(() => {
   const email = useSignal('');
@@ -21,7 +22,7 @@ export default component$(() => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 วินาที
      
-      const response = await fetch('http://dexto.com:3000/graphql', {  
+      const response = await fetch(API_URL, {  
         method: 'POST',
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },

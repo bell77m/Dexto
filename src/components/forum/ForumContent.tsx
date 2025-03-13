@@ -1,5 +1,6 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
   export default component$(() => {
     const { userId } = useUserStore();
@@ -13,7 +14,7 @@ import { useUserStore } from "~/store/store";
     const loadPosts = $(async () => {
       isLoading.value = true;
       try {
-        const res = await fetch("http://dexto.com:3000/graphql", {
+        const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

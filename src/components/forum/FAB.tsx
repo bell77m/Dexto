@@ -1,5 +1,6 @@
 import { component$, useSignal, $ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export default component$(() => {
   const { userId } = useUserStore();
@@ -15,7 +16,7 @@ export default component$(() => {
       .map(tag => tag.substring(1))
       .join(",");
 
-    const response = await fetch("http://dexto.com:3000/graphql", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

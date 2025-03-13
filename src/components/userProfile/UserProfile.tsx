@@ -1,6 +1,7 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
 import { avatarUrls } from "./avatarConfig";
+import API_URL from "~/configURL/config";
 
 export const UserProfile = component$(() => {
   const { displayName, profilePictureUrl, userId, updateStore } = useUserStore();
@@ -42,7 +43,7 @@ export const UserProfile = component$(() => {
     isSaving.value = true;
 
     try {
-      const response = await fetch("http://dexto.com:3000/graphql", {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
