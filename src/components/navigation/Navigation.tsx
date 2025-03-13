@@ -45,7 +45,7 @@ import { component$ } from "@builder.io/qwik";
 import { useNavigate } from "@builder.io/qwik-city";
 import { Link } from "@builder.io/qwik-city";
 import { NavItem } from "./NavItem";
-import { Toggle } from "./Toggle";
+
 
 export const Navigation = component$(() => {
   const nav = useNavigate(); // ใช้สำหรับเปลี่ยน route
@@ -75,7 +75,6 @@ export const Navigation = component$(() => {
         </div>
 
         <div class="flex grow shrink gap-4 items-center self-stretch my-auto min-w-[240px] w-[303px]">
-          <Toggle isActive={false} />
             <Link href="/login" class="px-8 py-2.5 text-white">
               Login
             </Link>
