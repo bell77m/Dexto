@@ -9,18 +9,15 @@ export const UserProfile = component$(() => {
   const newDisplayName = useSignal(displayName.value);
   const isSaving = useSignal(false);
   const avatarUrl = useSignal<string>("/image/DeafaultPic.svg");
- 
 
   const selectAvatar = $((image: string) => {
     avatarUrl.value = `/image/${image}`;
     showPopup.value = false;
   });
 
-  
   const originalDisplayName = useSignal(displayName.value);
   const originalAvatar = useSignal(profilePictureUrl.value.trim());
 
-  
   useVisibleTask$(() => {
     newDisplayName.value = displayName.value;
     selectedAvatar.value = profilePictureUrl.value.trim();
@@ -28,13 +25,11 @@ export const UserProfile = component$(() => {
     originalAvatar.value = profilePictureUrl.value.trim();
   });
 
-
   const resetProfile = $(() => {
     newDisplayName.value = originalDisplayName.value;
     selectedAvatar.value = originalAvatar.value;
   });
 
- 
   const saveProfile = $(async () => {
     const cleanUrl = selectedAvatar.value.trim();
     const cleanDisplayName = newDisplayName.value.trim();
@@ -44,7 +39,7 @@ export const UserProfile = component$(() => {
       return;
     }
 
-    isSaving.value = true; 
+    isSaving.value = true;
 
     try {
       const response = await fetch("http://dexto.com:3000/graphql", {
@@ -69,10 +64,9 @@ export const UserProfile = component$(() => {
         console.error("❌ GraphQL Error:", result.errors);
       } else if (result.data?.updateUser) {
         console.log("✅ Profile updated successfully!");
-        updateStore(cleanDisplayName, userId.value, cleanUrl); 
-        originalDisplayName.value = cleanDisplayName; 
+        updateStore(cleanDisplayName, userId.value, cleanUrl);
+        originalDisplayName.value = cleanDisplayName;
         originalAvatar.value = cleanUrl;
-        // alert("Profile updated successfully!");
       } else {
         console.error("❌ Failed to update profile.");
       }
@@ -80,7 +74,7 @@ export const UserProfile = component$(() => {
       console.error("❌ Error updating profile:", error);
     } finally {
       setTimeout(() => {
-        isSaving.value = false; 
+        isSaving.value = false;
       }, 2000);
     }
   });
@@ -105,8 +99,7 @@ export const UserProfile = component$(() => {
           >
             Choose Avatar
           </button>
-        <div class="mx-0 my-6 h-px bg-stone-300"></div>
-          {/* Login with GitHub (now directly under Choose Avatar) */}
+          <div class="mx-0 my-6 h-px bg-stone-300"></div>
           <a
             href="https://github.com/login/oauth/authorize?client_id=yourClientID"
             target="_blank"
@@ -118,7 +111,6 @@ export const UserProfile = component$(() => {
       </div>
 
       <div class="flex flex-col items-center p-5 w-[300px] max-md:w-full">
-        {/* รูปที่แสดงเป็นรูปที่เลือก */}
         <img src={selectedAvatar.value} alt="Avatar Preview" class="rounded-full h-[180px] w-[180px] border-2 border-emerald-300" />
         <div class="flex gap-6 mt-auto max-sm:flex-col max-sm:gap-2">
           <button
@@ -132,30 +124,30 @@ export const UserProfile = component$(() => {
           </button>
           <button
             class="px-4 py-2 text-base text-white bg-gray-600 rounded-md cursor-pointer border-none"
-            onClick$={resetProfile} // เมื่อกดปุ่มนี้ ข้อมูลจะกลับเป็นค่าก่อนหน้า
+            onClick$={resetProfile}
           >
             Cancel
           </button>
         </div>
       </div>
 
-      {/*  Popup เลือก Avatar */}
+      {/* Popup เลือก Avatar */}
       {showPopup.value && (
         <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
-          <div class="bg-gray-800 p-5 rounded-lg w-[300px] text-center">
-            <div class="text-white text-lg font-bold mb-4">Choose an Avatar</div>
-            <div class="grid grid-cols-3 gap-2">
+          <div class="bg-gray-800 p-6 rounded-lg w-[500px] text-center">
+            <div class="text-white text-xl font-bold mb-6">Choose an Avatar</div>
+            <div class="grid grid-cols-4 gap-4">
               {avatarUrls.map((url, i) => (
                 <img
                   key={i}
                   src={url}
                   alt={`Avatar ${i + 1}`}
-                  class="cursor-pointer rounded-lg w-[80px] h-[80px] border-2 border-transparent hover:border-emerald-300"
+                  class="cursor-pointer rounded-lg w-[100px] h-[100px] border-2 border-transparent hover:border-emerald-300"
                   onClick$={() => (selectedAvatar.value = url)}
                 />
               ))}
             </div>
-            <button class="mt-4 px-4 py-2 text-white bg-red-500 rounded-md" onClick$={() => (showPopup.value = false)}>
+            <button class="mt-6 px-5 py-3 text-white bg-red-500 rounded-md text-lg" onClick$={() => (showPopup.value = false)}>
               Close
             </button>
           </div>
@@ -164,5 +156,3 @@ export const UserProfile = component$(() => {
     </div>
   );
 });
-
-
