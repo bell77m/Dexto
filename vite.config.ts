@@ -12,6 +12,9 @@ import { partytownVite } from "@builder.io/partytown/utils";
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import tailwindcss from '@tailwindcss/vite'
+import basicSsl from '@vitejs/plugin-basic-ssl'
+import fs from 'fs';
+import mkcert from "vite-plugin-mkcert";
 
 type PkgDep = Record<string, string>;
 const { dependencies = {}, devDependencies = {} } = pkg as any as {
@@ -83,7 +86,9 @@ export default defineConfig(({ command, mode }): UserConfig => {
       qwikVite(),
       tsconfigPaths(),
       partytownVite({ dest: join(__dirname, "dist", "~partytown") }),
-      monacoEditorPlugin()
+      monacoEditorPlugin(),
+      basicSsl(),
+      mkcert()
     ],
     // Consolidated optimizeDeps configuration
     optimizeDeps: {
@@ -107,12 +112,26 @@ export default defineConfig(({ command, mode }): UserConfig => {
       }
     },
     server: {
+      https: {
+        key: fs.readFileSync('cert/key.pem'),
+        cert: fs.readFileSync('cert/cert.pem'),
+      },
+      proxy: {
+        '/ws': {
+          target: 'wss://192.168.118.6:12345',
+          ws: true,
+          changeOrigin: true,
+          secure: true,
+        }
+      },
+      host: '192.168.118.6',
       headers: {
         // Don't cache the server response in dev mode
         "Cache-Control": "public, max-age=0",
         'Cross-Origin-Embedder-Policy': 'require-corp',
         'Cross-Origin-Opener-Policy': 'same-origin',
       },
+
     },
     preview: {
       headers: {

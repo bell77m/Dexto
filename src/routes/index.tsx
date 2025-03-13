@@ -11,15 +11,29 @@ import {
     STORAGE_KEY_MAIN_FILE
 } from "~/Var_and_Func/constants";
 import {runCode} from "~/Var_and_Func/runcode";
-import "../Var_and_Func/index";
+import "../Var_and_Func";
 
-import { VCManager } from "../../public/imported_rtc/vc";
+import {VCManager} from "~/imported_/vc";
 import VoiceChat from "../components/VoiceChat/VoiceChat";
+import {
+    deleteFileFromServer,
+    listFilesFromServer,
+    moveFileOnServer,
+    uploadFilesToServer
+} from "~/Var_and_Func/filesExplorer";
 
 export default component$(() => {
     // Use useStore for complex state to prevent unnecessary re-renders
-    const state = useStore({
-        files: DEFAULT_EXAMPLES.javascript,
+    const state = useStore<{
+        files: Record<string, string>;
+        mainFile: string;
+        language: string;
+        isRunning: boolean;
+        output: string;
+        isSaved: boolean;
+        serverSync: boolean;
+    }>({
+        files: DEFAULT_EXAMPLES.javascript as Record<string, string>,
         mainFile: 'index.js',
         language: 'javascript',
         isRunning: false,
@@ -46,7 +60,7 @@ export default component$(() => {
     // New signals for drag and drop and file import
     const draggingFile = useSignal<string | null>(null);
     const dragOverFolder = useSignal<string | null>(null);
-    const fileInputRef = useSignal<HTMLInputElement | null>(null);
+    const fileInputRef = useSignal<Element>();
     const isUploading = useSignal<boolean>(false);
     const uploadProgress = useSignal<number>(0);
 
@@ -175,7 +189,7 @@ export default component$(() => {
             // Now fetch each file's content
             for (const file of serverFiles) {
                 try {
-                    const response = await fetch(`http://localhost:12345/files/${file}`);
+                    const response = await fetch(`http://192.168.118.6:12346/files/${file}`);
                     if (response.ok) {
                         const content = await response.text();
                         newFiles[file] = content;
@@ -1003,8 +1017,6 @@ export default component$(() => {
             fileInputRef.value.click();
         }
     });
-
-
 
     // Toggle server sync mode
     const toggleServerSync = $(() => {

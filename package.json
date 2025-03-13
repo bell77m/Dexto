@@ -26,7 +26,8 @@
     "start": "vite --open --mode ssr",
     "test.unit": "vitest components",
     "test.unit.ui": "vitest --ui components",
-    "qwik": "qwik"
+    "qwik": "qwik",
+    "cert": "rmdir /s /q cert && mkdir cert && mkcert -key-file cert/key.pem -cert-file cert/cert.pem 192.168.118.6"
   },
   "devDependencies": {
     "@builder.io/partytown": "^0.10.3",
@@ -59,6 +60,7 @@
     "@mui/material": "^6.4.7",
     "@tailwindcss/postcss": "^4.0.12",
     "@tailwindcss/vite": "^4.0.12",
+    "@vitejs/plugin-basic-ssl": "^2.0.0",
     "glob": "^11.0.1",
     "i": "^0.3.7",
     "lib0": "^0.2.99",
@@ -69,6 +71,7 @@
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.0.12",
     "uuid": "^11.1.0",
+    "vite-plugin-mkcert": "^1.17.7",
     "vite-plugin-monaco-editor": "^1.1.0",
     "y-monaco": "^0.1.6",
     "y-protocols": "^1.0.6",
