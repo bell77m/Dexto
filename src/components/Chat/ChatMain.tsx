@@ -122,7 +122,7 @@ export const ChatMain = component$(() => {
   useVisibleTask$(() => loadFriends());
 
   return (
-    <div class="flex h-screen w-full bg-gray-900 text-white">
+    <div class="flex h-screen w-[1421px] bg-gray-900 text-white">
       {/* Sidebar รายชื่อเพื่อน */}
       <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
