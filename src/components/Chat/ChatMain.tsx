@@ -45,6 +45,18 @@ export const ChatMain = component$(() => {
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
   });
 
+  // ✅ ฟังก์ชันสำหรับจัดรูปแบบเวลา
+  const formatMessageTime = $((timestamp: string) => {
+    if (!timestamp) return "";
+    
+    const date = new Date(timestamp);
+    
+    // จัดรูปแบบเวลา (HH:MM)
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  });
+
   // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
   useVisibleTask$(() => {
     if (scrollContainerRef.value) {
@@ -82,11 +94,13 @@ export const ChatMain = component$(() => {
 
   // ✅ โหลดข้อความใหม่ทุก 2 วินาที (Real-time)
   useVisibleTask$(() => {
-    setInterval(() => {
+    const interval = setInterval(() => {
       if (selectedFriend.value) {
         loadMessages();
       }
     }, 2000);
+    
+    return () => clearInterval(interval);
   });
 
   // ✅ โหลดเพื่อนเมื่อเปิดหน้า Chat
@@ -102,7 +116,7 @@ export const ChatMain = component$(() => {
             <p class="text-center text-gray-400">No friends found</p>
           ) : (
             friends.value.map((friend) => (
-              <li key={friend.id} class={`p-4 cursor-pointer rounded-md flex items-center gap-4 ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : ""}`} onClick$={() => { selectedFriend.value = friend; loadMessages(); }}>
+              <li key={friend.id} class={`p-4 cursor-pointer rounded-md flex items-center gap-4 ${selectedFriend.value?.id === friend.id ? "bg-gray-700" : "hover:bg-gray-700"}`} onClick$={() => { selectedFriend.value = friend; loadMessages(); }}>
                 <img src={friend.profilePictureUrl || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
@@ -114,38 +128,47 @@ export const ChatMain = component$(() => {
       </aside>
 
       {/* Chat Panel */}
-      <section class="w-2/3 flex flex-col p-4">
-        <h2 class="text-lg font-semibold border-b pb-2">{selectedFriend.value?.displayName || "Select a friend to start chat"}</h2>
+      <section class="w-2/3 flex flex-col p-4 bg-gray-900">
+        <h2 class="text-lg font-semibold border-b border-gray-700 pb-2">{selectedFriend.value?.displayName || "Select a friend to start chat"}</h2>
 
         {/* Messages */}
-        <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-2">
-          {messages.value.map((msg, index) => (
-            <div key={index} class={`flex ${msg.senderId === userId.value ? "justify-end" : "justify-start"}`}>
-              {msg.imageUrl ? (
-                <img src={msg.imageUrl} class="w-40 rounded-lg" />
-              ) : (
-                <span class={`p-2 rounded-lg ${msg.senderId === userId.value ? "bg-blue-600" : "bg-gray-700"}`}>
-                  {msg.message}
-                </span>
-              )}
-            </div>
-          ))}
+        <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-3">
+          {messages.value.map((msg, index) => {
+            const isUserMessage = msg.senderId === userId.value;
+            return (
+              <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
+                <div class="max-w-[70%] relative">
+                  {/* ข้อความ */}
+                  <div class={`relative p-3 rounded-xl ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
+                    {msg.message}
+                  </div>
+                  
+                  {/* เวลา */}
+                  <div class={`absolute bottom-1 ${isUserMessage ? "left-[-45px]" : "right-[-45px]"}`}>
+                    <span class="text-xs text-gray-400">
+                      {formatMessageTime(msg.sentAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Input */}
-        <div class="flex gap-2 border-t p-2">
+        <div class="flex gap-2 border-t border-gray-700 p-2 mt-3">
           <input
             bind:value={messageText}
-            class="flex-1 p-2 bg-gray-800 rounded-md"
+            class="flex-1 p-2 bg-gray-800 rounded-lg focus:outline-none focus:border-blue-500 border border-gray-700"
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); // ป้องกันขึ้นบรรทัดใหม่
                 sendMessage(); 
               } 
-            }} // ✅ เพิ่มให้กด Enter เพื่อส่งข้อความ
+            }}
           />
-          <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={() => sendMessage()}>Send</button>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick$={() => sendMessage()}>Send</button>
         </div>
       </section>
     </div>
