@@ -167,12 +167,12 @@ import { useUserStore } from "~/store/store";
               </button>
               
               
-              <button
+              {/* <button
                 class={`px-4 py-2 rounded ${likedPosts.value[post.id] ? "bg-green-600" : "bg-gray-600"}`}
                 onClick$={() => likePost(post.id, post.userId)}
               >
                 👍 {likeCounts.value[post.id] ?? 0} Likes
-              </button>
+              </button> */}
 
               {post.userId === userId.value && (
                 <button class="px-4 py-2 bg-red-500 text-white rounded" onClick$={() => deletePost(post.id)}>
