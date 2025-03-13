@@ -1,16 +1,20 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
+
 
 export default component$(() => {
   const { userId } = useUserStore();
   const posts = useSignal([]);
   const isLoading = useSignal(true);
   const newComment = useSignal<{ [key: number]: string }>({});
+  const navigate = useNavigate();
 
   const loadPosts = $(async () => {
     isLoading.value = true;
     try {
-      const res = await fetch("http://dexto.com:3000/graphql", {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -49,7 +53,8 @@ export default component$(() => {
     } catch (err) {
       console.error("Error loading posts", err);
       isLoading.value = false;
-    }
+      navigate('/service-unavailable');
+     }
   });
   
 
@@ -57,7 +62,7 @@ export default component$(() => {
     const commentText = newComment.value[postId]?.trim();
     if (!commentText || commentText.length === 0) return alert("⚠️ Comment cannot be empty!");
   
-    await fetch("http://dexto.com:3000/graphql", {
+    await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -81,7 +86,7 @@ export default component$(() => {
 
   const deletePost = $(async (postId: number) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
-    const response = await fetch("http://dexto.com:3000/graphql", {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

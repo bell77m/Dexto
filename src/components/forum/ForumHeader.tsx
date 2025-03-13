@@ -31,7 +31,7 @@ export const ForumHeader = component$(() => {
   return (
     <header class="flex overflow-visible flex-col justify-center px-11 py-4 w-full bg-stone-50 max-md:px-5 max-md:max-w-full">
       <nav class="flex flex-wrap gap-10 items-center max-md:max-w-full">
-        <Link href="/" class="flex shrink-0 items-center cursor-pointer">
+        <Link href="/home" class="flex shrink-0 items-center cursor-pointer">
           <img
             alt="My DEXTO Icon"
             src="/image/DextoLogoDark.svg"
@@ -63,7 +63,7 @@ export const ForumHeader = component$(() => {
         <div class="grow shrink self-stretch my-auto w-48">
         <div class="flex gap-8 items-center justify-between w-full">
           {/* Profile Section */}
-          <div class="flex gap-4 text-base font-medium text-black rounded-full items-center">
+          <div class="flex gap-4 text-base font-medium text-black rounded-full items-center ml-auto">
             <img
               loading="lazy"
               src={profilePictureUrl.value || "https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif"}
