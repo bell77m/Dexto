@@ -127,7 +127,7 @@ export default component$(() => {
   });
 
   return (
-    <div>
+    <div class="flex flex-col min-h-screen">
       {/* Forum Header */}
       <header class="flex overflow-visible flex-col justify-center px-11 py-4 w-full bg-stone-50 max-md:px-5 max-md:max-w-full">
         <nav class="flex flex-wrap gap-10 items-center max-md:max-w-full">
@@ -177,7 +177,8 @@ export default component$(() => {
         </nav>
       </header>
 
-      <div class="p-6 bg-gray-900 text-white flex flex-col items-center">
+      {/* Main Content */}
+      <main class="p-6 bg-gray-900 text-white flex flex-col items-center flex-grow">
         {isLoading.value ? (
           <p class="text-left text-gray-400 w-full max-w-2xl">📢 Loading forum posts...</p>
         ) : posts.value.length === 0 ? (
@@ -290,7 +291,12 @@ export default component$(() => {
             );
           })
         )}
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer class="bg-gray-800 text-white text-center py-4 w-full mt-auto">
+        <p>&copy; 2024 My DEXTO. All rights reserved.</p>
+      </footer>
     </div>
   );
 });
