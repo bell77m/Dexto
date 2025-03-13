@@ -1,4 +1,5 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
 import API_URL from "~/configURL/config";
 
@@ -10,6 +11,7 @@ import API_URL from "~/configURL/config";
     const newComment = useSignal<{ [key: number]: string }>({});
     const likedPosts = useSignal<{ [key: number]: boolean }>({});
     const likeCounts = useSignal<{ [key: number]: number }>({});
+    const navigate = useNavigate();
   
     const loadPosts = $(async () => {
       isLoading.value = true;
@@ -52,7 +54,8 @@ import API_URL from "~/configURL/config";
       } catch (err) {
         console.error("Error loading posts", err);
         isLoading.value = false;
-      }
+        navigate('/service-unavailable');
+       }
     });
 
   const addComment = $(async (postId: number) => {
