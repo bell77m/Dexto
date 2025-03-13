@@ -1,4 +1,5 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
 import API_URL from "~/configURL/config";
 
@@ -14,6 +15,7 @@ export const ChatMain = component$(() => {
   const searchQuery = useSignal("");
   const unreadMessages = useSignal({});
   const lastNotifiedMessages = useSignal({});
+  const navigate = useNavigate();
 
   // Request notification permission
   const requestNotificationPermission = $(() => {
