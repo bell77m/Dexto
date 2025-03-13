@@ -3,10 +3,11 @@ import { useUserStore } from "~/store/store";
 
 export const ChatMain = component$(() => {
   const { userId } = useUserStore();
-  const friends = useSignal([]);
+  const friends = useSignal([]);  // รายชื่อเพื่อนทั้งหมด
   const selectedFriend = useSignal(null);
   const messages = useSignal({});
   const messageText = useSignal("");
+  const searchQuery = useSignal("");  // คำค้นหาจากผู้ใช้
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
 
@@ -123,9 +124,25 @@ export const ChatMain = component$(() => {
 
   return (
     <div class="flex h-screen w-[1421px] bg-gray-900 text-white">
-      {/* Sidebar รายชื่อเพื่อน */}
+      {/* Sidebar รายชื่อเพื่อน + แถบค้นหา */}
       <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
+
+        {/* แถบค้นหาชื่อผู้ใช้ */}
+        <div class="mb-4">
+          <input
+            type="text"
+            placeholder="Search friends..."
+            class="w-full p-2 bg-gray-700 rounded-md text-white"
+            value={searchQuery.value}
+            onInput$={(e) => { 
+              searchQuery.value = (e.target as HTMLInputElement).value;
+              // กรองเพื่อนที่พิมพ์ในแถบค้นหา
+            }}
+          />
+        </div>
+
+        {/* แสดงรายชื่อเพื่อนทั้งหมด */}
         <ul class="flex-1 overflow-y-auto">
           {friends.value.length === 0 ? (
             <p class="text-center text-gray-400">No friends found</p>
@@ -163,12 +180,9 @@ export const ChatMain = component$(() => {
             return (
               <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
                 <div class="max-w-[70%] relative">
-                  {/* Message content */}
                   <div class={`relative p-3 rounded-xl break-words whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
                     {msg.message}
                   </div>
-                  
-                  {/* Time */}
                   <div class={`absolute bottom-1 ${isUserMessage ? "left-[-45px]" : "right-[-45px]"}`}>
                     <span class="text-xs text-gray-400">
                       {formatMessageTime(msg.sentAt)}
@@ -192,7 +206,6 @@ export const ChatMain = component$(() => {
                 e.preventDefault(); 
                 sendMessage(); 
               } else if (e.key === 'Enter' && e.shiftKey) {
-                // Allow new line on Shift + Enter
                 messageText.value += '\n';
               }
             }}
