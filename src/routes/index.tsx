@@ -14,7 +14,7 @@ import {
 // Server function to call the FastAPI backend
 export const runCode = server$(async (files: Record<string, string>, language: string, mainFile: string) => {
     try {
-        const response = await fetch('http://localhost:12345/run', {
+        const response = await fetch('http://localhost:8080/run', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -63,6 +63,8 @@ export default component$(() => {
     const showMoveFileDialog = useSignal<boolean>(false);
     const fileToMove = useSignal<string>('');
     const targetFolder = useSignal<string>('');
+    const selectedFiles = useSignal<Set<string>>(new Set());
+    const showMultiSelectMode = useSignal<boolean>(false);
 
     // Load saved files from localStorage
     useVisibleTask$(({ track }) => {
@@ -413,6 +415,29 @@ export default component$(() => {
         }
     });
 
+    // Toggle file selection for multiple file operations
+    const toggleFileSelection = $((filePath: string) => {
+        const newSelection = new Set(selectedFiles.value);
+
+        if (newSelection.has(filePath)) {
+            newSelection.delete(filePath);
+        } else {
+            newSelection.add(filePath);
+        }
+
+        selectedFiles.value = newSelection;
+    });
+
+    // Initiate multi-file move dialog
+    const initiateMultiFileMoveDialog = $(() => {
+        if (selectedFiles.value.size === 0) {
+            alert("Please select at least one file to move.");
+            return;
+        }
+
+        showMoveFileDialog.value = true;
+    });
+
     // Handle moving files between folders
     const moveFile = $(() => {
         if (!fileToMove.value || targetFolder.value === undefined) return;
@@ -457,6 +482,68 @@ export default component$(() => {
         fileToMove.value = '';
         targetFolder.value = '';
         showMoveFileDialog.value = false;
+    });
+
+    // Enhanced moveFile function to support multiple files
+    const moveFiles = $(() => {
+        if (!targetFolder.value || selectedFiles.value.size === 0) return;
+
+        // Create a copy of the files object
+        const newFiles = { ...state.files };
+        let newMainFile = state.mainFile;
+
+        // Process each selected file
+        for (const filePath of selectedFiles.value) {
+            // Skip folders
+            if (state.files[filePath] === FOLDER_MARKER || fileTree.value.find(entry => entry.path === filePath)?.isFolder) {
+                continue;
+            }
+
+            // Get the filename without path
+            const fileName = filePath.includes('/')
+                ? filePath.substring(filePath.lastIndexOf('/') + 1)
+                : filePath;
+
+            // Create the new path
+            const newPath = targetFolder.value ? `${targetFolder.value}/${fileName}` : fileName;
+
+            // Check if target file already exists
+            if (newFiles[newPath]) {
+                // Skip this file and continue with others
+                console.warn(`A file named ${fileName} already exists in the target folder. Skipping.`);
+                continue;
+            }
+
+            // Copy the file content to the new location
+            newFiles[newPath] = newFiles[filePath];
+
+            // Delete the old file
+            delete newFiles[filePath];
+
+            // If we moved the current file, update our tracking
+            if (filePath === state.mainFile) {
+                newMainFile = newPath;
+            }
+        }
+
+        // Update the files object
+        state.files = newFiles;
+
+        // Update mainFile if it was moved
+        if (state.mainFile !== newMainFile) {
+            state.mainFile = newMainFile;
+
+            // Update editor if it exists
+            if (editorInstance.value) {
+                editorInstance.value.setValue(state.files[newMainFile] || '');
+            }
+        }
+
+        // Clear the selection and close the dialog
+        selectedFiles.value = new Set();
+        targetFolder.value = '';
+        showMoveFileDialog.value = false;
+        showMultiSelectMode.value = false;
     });
 
     // Initiate the file move dialog
@@ -562,7 +649,7 @@ export default component$(() => {
 
         if (editorInstance.value) {
             // Only update language, not recreate the editor
-            monaco.editor.setModelLanguage(editorInstance.value.getModel(), state.language);
+            monaco.editor.setModelLanguage(editorInstance.value.getModel()!, state.language);
         }
     });
 
@@ -606,7 +693,27 @@ export default component$(() => {
             <div class="flex flex-1 overflow-hidden">
                 {/* File explorer */}
                 <div class="w-64 bg-gray-800 p-4 flex flex-col">
-                    <h2 class="text-lg font-bold mb-2">Files</h2>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-bold">Files</h2>
+                        <div class="flex gap-1">
+                            <button
+                                onClick$={() => showMultiSelectMode.value = !showMultiSelectMode.value}
+                                class={`text-xs px-2 py-1 rounded ${showMultiSelectMode.value ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                title="Toggle multi-select mode"
+                            >
+                                {showMultiSelectMode.value ? "Exit Multi-Select" : "Multi-Select"}
+                            </button>
+                            {showMultiSelectMode.value && selectedFiles.value.size > 0 && (
+                                <button
+                                    onClick$={initiateMultiFileMoveDialog}
+                                    class="text-xs bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded"
+                                    title="Move selected files"
+                                >
+                                    Move ({selectedFiles.value.size})
+                                </button>
+                            )}
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-2 mb-4">
                         {/* File creation UI */}
                         <div class="flex gap-2">
@@ -628,7 +735,6 @@ export default component$(() => {
 
                         {/* Folder creation UI */}
                         <div class="flex justify-between items-center">
-
                             <button
                                 onClick$={() => showNewFolderInput.value = !showNewFolderInput.value}
                                 class="bg-teal-600 hover:bg-teal-700 px-2 py-1 rounded text-xs"
@@ -677,8 +783,6 @@ export default component$(() => {
                                 class="bg-gray-700 text-white p-2 rounded w-full"
                             />
                         )}
-
-
                     </div>
                     <div class="flex-1 overflow-y-auto">
                         <ul>
@@ -687,17 +791,26 @@ export default component$(() => {
                                     key={file.path}
                                     class={`p-2 mb-1 cursor-pointer hover:bg-gray-700 rounded flex justify-between items-center
                                     ${file.path === state.mainFile ? 'bg-gray-700' : ''}
-                                    ${file.isFolder ? 'text-blue-300 font-semibold' : ''}`}
+                                    ${file.isFolder ? 'text-blue-300 font-semibold' : ''}
+                                    ${selectedFiles.value.has(file.path) ? 'border border-blue-500' : ''}`}
                                     style={{ marginLeft: `${file.depth * 12}px` }}
                                 >
                                     <span
-                                        class="flex-grow"
-                                        onClick$={() => selectFile(file.path)}
+                                        class="flex-grow flex items-center"
+                                        onClick$={() => showMultiSelectMode.value ? toggleFileSelection(file.path) : selectFile(file.path)}
                                     >
+                                        {showMultiSelectMode.value && !file.isFolder && (
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedFiles.value.has(file.path)}
+                                                onChange$={() => toggleFileSelection(file.path)}
+                                                class="mr-1"
+                                            />
+                                        )}
                                         {file.isFolder ? '📁 ' : '📄 '}{file.name}
                                     </span>
                                     <div class="flex">
-                                        {!file.isFolder && (
+                                        {!file.isFolder && !showMultiSelectMode.value && (
                                             <button
                                                 onClick$={() => initiateFileMoveDialog(file.path)}
                                                 class="text-yellow-400 hover:text-yellow-600 px-1"
@@ -736,8 +849,20 @@ export default component$(() => {
             {showMoveFileDialog.value && (
                 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
-                        <h3 class="text-lg font-bold mb-4">Move File</h3>
-                        <p class="mb-4">Moving: <span class="font-mono">{fileToMove.value}</span></p>
+                        <h3 class="text-lg font-bold mb-4">Move File{selectedFiles.value.size > 1 ? 's' : ''}</h3>
+
+                        {selectedFiles.value.size > 0 ? (
+                            <div class="mb-4">
+                                <p>Moving {selectedFiles.value.size} file{selectedFiles.value.size > 1 ? 's' : ''}:</p>
+                                <div class="max-h-32 overflow-y-auto mt-2 bg-gray-700 rounded p-2">
+                                    {Array.from(selectedFiles.value).map(file => (
+                                        <div key={file} class="text-sm font-mono truncate">{file}</div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <p class="mb-4">Moving: <span class="font-mono">{fileToMove.value}</span></p>
+                        )}
 
                         <div class="mb-4">
                             <label class="block mb-2">Select destination folder:</label>
@@ -767,7 +892,7 @@ export default component$(() => {
                                 Cancel
                             </button>
                             <button
-                                onClick$={moveFile}
+                                onClick$={selectedFiles.value.size > 0 ? moveFiles : moveFile}
                                 class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
                             >
                                 Move
