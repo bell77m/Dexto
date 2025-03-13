@@ -6,7 +6,44 @@ import API_URL from "~/configURL/config";
 export default component$(() => {
   const { userId } = useUserStore();
   const friendRequests = useSignal([]); 
-  const isLoading = useSignal(true);  
+  const isLoading = useSignal(true);
+  const lastNotifiedRequestIds = useSignal(new Set());
+
+  // Request notification permission
+  const requestNotificationPermission = $(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted');
+        }
+      });
+    }
+  });
+
+  // Send browser notification for friend requests
+  const sendFriendRequestNotification = $((request) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      // Only notify if this is a new request and hasn't been notified before
+      if (!lastNotifiedRequestIds.value.has(request.id)) {
+        const notification = new Notification('New Friend Request', {
+          body: `${request.sender.displayName} sent you a friend request`,
+          icon: request.sender.profilePictureUrl || "/image/defaultProfile.svg"
+        });
+
+        // Add click event to open notifications
+        notification.onclick = () => {
+          // Focus the browser window
+          window.focus();
+
+          // Redirect to notifications page (assuming there's a route to notifications)
+          window.location.href = '/notifications';
+        };
+
+        // Update the last notified request
+        lastNotifiedRequestIds.value.add(request.id);
+      }
+    }
+  });
 
   const fetchFriendRequests = $(async () => {
     isLoading.value = true;
@@ -34,7 +71,17 @@ export default component$(() => {
 
       const result = await response.json();
       if (result.data?.getFriendRequests) {
-        friendRequests.value = result.data.getFriendRequests;
+        // Check if there are new friend requests
+        const newRequests = result.data.getFriendRequests;
+        
+        // Send notification for new requests
+        if (newRequests.length > 0) {
+          newRequests.forEach(request => {
+            sendFriendRequestNotification(request);
+          });
+        }
+
+        friendRequests.value = newRequests;
       } else {
         console.warn("⚠️ No friend requests found.");
       }
@@ -45,8 +92,20 @@ export default component$(() => {
     }
   });
 
+  // Periodically check for new friend requests
   useVisibleTask$(() => {
+    // Request notification permission on component mount
+    requestNotificationPermission();
+
+    // Initial fetch
     fetchFriendRequests();
+
+    // Check for new requests every 10 seconds
+    const interval = setInterval(() => {
+      fetchFriendRequests();
+    }, 10000);
+
+    return () => clearInterval(interval);
   });
 
   const handleAccept = $(async (senderId: number) => {
