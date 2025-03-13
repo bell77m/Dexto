@@ -66,6 +66,7 @@ export const UserProfile = component$(() => {
       } else if (result.data?.updateUser) {
         console.log("✅ Profile updated successfully!");
         updateStore(cleanDisplayName, userId.value, cleanUrl);
+        window.location.reload();
         originalDisplayName.value = cleanDisplayName;
         originalAvatar.value = cleanUrl;
       } else {
