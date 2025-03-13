@@ -39,8 +39,11 @@ export const ChatMain = component$(() => {
         
         // Only send notification if the latest message hasn't been notified before
         if (latestMessage.id !== lastNotifiedMessageId) {
+          // Clean message text for notification (remove line breaks)
+          const cleanMessage = message.replace(/\n/g, ' ');
+          
           const notification = new Notification(`New message from ${friend.displayName}`, {
-            body: message.length > 50 ? message.substring(0, 50) + '...' : message,
+            body: cleanMessage.length > 50 ? cleanMessage.substring(0, 50) + '...' : cleanMessage,
             icon: friend.profilePictureUrl || "/image/defaultProfile.svg"
           });
 
@@ -158,6 +161,7 @@ export const ChatMain = component$(() => {
         // Update latest message for friend
         const latestMessage = newMessages[newMessages.length - 1];
         if (latestMessage) {
+          // Store the original message with line breaks
           friend.latestMessage = latestMessage.message;
           friend.latestMessageTime = latestMessage.sentAt;
 
@@ -202,15 +206,28 @@ export const ChatMain = component$(() => {
     }
   });
 
+  // Process message text for preview in the sidebar
+  const getMessagePreview = $((message: string) => {
+    // Replace line breaks with spaces for preview
+    const previewText = message.replace(/\n/g, ' ');
+    return previewText.length > 30 ? previewText.slice(0, 30) + '...' : previewText;
+  });
+
   // Send message and update database + UI
   const sendMessage = $(() => {
     if (!messageText.value.trim() || !selectedFriend.value) return;
+
+    // Escape special characters for GraphQL query
+    const escapedMessage = messageText.value
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, '\\n');
 
     fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `mutation { sendMessage(userId: ${userId.value}, friendId: ${selectedFriend.value.id}, message: "${messageText.value}") }`
+        query: `mutation { sendMessage(userId: ${userId.value}, friendId: ${selectedFriend.value.id}, message: "${escapedMessage}") }`
       }),
     })
       .then(() => {
@@ -276,9 +293,7 @@ export const ChatMain = component$(() => {
                   {friend.latestMessage && (
                     <div class="text-xs text-gray-400 flex items-center gap-2">
                       <p class="flex-1 truncate max-w-[calc(100%-50px)]">
-                        {friend.latestMessage.length > 30
-                          ? friend.latestMessage.slice(0, 30) + '...'
-                          : friend.latestMessage}
+                        {getMessagePreview(friend.latestMessage)}
                       </p>
                       <p>{friend.latestMessageTime && formatMessageTime(friend.latestMessageTime)}</p>
                     </div>
@@ -304,11 +319,14 @@ export const ChatMain = component$(() => {
         <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-3">
           {selectedFriend.value && messages.value[selectedFriend.value.id]?.map((msg, index) => {
             const isUserMessage = msg.senderId === userId.value;
+            // Split the message by newline characters to create separate lines
+            const messageLines = msg.message.split('\n');
+            
             return (
               <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
                 <div class="max-w-[70%] relative">
-                  {/* Message content */}
-                  <div class={`relative p-3 rounded-xl break-words whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
+                  {/* Message content with preserved line breaks */}
+                  <div class={`relative p-3 rounded-xl whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
                     {msg.message}
                   </div>
                   
@@ -335,10 +353,9 @@ export const ChatMain = component$(() => {
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); 
                 sendMessage(); 
-              } else if (e.key === 'Enter' && e.shiftKey) {
-                // Allow new line on Shift + Enter
-                messageText.value += '\n';
               }
+              // Removed the Shift+Enter condition as it's unnecessary
+              // Textarea will handle new lines naturally on Enter press
             }}
           />
           <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick$={() => sendMessage()}>Send</button>
