@@ -131,7 +131,7 @@ export default component$(() => {
       {/* Forum Header */}
       <header class="flex overflow-visible flex-col justify-center px-11 py-4 w-full bg-stone-50 max-md:px-5 max-md:max-w-full">
         <nav class="flex flex-wrap gap-10 items-center max-md:max-w-full">
-          <Link href="/" class="flex shrink-0 items-center cursor-pointer">
+          <Link href="/home" class="flex shrink-0 items-center cursor-pointer">
             <img
               alt="My DEXTO Icon"
               src="/image/DextoLogoDark.svg"
