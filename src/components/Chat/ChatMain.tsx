@@ -10,7 +10,7 @@ export const ChatMain = component$(() => {
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
 
-  // Load friends and add latest message
+  // Load friends and sort by latest message
   const loadFriends = $(() => {
     fetch("http://dexto.com:3000/graphql", {
       method: "POST",
@@ -22,7 +22,11 @@ export const ChatMain = component$(() => {
       .then((response) => response.json())
       .then((result) => {
         if (result.data?.getFriends) {
-          friends.value = [...result.data.getFriends];
+          friends.value = result.data.getFriends.sort((a, b) => {
+            const timestampA = a.latestMessageTime ? new Date(a.latestMessageTime).getTime() : 0;
+            const timestampB = b.latestMessageTime ? new Date(b.latestMessageTime).getTime() : 0;
+            return timestampB - timestampA;
+          });
         }
       })
       .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
@@ -41,11 +45,19 @@ export const ChatMain = component$(() => {
       .then((response) => response.json())
       .then((result) => {
         messages.value = result.data?.getChatMessages || [];
+        
         // Add the latest message and its timestamp to the selected friend's data
         const latestMessage = result.data?.getChatMessages?.[result.data.getChatMessages.length - 1];
         if (latestMessage) {
           selectedFriend.value.latestMessage = latestMessage.message;
           selectedFriend.value.latestMessageTime = latestMessage.sentAt;
+          
+          // Re-sort friends list based on latest message
+          friends.value = [...friends.value].sort((a, b) => {
+            const timestampA = a.latestMessageTime ? new Date(a.latestMessageTime).getTime() : 0;
+            const timestampB = b.latestMessageTime ? new Date(b.latestMessageTime).getTime() : 0;
+            return timestampB - timestampA;
+          });
         }
       })
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
@@ -123,7 +135,6 @@ export const ChatMain = component$(() => {
                 <img src={friend.profilePictureUrl || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
-                  {/* Show the latest message and timestamp on the same line */}
                   {friend.latestMessage && (
                     <div class="text-xs text-gray-400 truncate flex items-center gap-2">
                       <p class="flex-1">{friend.latestMessage}</p>
@@ -173,7 +184,7 @@ export const ChatMain = component$(() => {
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); // Prevent new line
+                e.preventDefault(); 
                 sendMessage(); 
               } 
             }}
