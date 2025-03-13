@@ -11,6 +11,12 @@ export const UserProfile = component$(() => {
   const isSaving = useSignal(false);
   const avatarUrl = useSignal<string>("/image/DeafaultPic.svg");
 
+  // Function to remove special characters from display name
+  const sanitizeDisplayName = $((name: string) => {
+    // Allow only letters and numbers
+    return name.replace(/[^a-zA-Z0-9]/g, '');
+  });
+
   const selectAvatar = $((image: string) => {
     avatarUrl.value = `/image/${image}`;
     showPopup.value = false;
@@ -33,10 +39,16 @@ export const UserProfile = component$(() => {
 
   const saveProfile = $(async () => {
     const cleanUrl = selectedAvatar.value.trim();
-    const cleanDisplayName = newDisplayName.value.trim();
+    const cleanDisplayName = await sanitizeDisplayName(newDisplayName.value.trim());
 
     if (!cleanUrl || !cleanDisplayName) {
       console.error("❌ Invalid data");
+      return;
+    }
+
+    // Ensure display name is not empty after sanitization
+    if (cleanDisplayName.length === 0) {
+      console.error("❌ Display name cannot be empty after removing special characters");
       return;
     }
 
@@ -89,7 +101,12 @@ export const UserProfile = component$(() => {
         <input
           type="text"
           value={newDisplayName.value}
-          onInput$={(e) => (newDisplayName.value = (e.target as HTMLInputElement).value)}
+          onInput$={(e) => {
+            // Remove special characters in real-time
+            const sanitizedValue = (e.target as HTMLInputElement).value.replace(/[^a-zA-Z0-9]/g, '');
+            (e.target as HTMLInputElement).value = sanitizedValue;
+            newDisplayName.value = sanitizedValue;
+          }}
           class="p-3 mb-6 w-full text-base text-white bg-gray-800 rounded-lg border-none"
         />
         <div class="mx-0 my-6 h-px bg-stone-300"></div>

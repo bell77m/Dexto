@@ -1,13 +1,12 @@
 import { $, component$, useSignal } from "@builder.io/qwik";
 
-// ฟังก์ชันสำหรับกำหนดไอคอนตามประเภทไฟล์
 const getLanguageImage = $((language: string) => {
   if (language === "Python") {
-    return "ᵖʸ📄";  // สำหรับไฟล์ Python
+    return "ᵖʸ📄";
   } else if (language === "Javascript") {
-    return "ʲˢ📄";  // สำหรับไฟล์ Javascript
+    return "ʲˢ📄";
   } else {
-    return "📂";  // สำหรับไฟล์อื่นๆ
+    return "📂";
   }
 });
 
@@ -41,23 +40,60 @@ export const MyProject = component$((props: { class?: string }) => {
   const handleFileUpload = $((e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (file) {
-      const fileType = file.name.split(".").pop()?.toLowerCase();
+      // Sanitize filename and ensure it's not empty
+      const fileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '').trim();
+      
+      if (fileName === "") {
+        alert("Invalid filename. Please choose a file with a valid name.");
+        return;
+      }
+
+      const fileType = fileName.split(".").pop()?.toLowerCase();
+      
       if (fileType === "py" || fileType === "js") {
-        alert(`File ${file.name} is valid and uploaded!`);
+        alert(`File ${fileName} is valid and uploaded!`);
         
-        // เพิ่มโปรเจกต์ใหม่หลังจากการอัปโหลดไฟล์
         const newProject = {
-          name: file.name,
+          name: fileName,
           language: fileType === "py" ? "Python" : "Javascript",
-          image: getLanguageImage(fileType === "py" ? "Python" : "Javascript"), // ใช้ฟังก์ชัน getLanguageImage เพื่อกำหนดไอคอน
+          image: getLanguageImage(fileType === "py" ? "Python" : "Javascript"),
           createdAt: Date.now(),
           isEditing: false,
         };
-        projects.value = [...projects.value, newProject];  // เพิ่มโปรเจกต์เข้าไปในรายการ
+        projects.value = [...projects.value, newProject];
       } else {
         alert("Please upload only Python (.py) or JavaScript (.js) files.");
       }
     }
+  });
+
+  const createProject = $(() => {
+    // Trim and validate project name
+    const sanitizedName = newProjectName.value.trim();
+    
+    if (!sanitizedName) {
+      alert("Project name cannot be empty.");
+      return;
+    }
+
+    if (!selectedLanguage.value) {
+      alert("Please select a language.");
+      return;
+    }
+
+    projects.value = [
+      ...projects.value,
+      {
+        name: sanitizedName,
+        language: selectedLanguage.value,
+        image: getLanguageImage(selectedLanguage.value),
+        createdAt: Date.now(),
+        isEditing: false,
+      },
+    ];
+    newProjectName.value = "";
+    selectedLanguage.value = "";
+    isCreating.value = false;
   });
 
   return (
@@ -76,7 +112,6 @@ export const MyProject = component$((props: { class?: string }) => {
         </button>
       </h2>
 
-      {/* File Upload */}
       <input
         type="file"
         ref={(el) => (fileInputRef.value = el)}
@@ -92,7 +127,12 @@ export const MyProject = component$((props: { class?: string }) => {
               class="w-full p-2 mt-4 bg-gray-700 text-white border border-gray-500 rounded-md"
               placeholder="Enter project name..."
               value={newProjectName.value}
-              onInput$={(e) => (newProjectName.value = (e.target as HTMLInputElement).value)}
+              onInput$={(e) => {
+                // Remove non-English characters and spaces
+                const sanitizedValue = (e.target as HTMLInputElement).value.replace(/[^a-zA-Z0-9.-]/g, '');
+                (e.target as HTMLInputElement).value = sanitizedValue;
+                newProjectName.value = sanitizedValue;
+              }}
             />
 
             <h3 class="mt-4">Choose Language:</h3>
@@ -114,23 +154,7 @@ export const MyProject = component$((props: { class?: string }) => {
               </button>
               <button
                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                onClick$={() => {
-                  if (newProjectName.value && selectedLanguage.value) {
-                    projects.value = [
-                      ...projects.value,
-                      {
-                        name: newProjectName.value,
-                        language: selectedLanguage.value,
-                        image: getLanguageImage(selectedLanguage.value), // ใช้ฟังก์ชัน getLanguageImage เพื่อกำหนดไอคอน
-                        createdAt: Date.now(),
-                        isEditing: false,
-                      },
-                    ];
-                    newProjectName.value = "";
-                    selectedLanguage.value = "";
-                    isCreating.value = false;
-                  }
-                }}
+                onClick$={createProject}
               >
                 Create
               </button>
@@ -144,23 +168,30 @@ export const MyProject = component$((props: { class?: string }) => {
             No projects available.
         </p>}
 
-      {/* Project List */}
       <div class="mt-8 ml-20 w-full max-w-3xl space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         {projects.value.map((project, index) => (
           <div key={index} class="relative flex flex-col items-start px-6 py-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-300 group">
             <div class="flex gap-6 items-center">
-              <span class="text-3xl">{project.image}</span> {/* แสดงไอคอน 📄ᵖʸ หรือ 📄ʲˢ */}
+              <span class="text-3xl">{project.image}</span>
               <div>
                 {project.isEditing ? (
                   <input
                     class="text-xl font-medium bg-gray-700 text-white border border-gray-500 px-2 py-1 rounded-md"
                     value={project.name}
                     onInput$={(e) => {
-                      projects.value[index].name = (e.target as HTMLInputElement).value;
+                      // Remove non-English characters and spaces
+                      const sanitizedValue = (e.target as HTMLInputElement).value.replace(/[^a-zA-Z0-9.-]/g, '');
+                      (e.target as HTMLInputElement).value = sanitizedValue;
+                      projects.value[index].name = sanitizedValue;
                     }}
                     onBlur$={() => {
+                      // Prevent completely empty name
+                      if (projects.value[index].name.trim() === "") {
+                        alert("Project name cannot be empty.");
+                        return;
+                      }
                       projects.value[index].isEditing = false;
-                      projects.value = [...projects.value]; // อัปเดต state
+                      projects.value = [...projects.value];
                     }}
                     autoFocus
                   />
@@ -179,7 +210,7 @@ export const MyProject = component$((props: { class?: string }) => {
                 class="bg-gray-700 hover:bg-gray-500 text-white px-2 py-1 rounded-md"
                 onClick$={() => {
                   projects.value[index].isEditing = true;
-                  projects.value = [...projects.value]; // อัปเดต state
+                  projects.value = [...projects.value];
                 }}
               >
                 <img alt="Edit Icon" src="https://img.icons8.com/?size=100&id=8Y4tD58oU8lB&format=png&color=FFFFFF" width="25" height="25" />

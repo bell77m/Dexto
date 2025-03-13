@@ -13,15 +13,30 @@ export default component$(() => {
   const navigate = useNavigate();
   const API_URLL = import.meta.env.VITE_API_URL || API_URL;
 
+  // Convert to QRL using $
+  const isValidUsername = $((username: string) => {
+    const usernameRegex = /^[a-zA-Z0-9]+$/;
+    return usernameRegex.test(username);
+  });
+
   const handleSubmit$ = $(async () => {
     errorMessages.value = [];
     isLoading.value = true;
 
+    // Prevent special characters in name
+    if (!name.value.trim() || !await isValidUsername(name.value)) 
+      errorMessages.value.push("Username must contain only letters and numbers!");
+    
     if (!agree.value) errorMessages.value.push("You must agree to the terms & policy!");
-    if (!name.value.trim()) errorMessages.value.push("Name is required!");
-    if (!email.value.toLowerCase().trim().match(/^\S+@\S+\.\S+$/)) errorMessages.value.push("Invalid email format!");
-    if (password.value.length < 6) errorMessages.value.push("Password must be at least 6 characters long!");
-    if (password.value !== confirmPassword.value) errorMessages.value.push("Passwords do not match!");
+    
+    if (!email.value.toLowerCase().trim().match(/^\S+@\S+\.\S+$/)) 
+      errorMessages.value.push("Invalid email format!");
+    
+    if (password.value.length < 6) 
+      errorMessages.value.push("Password must be at least 6 characters long!");
+    
+    if (password.value !== confirmPassword.value) 
+      errorMessages.value.push("Passwords do not match!");
 
     if (errorMessages.value.length > 0) {
       isLoading.value = false;
@@ -73,13 +88,53 @@ export default component$(() => {
         <h1 class="text-3xl font-bold mb-6">Get Started Now</h1>
         <form class="w-full max-w-sm" preventdefault:submit onSubmit$={handleSubmit$}>
           <label class="block mb-2">Name</label>
-          <input type="text" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter your name" onInput$={(e) => name.value = e.target.value.trim()} />
+          <input 
+            type="text" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your name" 
+            onInput$={(e) => {
+              // Remove non-alphanumeric characters from input
+              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+              e.target.value = value;
+              name.value = value;
+            }} 
+          />
           <label class="block mb-2">Email address</label>
-          <input type="email" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter your email" onInput$={(e) => email.value = e.target.value.toLowerCase().trim()} />
+          <input 
+            type="email" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your email" 
+            onInput$={(e) => {
+              // Remove spaces from input
+              const value = e.target.value.replace(/\s/g, '');
+              e.target.value = value;
+              email.value = value.toLowerCase();
+            }} 
+          />
           <label class="block mb-2">Password</label>
-          <input type="password" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter your password" onInput$={(e) => password.value = e.target.value} />
+          <input 
+            type="password" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your password" 
+            onInput$={(e) => {
+              // Remove spaces from input
+              const value = e.target.value.replace(/\s/g, '');
+              e.target.value = value;
+              password.value = value;
+            }} 
+          />
           <label class="block mb-2">Confirm Password</label>
-          <input type="password" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter your password again" onInput$={(e) => confirmPassword.value = e.target.value} />
+          <input 
+            type="password" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your password again" 
+            onInput$={(e) => {
+              // Remove spaces from input
+              const value = e.target.value.replace(/\s/g, '');
+              e.target.value = value;
+              confirmPassword.value = value;
+            }} 
+          />
           
           {errorMessages.value.length > 0 && (
             <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
@@ -95,7 +150,11 @@ export default component$(() => {
             <input type="checkbox" class="mr-2" onChange$={(e) => agree.value = e.target.checked} />
             <span>I agree to the <a href="#" class="text-blue-600">terms & policy</a></span>
           </div>
-          <button type="submit" class="w-full bg-black text-white py-2 rounded flex items-center justify-center disabled:opacity-50" disabled={!name.value || !email.value || !password.value || !confirmPassword.value || isLoading.value}>
+          <button 
+            type="submit" 
+            class="w-full bg-black text-white py-2 rounded flex items-center justify-center disabled:opacity-50" 
+            disabled={!name.value || !email.value || !password.value || !confirmPassword.value || isLoading.value}
+          >
             {isLoading.value ? <span class="animate-spin mr-2">🔄</span> : "Sign up"}
           </button>
         </form>
