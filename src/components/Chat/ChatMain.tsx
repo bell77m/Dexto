@@ -177,7 +177,7 @@ export const ChatMain = component$(() => {
       })
       .catch((error) => {
         console.error("❌ ERROR: Loading messages failed!", error);
-        navigate('/service-unavailable'); // เพิ่มการ route
+        navigate('/service-unavailable');
       });
   });
 
@@ -241,7 +241,7 @@ export const ChatMain = component$(() => {
       })
       .catch((error) => {
         console.error("❌ ERROR: Sending message failed!", error);
-        navigate('/service-unavailable'); // เพิ่มการ route
+        navigate('/service-unavailable');
       });
   });
 
@@ -321,20 +321,44 @@ export const ChatMain = component$(() => {
 
       {/* Chat Panel */}
       <section class="w-2/3 flex flex-col p-4 bg-gray-900">
-        <h2 class="text-lg font-semibold border-b border-gray-700 pb-2">{selectedFriend.value?.displayName || "Select a friend to start chat"}</h2>
+        <h2 class="text-lg font-semibold border-b border-gray-700 pb-2">
+          {selectedFriend.value?.displayName || "Select a friend to start chat"}
+        </h2>
 
         {/* Messages */}
-        <div ref={scrollContainerRef} class="flex-1 overflow-y-auto p-4 space-y-3">
+        <div 
+          ref={scrollContainerRef} 
+          class="flex-1 overflow-y-auto p-4 space-y-3"
+          style={{ 
+            overflowWrap: 'break-word', 
+            wordBreak: 'break-word' 
+          }}
+        >
           {selectedFriend.value && messages.value[selectedFriend.value.id]?.map((msg, index) => {
             const isUserMessage = msg.senderId === userId.value;
-            // Split the message by newline characters to create separate lines
-            const messageLines = msg.message.split('\n');
             
             return (
-              <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
-                <div class="max-w-[70%] relative">
-                  {/* Message content with preserved line breaks */}
-                  <div class={`relative p-3 rounded-xl whitespace-pre-wrap ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
+              <div 
+                key={index} 
+                class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}
+              >
+                <div class="max-w-full relative">
+                  {/* Message content with preserved line breaks and word wrapping */}
+                  <div 
+                    class={`
+                      relative 
+                      p-3 
+                      rounded-xl 
+                      whitespace-pre-wrap 
+                      break-words 
+                      max-w-[400px] 
+                      ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}
+                    `}
+                    style={{
+                      wordBreak: 'break-word', 
+                      overflowWrap: 'break-word'
+                    }}
+                  >
                     {msg.message}
                   </div>
                   
@@ -353,20 +377,57 @@ export const ChatMain = component$(() => {
         {/* Input */}
         <div class="flex gap-2 border-t border-gray-700 p-2 mt-3">
           <textarea
+            ref={fileInputRef}
             value={messageText.value}
-            onInput$={(e) => { messageText.value = (e.target as HTMLTextAreaElement).value; }}
-            class="flex-1 p-2 bg-gray-800 rounded-lg focus:outline-none focus:border-blue-500 border border-gray-700 resize-none h-12"
+            onInput$={(e) => { 
+              const target = e.target as HTMLTextAreaElement;
+              messageText.value = target.value; 
+              
+              // Auto-resize textarea
+              target.style.height = 'auto';
+              target.style.height = `${Math.min(Math.max(target.scrollHeight, 48), 150)}px`;
+            }}
+            class="
+              flex-1 
+              p-2 
+              bg-gray-800 
+              rounded-lg 
+              focus:outline-none 
+              focus:border-blue-500 
+              border 
+              border-gray-700 
+              resize-none 
+              h-12 
+              max-h-[150px] 
+              overflow-y-auto
+            "
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); 
                 sendMessage(); 
+                
+                // Reset textarea to original size after sending
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = '48px';
               }
-              // Removed the Shift+Enter condition as it's unnecessary
-              // Textarea will handle new lines naturally on Enter press
             }}
           />
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" onClick$={() => sendMessage()}>Send</button>
+          
+          <button 
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg" 
+            disabled={!messageText.value.trim() || !selectedFriend.value}
+            onClick$={() => {
+              sendMessage();
+              
+              // Reset textarea to original size after sending
+              if (fileInputRef.value) {
+                fileInputRef.value.style.height = '48px';
+              }
+            }}
+          >
+            Send
+          </button>
         </div>
       </section>
     </div>
