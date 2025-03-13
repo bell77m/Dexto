@@ -221,8 +221,8 @@ export const ChatMain = component$(() => {
           </div>
         </div>
 
-        {/* Input */}
-        <div class="flex gap-2 border-t border-gray-700 p-2 mt-3">
+        {/* Input (ชิดขอบล่าง) */}
+        <div class="flex gap-2 border-t border-gray-700 p-2 mt-auto">
           <textarea
             value={messageText.value}
             onInput$={(e) => { messageText.value = (e.target as HTMLTextAreaElement).value; }}
