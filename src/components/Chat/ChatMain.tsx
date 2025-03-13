@@ -8,9 +8,9 @@ export const ChatMain = component$(() => {
   const messages = useSignal([]);
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
-  const scrollContainerRef = useSignal<HTMLDivElement | null>(null); // ✅ ใช้เพื่อให้ Scroll Auto
+  const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
 
-  // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
+  // Load friends and sort by latest message
   const loadFriends = $(() => {
     fetch("http://dexto.com:3000/graphql", {
       method: "POST",
@@ -22,13 +22,17 @@ export const ChatMain = component$(() => {
       .then((response) => response.json())
       .then((result) => {
         if (result.data?.getFriends) {
-          friends.value = [...result.data.getFriends];
+          friends.value = result.data.getFriends.sort((a, b) => {
+            const timestampA = a.latestMessageTime ? new Date(a.latestMessageTime).getTime() : 0;
+            const timestampB = b.latestMessageTime ? new Date(b.latestMessageTime).getTime() : 0;
+            return timestampB - timestampA;
+          });
         }
       })
       .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
   });
 
-  // ✅ โหลดข้อความแชทของเพื่อนที่เลือก
+  // Load messages for selected friend
   const loadMessages = $(() => {
     if (!selectedFriend.value) return;
     fetch("http://dexto.com:3000/graphql", {
@@ -41,23 +45,34 @@ export const ChatMain = component$(() => {
       .then((response) => response.json())
       .then((result) => {
         messages.value = result.data?.getChatMessages || [];
+        
+        // Add the latest message and its timestamp to the selected friend's data
+        const latestMessage = result.data?.getChatMessages?.[result.data.getChatMessages.length - 1];
+        if (latestMessage) {
+          selectedFriend.value.latestMessage = latestMessage.message;
+          selectedFriend.value.latestMessageTime = latestMessage.sentAt;
+          
+          // Re-sort friends list based on latest message
+          friends.value = [...friends.value].sort((a, b) => {
+            const timestampA = a.latestMessageTime ? new Date(a.latestMessageTime).getTime() : 0;
+            const timestampB = b.latestMessageTime ? new Date(b.latestMessageTime).getTime() : 0;
+            return timestampB - timestampA;
+          });
+        }
       })
       .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
   });
 
-  // ✅ ฟังก์ชันสำหรับจัดรูปแบบเวลา
+  // Format message timestamp
   const formatMessageTime = $((timestamp: string) => {
     if (!timestamp) return "";
-    
     const date = new Date(timestamp);
-    
-    // จัดรูปแบบเวลา (HH:MM)
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   });
 
-  // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
+  // Scroll to bottom when new messages are added
   useVisibleTask$(() => {
     if (scrollContainerRef.value) {
       const observer = new MutationObserver(() => {
@@ -70,7 +85,7 @@ export const ChatMain = component$(() => {
     }
   });
 
-  // ✅ ส่งข้อความ และอัปเดต Database + UI ทันที
+  // Send message and update database + UI
   const sendMessage = $(() => {
     if (!messageText.value.trim() || !selectedFriend.value) return;
 
@@ -92,7 +107,7 @@ export const ChatMain = component$(() => {
       .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
   });
 
-  // ✅ โหลดข้อความใหม่ทุก 2 วินาที (Real-time)
+  // Load new messages every 2 seconds (Real-time)
   useVisibleTask$(() => {
     const interval = setInterval(() => {
       if (selectedFriend.value) {
@@ -103,11 +118,11 @@ export const ChatMain = component$(() => {
     return () => clearInterval(interval);
   });
 
-  // ✅ โหลดเพื่อนเมื่อเปิดหน้า Chat
+  // Load friends when the chat page is loaded
   useVisibleTask$(() => loadFriends());
 
   return (
-    <div class="flex h-screen w-full bg-gray-900 text-white">
+    <div class="flex h-screen w-[1421px] bg-gray-900 text-white">
       {/* Sidebar รายชื่อเพื่อน */}
       <aside class="w-1/3 bg-gray-800 p-4 flex flex-col">
         <h2 class="text-center font-semibold mb-4">Chat</h2>
@@ -120,6 +135,12 @@ export const ChatMain = component$(() => {
                 <img src={friend.profilePictureUrl || "/image/defaultProfile.svg"} class="w-10 h-10 rounded-full" />
                 <div class="flex-1">
                   <span class="font-semibold">{friend.displayName}</span>
+                  {friend.latestMessage && (
+                    <div class="text-xs text-gray-400 truncate flex items-center gap-2">
+                      <p class="flex-1">{friend.latestMessage}</p>
+                      <p>{friend.latestMessageTime && formatMessageTime(friend.latestMessageTime)}</p>
+                    </div>
+                  )}
                 </div>
               </li>
             ))
@@ -138,12 +159,12 @@ export const ChatMain = component$(() => {
             return (
               <div key={index} class={`flex ${isUserMessage ? "justify-end" : "justify-start"} mb-3`}>
                 <div class="max-w-[70%] relative">
-                  {/* ข้อความ */}
+                  {/* Message content */}
                   <div class={`relative p-3 rounded-xl ${isUserMessage ? "bg-blue-600 text-white" : "bg-gray-700 text-white"}`}>
                     {msg.message}
                   </div>
                   
-                  {/* เวลา */}
+                  {/* Time */}
                   <div class={`absolute bottom-1 ${isUserMessage ? "left-[-45px]" : "right-[-45px]"}`}>
                     <span class="text-xs text-gray-400">
                       {formatMessageTime(msg.sentAt)}
@@ -163,7 +184,7 @@ export const ChatMain = component$(() => {
             placeholder="Type a message..."
             onKeyDown$={(e) => { 
               if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); // ป้องกันขึ้นบรรทัดใหม่
+                e.preventDefault(); 
                 sendMessage(); 
               } 
             }}
