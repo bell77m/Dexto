@@ -60,13 +60,6 @@ export default component$(() => {
   });
 
   // ฟังก์ชันค้นหาจากคำค้น
-  const handleKeyDown = $(async (event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      await handleSearch(); // เมื่อกด Enter จะทำการค้นหา
-    }
-  });
-
-  // ฟังก์ชันการค้นหาที่จะโหลดโพสต์ตามคำค้น
   const handleSearch = $(async () => {
     await loadPosts(); // เมื่อมีการค้นหาคำใหม่ ให้ส่งคำค้นไปยัง GraphQL API
   });
@@ -115,6 +108,20 @@ export default component$(() => {
     }
   });
 
+  // การตรวจสอบการขยายโพสต์และคอมเมนต์
+  const postExpanded = useStore<{ [key: number]: boolean }>({});
+  const commentExpanded = useStore<{ [key: number]: boolean }>({});
+
+  // ฟังก์ชัน toggle สำหรับขยายโพสต์
+  const togglePostExpand = $(async (postId: number) => {
+    postExpanded[postId] = !postExpanded[postId];
+  });
+
+  // ฟังก์ชัน toggle สำหรับขยายคอมเมนต์
+  const toggleCommentExpand = $(async (commentId: number) => {
+    commentExpanded[commentId] = !commentExpanded[commentId];
+  });
+
   useVisibleTask$(() => {
     loadPosts(); // โหลดโพสต์เมื่อ component ถูกแสดง
   });
@@ -124,7 +131,7 @@ export default component$(() => {
       {/* Forum Header */}
       <header class="flex overflow-visible flex-col justify-center px-11 py-4 w-full bg-stone-50 max-md:px-5 max-md:max-w-full">
         <nav class="flex flex-wrap gap-10 items-center max-md:max-w-full">
-          <Link href="/" class="flex shrink-0 items-center cursor-pointer">
+          <Link href="/home" class="flex shrink-0 items-center cursor-pointer">
             <img
               alt="My DEXTO Icon"
               src="/image/DextoLogoDark.svg"
@@ -151,7 +158,11 @@ export default component$(() => {
                 class="w-full bg-transparent border-none focus:outline-none"
                 value={searchQuery.value}
                 onInput$={(e) => searchQuery.value = (e.target as HTMLInputElement).value} // อัพเดตค่าเมื่อมีการพิมพ์
-                onKeyDown$={handleKeyDown}  // เมื่อกด Enter จะทำการค้นหา
+                onKeyDown$={(event) => {
+                  if (event.key === 'Enter') {
+                    handleSearch();  // เมื่อกด Enter ให้ทำการค้นหา
+                  }
+                }}  // เมื่อกด Enter จะทำการค้นหา
               />
             </div>
           </div>
@@ -161,7 +172,7 @@ export default component$(() => {
             class="px-4 py-2 bg-blue-500 text-white rounded ml-2"
             onClick$={handleSearch} // เมื่อคลิกปุ่มค้นหา
           >
-            🔍 Search
+            Search
           </button>
         </nav>
       </header>
@@ -199,10 +210,20 @@ export default component$(() => {
                 {/* ✅ ตัดเนื้อหาโพสต์ ถ้ายาวเกิน 300 ตัวอักษร */}
                 <div class="max-w break-words whitespace-pre-line overflow-wrap break-word mt-2">
                   <p class="text-left">
-                    {post.content.length <= 300
+                    {postExpanded[post.id] || post.content.length <= 300
                       ? post.content
                       : post.content.slice(0, 300) + "..."}
                   </p>
+
+                  {/* ปุ่ม Read More / Read Less */}
+                  {post.content.length > 300 && (
+                    <button
+                      class="text-blue-400 text-sm underline"
+                      onClick$={() => togglePostExpand(post.id)}
+                    >
+                      {postExpanded[post.id] ? "Read less" : "Read more"}
+                    </button>
+                  )}
                 </div>
 
                 <div class="mt-2 flex flex-wrap gap-2 max-w-[85%]">
@@ -223,7 +244,21 @@ export default component$(() => {
                           <img src={comment.userProfile || "/image/defaultProfile.svg"} class="w-8 h-8 rounded-full" />
                           <div class="max-w-[85%] break-words whitespace-pre-line overflow-wrap break-word">
                             <span class="font-semibold">{comment.userName}</span>
-                            <p class="text-left">{comment.content}</p>
+                            <p class="text-left">
+                              {commentExpanded[comment.id] || comment.content.length <= 100
+                                ? comment.content
+                                : comment.content.slice(0, 100) + "..."}
+                            </p>
+
+                            {/* ปุ่ม Read More / Read Less */}
+                            {comment.content.length > 100 && (
+                              <button
+                                class="text-blue-400 text-sm underline"
+                                onClick$={() => toggleCommentExpand(comment.id)}
+                              >
+                                {commentExpanded[comment.id] ? "Read less" : "Read more"}
+                              </button>
+                            )}
                           </div>
                         </div>
                       );

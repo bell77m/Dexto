@@ -10,7 +10,6 @@ export default component$(() => {
         <div class="flex justify-center py-5">
             <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32"/>
         </div>
-       <h1 class="text-4xl font-bold text-black mb-4">503</h1>
        <h2 class="text-2xl mb-4">Service Unavailable</h2>
        <p class="text-gray-600 mb-6">
          ขณะนี้ระบบอยู่ระหว่างการปรับปรุง กรุณาลองใหม่ภายหลัง

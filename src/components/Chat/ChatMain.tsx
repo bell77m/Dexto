@@ -1,4 +1,5 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
 
 export const ChatMain = component$(() => {
@@ -9,6 +10,7 @@ export const ChatMain = component$(() => {
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
 
   // Load friends and sort by latest message
   const loadFriends = $(() => {
@@ -34,7 +36,10 @@ export const ChatMain = component$(() => {
           });
         }
       })
-      .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
+      .catch((error) => {
+        console.error("❌ ERROR: Loading friends failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
   });
 
   // Load messages for a given friend
@@ -64,7 +69,10 @@ export const ChatMain = component$(() => {
           });
         }
       })
-      .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
+      .catch((error) => {
+        console.error("❌ ERROR: Loading messages failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
   });
 
   // Format message timestamp
@@ -104,7 +112,10 @@ export const ChatMain = component$(() => {
         messageText.value = "";
         loadMessages(selectedFriend.value); // Reload messages after sending
       })
-      .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
+      .catch((error) => {
+        console.error("❌ ERROR: Sending message failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
   });
 
   // Load new messages every 2 seconds (Real-time) for all friends
