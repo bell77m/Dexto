@@ -1,5 +1,6 @@
 import { component$, useSignal, $ } from "@builder.io/qwik";
 import { useUserStore } from "~/store/store";
+import API_URL from "~/configURL/config";
 
 export default component$(() => {
   const { userId } = useUserStore();
@@ -8,18 +9,30 @@ export default component$(() => {
   const newPostContent = useSignal("");
   const newPostTags = useSignal("");
 
+  // ✅ ฟังก์ชันเพิ่มโพสต์ รองรับ `Enter`
   const addPost = $(async () => {
+    if (!newPostTitle.value.trim() || !newPostContent.value.trim()) {
+      return alert("⚠️ Title and Content cannot be empty!");
+    }
+
     const formattedTags = newPostTags.value
       .split(" ")
       .filter(tag => tag.startsWith("#"))
       .map(tag => tag.substring(1))
       .join(",");
 
-    const response = await fetch("http://dexto.com:3000/graphql", {
+    // ✅ ไม่ต้องแปลง `\n` ให้ GraphQL บันทึกข้อความตามปกติ
+    const formattedContent = newPostContent.value;
+
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `mutation { createPost(userId: ${userId.value}, title: "${newPostTitle.value}", content: "${newPostContent.value}", tags: "${formattedTags}") { id } }`,
+        query: `mutation {
+          createPost(userId: ${userId.value}, title: """${newPostTitle.value}""", content: """${formattedContent}""", tags: """${formattedTags}""") {
+            id
+          }
+        }`,
       }),
     });
 
