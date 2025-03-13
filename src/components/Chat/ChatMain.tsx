@@ -134,7 +134,17 @@ export const ChatMain = component$(() => {
 
         {/* Input */}
         <div class="flex gap-2 border-t p-2">
-          <input bind:value={messageText} class="flex-1 p-2 bg-gray-800 rounded-md" placeholder="Type a message..." />
+          <input
+            bind:value={messageText}
+            class="flex-1 p-2 bg-gray-800 rounded-md"
+            placeholder="Type a message..."
+            onKeyDown$={(e) => { 
+              if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); // ป้องกันขึ้นบรรทัดใหม่
+                sendMessage(); 
+              } 
+            }} // ✅ เพิ่มให้กด Enter เพื่อส่งข้อความ
+          />
           <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={() => sendMessage()}>Send</button>
         </div>
       </section>
