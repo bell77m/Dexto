@@ -7,7 +7,7 @@ import { ForumFooter } from "./ForumFooter";
 export const Forum = component$(() => {
   return (
     <div class="flex flex-col w-full">
-      <ForumHeader />
+      {/* <ForumHeader /> */}
       <ForumContent />
       <FAB />
       <ForumFooter />

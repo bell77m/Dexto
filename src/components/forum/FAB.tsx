@@ -11,50 +11,50 @@ export default component$(() => {
 
   // ✅ ฟังก์ชันเพิ่มโพสต์ รองรับ `Enter`
   const addPost = $(async () => {
-    if (!newPostTitle.value.trim() || !newPostContent.value.trim()) {
-      return alert("⚠️ Title and Content cannot be empty!");
-    }
-  
-    const formattedTags = newPostTags.value
-      .split(" ")
-      .filter(tag => tag.startsWith("#"))
-      .map(tag => tag.substring(1))
-      .join(",");
-  
-    // ✅ ใช้ `variables` เพื่อส่งข้อมูลขนาดใหญ่
-    const variables = {
-      userId: userId.value,
-      title: newPostTitle.value,
-      content: newPostContent.value, // ✅ ไม่ต้องแปลง `\n`
-      tags: formattedTags,
-    };
-  
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation CreatePost($userId: Int!, $title: String!, $content: String!, $tags: String!) {
-            createPost(userId: $userId, title: $title, content: $content, tags: $tags) {
-              id
-            }
+  if (!newPostTitle.value.trim() || !newPostContent.value.trim()) {
+    return alert("⚠️ Title and Content cannot be empty!");
+  }
+
+  const formattedTags = newPostTags.value
+    .split(" ")
+    .filter(tag => tag.startsWith("#"))
+    .map(tag => tag.substring(1))
+    .join(",");
+
+  // ✅ ใช้ `variables` เพื่อส่งข้อมูลขนาดใหญ่
+  const variables = {
+    userId: userId.value,
+    title: newPostTitle.value,
+    content: newPostContent.value, // ✅ ไม่ต้องแปลง `\n`
+    tags: formattedTags,
+  };
+
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
+        mutation CreatePost($userId: Int!, $title: String!, $content: String!, $tags: String!) {
+          createPost(userId: $userId, title: $title, content: $content, tags: $tags) {
+            id
           }
-        `,
-        variables, // ✅ ส่งข้อมูลผ่าน variables
-      }),
-    });
-  
-    const result = await response.json();
-    if (result.data?.createPost) {
-      newPostTitle.value = "";
-      newPostContent.value = "";
-      newPostTags.value = "";
-      showModal.value = false;
-      location.reload();
-    } else {
-      alert("❌ Failed to create post");
-    }
+        }
+      `,
+      variables, // ✅ ส่งข้อมูลผ่าน variables
+    }),
   });
+
+  const result = await response.json();
+  if (result.data?.createPost) {
+    newPostTitle.value = "";
+    newPostContent.value = "";
+    newPostTags.value = "";
+    showModal.value = false;
+    location.reload();
+  } else {
+    alert("❌ Failed to create post");
+  }
+});
 
   return (
     <div>
