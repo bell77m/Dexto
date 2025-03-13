@@ -12,6 +12,7 @@ export const ChatMain = component$(() => {
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null);
   const searchQuery = useSignal("");
   const unreadMessages = useSignal({});
+  const lastNotifiedMessages = useSignal({});
 
   // Request notification permission
   const requestNotificationPermission = $(() => {
@@ -27,10 +28,35 @@ export const ChatMain = component$(() => {
   // Send browser notification
   const sendBrowserNotification = $((friend, message) => {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(`New message from ${friend.displayName}`, {
-        body: message.length > 50 ? message.substring(0, 50) + '...' : message,
-        icon: friend.profilePictureUrl || "/image/defaultProfile.svg"
-      });
+      // Check if this is the latest unnotified message for this friend
+      const lastNotifiedMessageId = lastNotifiedMessages.value[friend.id];
+      const newMessages = messages.value[friend.id]
+        .filter(msg => msg.senderId !== userId.value && !msg.isRead);
+
+      if (newMessages.length > 0) {
+        const latestMessage = newMessages[newMessages.length - 1];
+        
+        // Only send notification if the latest message hasn't been notified before
+        if (latestMessage.id !== lastNotifiedMessageId) {
+          const notification = new Notification(`New message from ${friend.displayName}`, {
+            body: message.length > 50 ? message.substring(0, 50) + '...' : message,
+            icon: friend.profilePictureUrl || "/image/defaultProfile.svg"
+          });
+
+          // Add click event to focus on the specific chat
+          notification.onclick = () => {
+            // Focus the browser window
+            window.focus();
+
+            // Select the friend and clear unread messages
+            selectedFriend.value = friend;
+            clearUnreadMessages(friend);
+          };
+
+          // Update the last notified message for this friend
+          lastNotifiedMessages.value[friend.id] = latestMessage.id;
+        }
+      }
     }
   });
 
@@ -113,11 +139,16 @@ export const ChatMain = component$(() => {
 
         // Update unread messages
         if (newUnreadMessages.length > 0) {
-          unreadMessages.value[friend.id] = newUnreadMessages.length;
-          
-          // Send browser notification for the first new unread message
+          // Only show unread messages indicator if not in this friend's chat
           if (selectedFriend.value?.id !== friend.id) {
-            sendBrowserNotification(friend, newUnreadMessages[0].message);
+            unreadMessages.value[friend.id] = newUnreadMessages.length;
+            
+            // Send browser notification only for the latest new unread message
+            sendBrowserNotification(friend, newUnreadMessages[newUnreadMessages.length - 1].message);
+          } else {
+            // If currently in this friend's chat, clear unread messages
+            unreadMessages.value[friend.id] = 0;
+            markMessagesAsRead(friend.id);
           }
         }
 
