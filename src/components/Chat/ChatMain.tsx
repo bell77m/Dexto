@@ -1,4 +1,5 @@
 import { component$, useSignal, $, useVisibleTask$ } from "@builder.io/qwik";
+import { useNavigate } from '@builder.io/qwik-city';
 import { useUserStore } from "~/store/store";
 
 export const ChatMain = component$(() => {
@@ -9,6 +10,7 @@ export const ChatMain = component$(() => {
   const messageText = useSignal("");
   const fileInputRef = useSignal<HTMLInputElement | null>(null);
   const scrollContainerRef = useSignal<HTMLDivElement | null>(null); // ✅ ใช้เพื่อให้ Scroll Auto
+  const navigate = useNavigate();
 
   // ✅ โหลดเพื่อนที่เป็นเพื่อนกัน
   const loadFriends = $(() => {
@@ -25,8 +27,11 @@ export const ChatMain = component$(() => {
           friends.value = [...result.data.getFriends];
         }
       })
-      .catch((error) => console.error("❌ ERROR: Loading friends failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Loading friends failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+    });
 
   // ✅ โหลดข้อความแชทของเพื่อนที่เลือก
   const loadMessages = $(() => {
@@ -42,8 +47,11 @@ export const ChatMain = component$(() => {
       .then((result) => {
         messages.value = result.data?.getChatMessages || [];
       })
-      .catch((error) => console.error("❌ ERROR: Loading messages failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Loading messages failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+   });
 
   // ✅ ใช้ MutationObserver เพื่อตรวจจับข้อความใหม่และ Scroll ลงสุด
   useVisibleTask$(() => {
@@ -77,8 +85,11 @@ export const ChatMain = component$(() => {
         messageText.value = "";
         loadMessages();
       })
-      .catch((error) => console.error("❌ ERROR: Sending message failed!", error));
-  });
+      .catch((error) => {
+        console.error("❌ ERROR: Sending message failed!", error);
+        navigate('/service-unavailable'); // เพิ่มการ route
+      });
+   });
 
   // ✅ โหลดข้อความใหม่ทุก 2 วินาที (Real-time)
   useVisibleTask$(() => {
@@ -134,17 +145,7 @@ export const ChatMain = component$(() => {
 
         {/* Input */}
         <div class="flex gap-2 border-t p-2">
-          <input
-            bind:value={messageText}
-            class="flex-1 p-2 bg-gray-800 rounded-md"
-            placeholder="Type a message..."
-            onKeyDown$={(e) => { 
-              if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); // ป้องกันขึ้นบรรทัดใหม่
-                sendMessage(); 
-              } 
-            }} // ✅ เพิ่มให้กด Enter เพื่อส่งข้อความ
-          />
+          <input bind:value={messageText} class="flex-1 p-2 bg-gray-800 rounded-md" placeholder="Type a message..." />
           <button class="px-4 py-2 bg-blue-600 rounded-md" onClick$={() => sendMessage()}>Send</button>
         </div>
       </section>

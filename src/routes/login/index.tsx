@@ -9,6 +9,8 @@ export default component$(() => {
   const errorMessage = useSignal('');
   const isLoading = useSignal(false);
   const navigate = useNavigate();
+
+  
   const userStore = useUserStore();  
 
   const handleLogin$ = $(async () => {
@@ -16,8 +18,12 @@ export default component$(() => {
     isLoading.value = true; 
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 วินาที
+     
       const response = await fetch('http://dexto.com:3000/graphql', {  
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
@@ -37,16 +43,44 @@ export default component$(() => {
           variables: { email: email.value, password: password.value },
         }),
       });
-
+     
+      clearTimeout(timeoutId);
+     
+      // ตรวจสอบ HTTP status
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            errorMessage.value = 'Bad Request. Please check your input.';
+            break;
+          case 401:
+            errorMessage.value = 'Unauthorized. Invalid credentials.';
+            break;
+          case 403:
+            errorMessage.value = 'Forbidden. You do not have access.';
+            break;
+          case 404:
+            errorMessage.value = 'Service not found.';
+            break;
+          case 500:
+            errorMessage.value = 'Internal Server Error. Please try again later.';
+            break;
+          default:
+            errorMessage.value = 'An unexpected error occurred.';
+        }
+        isLoading.value = false;
+        return;
+      }
+     
       const result = await response.json();
       const loginData = result.data?.loginUser;
-
+     
+      // ตรวจสอบ GraphQL response
       if (!loginData?.success) {
         errorMessage.value = loginData?.message || 'Login failed!';
         isLoading.value = false;
         return;
       }
-
+     
       console.log('User Data:', loginData.user);
       
       const { updateStore } = userStore;
@@ -55,12 +89,30 @@ export default component$(() => {
         loginData.user.id,
         loginData.user.profilePictureUrl
       );
-
-      console.log('Sidebar Display Name login :', userStore.displayName);
+     
+      console.log('Sidebar Display Name login:', userStore.displayName);
       alert(`Welcome, ${loginData.user.displayName}!`);
-      navigate('/home');  
-    } catch (error) {
-      errorMessage.value = 'Network error. Please try again!';
+      navigate('/home');
+     
+     } catch (error: unknown) {
+      // จัดการ error หลากหลายประเภท
+      if (error instanceof Error && error.name === 'AbortError') {
+        errorMessage.value = 'Request timed out. Please check your connection.';
+      } else if (error instanceof TypeError) {
+        // Network error
+        errorMessage.value = 'Network error. Please check your internet connection.';
+      } else if (error instanceof SyntaxError) {
+        // JSON parsing error
+        errorMessage.value = 'Error processing server response.';
+        navigate('/service-unavailable');
+      } else {
+        // Fallback for other unexpected errors
+        errorMessage.value = 'An unexpected error occurred. Please try again.';
+        navigate('/service-unavailable');
+      }
+    
+      // Log error for debugging
+      console.error('Login error:', error);
     } finally {
       isLoading.value = false;
     }
@@ -75,12 +127,7 @@ export default component$(() => {
           <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
         </Link>
         <h1 class="text-3xl font-bold mb-1">Welcome back!</h1>
-        <form 
-          class="w-full max-w-sm" 
-          preventdefault:submit 
-          onSubmit$={handleLogin$}
-          onKeyDown$={(e) => { if (e.key === 'Enter') handleLogin$(); }} // ✅ กด Enter เพื่อ Login
-        >
+        <form class="w-full max-w-sm" preventdefault:submit onSubmit$={handleLogin$}>
           <label class="block mb-2">Email address</label>
           <input
             type="email"
