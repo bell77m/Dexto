@@ -34,6 +34,22 @@ export const ChatMain = component$(() => {
     }
   });
 
+  // Mark messages as read
+  const markMessagesAsRead = $((friendId) => {
+    fetch("http://dexto.com:3000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `mutation { markMessagesAsRead(userId: ${userId.value}, friendId: ${friendId}) }`
+      }),
+    })
+      .then(() => {
+        // Clear unread messages for this friend after marking as read
+        unreadMessages.value[friendId] = 0;
+      })
+      .catch((error) => console.error("❌ ERROR: Marking messages as read failed!", error));
+  });
+
   // Load friends and sort by latest message
   const loadFriends = $(() => {
     fetch("http://dexto.com:3000/graphql", {
@@ -90,17 +106,16 @@ export const ChatMain = component$(() => {
         const newMessages = result.data?.getChatMessages || [];
         const previousMessages = messages.value[friend.id] || [];
 
-        // Check for new messages
+        // Count unread messages that are not from the current user
         const newUnreadMessages = newMessages.filter(
-          msg => msg.senderId !== userId.value && 
-          !previousMessages.some(prevMsg => prevMsg.id === msg.id)
+          msg => msg.senderId !== userId.value && !msg.isRead
         );
 
         // Update unread messages
         if (newUnreadMessages.length > 0) {
-          unreadMessages.value[friend.id] = (unreadMessages.value[friend.id] || 0) + newUnreadMessages.length;
+          unreadMessages.value[friend.id] = newUnreadMessages.length;
           
-          // Send browser notification for the first new message
+          // Send browser notification for the first new unread message
           if (selectedFriend.value?.id !== friend.id) {
             sendBrowserNotification(friend, newUnreadMessages[0].message);
           }
@@ -128,7 +143,8 @@ export const ChatMain = component$(() => {
   // Clear unread messages when a friend is selected
   const clearUnreadMessages = $((friend) => {
     if (unreadMessages.value[friend.id]) {
-      unreadMessages.value[friend.id] = 0;
+      // Mark messages as read on backend
+      markMessagesAsRead(friend.id);
     }
   });
 
