@@ -18,25 +18,61 @@ export default component$(() => {
     return usernameRegex.test(username);
   });
 
+  const validatePassword = $((pwd: string) => {
+    const errors: string[] = [];
+
+    // Check password length (at least 8 characters)
+    if (pwd.length < 8) {
+      errors.push("Password must be at least 8 characters long!");
+    }
+
+    // Check for uppercase letter
+    if (!/[A-Z]/.test(pwd)) {
+      errors.push("Password must contain at least one uppercase letter!");
+    }
+
+    // Check for lowercase letter
+    if (!/[a-z]/.test(pwd)) {
+      errors.push("Password must contain at least one lowercase letter!");
+    }
+
+    // Check for special character (non-Thai and not a dot)
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]/.test(pwd)) {
+      errors.push("Password must contain at least one special character!");
+    }
+
+    // Check for number
+    if (!/[0-9]/.test(pwd)) {
+      errors.push("Password must contain at least one number!");
+    }
+
+    return errors;
+  });
+
   const handleSubmit$ = $(async () => {
     errorMessages.value = [];
     isLoading.value = true;
 
-    // error signup
+    // Validate username
     if (!name.value.trim() || !await isValidUsername(name.value)) 
       errorMessages.value.push("Username must contain only letters and numbers!");
     
+    // Validate agreement
     if (!agree.value) errorMessages.value.push("You must agree to the terms & policy!");
     
+    // Validate email
     if (!email.value.toLowerCase().trim().match(/^\S+@\S+\.\S+$/)) 
       errorMessages.value.push("Invalid email format!");
     
-    if (password.value.length < 6) 
-      errorMessages.value.push("Password must be at least 6 characters long!");
+    // Validate password
+    const passwordValidationErrors = await validatePassword(password.value);
+    errorMessages.value.push(...passwordValidationErrors);
     
+    // Validate password match
     if (password.value !== confirmPassword.value) 
       errorMessages.value.push("Passwords do not match!");
 
+    // Stop if there are any errors
     if (errorMessages.value.length > 0) {
       isLoading.value = false;
       return;
