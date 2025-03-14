@@ -23,27 +23,27 @@ export default component$(() => {
 
     // Check password length (at least 8 characters)
     if (pwd.length < 8) {
-      errors.push("Password must be at least 8 characters long!");
+      errors.push("Password must be at least 8 characters long");
     }
 
     // Check for uppercase letter
     if (!/[A-Z]/.test(pwd)) {
-      errors.push("Password must contain at least one uppercase letter!");
+      errors.push("Password must contain at least one uppercase letter");
     }
 
     // Check for lowercase letter
     if (!/[a-z]/.test(pwd)) {
-      errors.push("Password must contain at least one lowercase letter!");
+      errors.push("Password must contain at least one lowercase letter");
     }
 
     // Check for special character (non-Thai and not a dot)
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]/.test(pwd)) {
-      errors.push("Password must contain at least one special character!");
+      errors.push("Password must contain at least one special character");
     }
 
     // Check for number
     if (!/[0-9]/.test(pwd)) {
-      errors.push("Password must contain at least one number!");
+      errors.push("Password must contain at least one number");
     }
 
     return errors;
@@ -55,14 +55,14 @@ export default component$(() => {
 
     // Validate username
     if (!name.value.trim() || !await isValidUsername(name.value)) 
-      errorMessages.value.push("Username must contain only letters and numbers!");
+      errorMessages.value.push("Username must contain only letters and numbers");
     
     // Validate agreement
-    if (!agree.value) errorMessages.value.push("You must agree to the terms & policy!");
+    if (!agree.value) errorMessages.value.push("You must agree to the terms and policy");
     
     // Validate email
     if (!email.value.toLowerCase().trim().match(/^\S+@\S+\.\S+$/)) 
-      errorMessages.value.push("Invalid email format!");
+      errorMessages.value.push("Invalid email format");
     
     // Validate password
     const passwordValidationErrors = await validatePassword(password.value);
@@ -70,7 +70,7 @@ export default component$(() => {
     
     // Validate password match
     if (password.value !== confirmPassword.value) 
-      errorMessages.value.push("Passwords do not match!");
+      errorMessages.value.push("Passwords do not match");
 
     // Stop if there are any errors
     if (errorMessages.value.length > 0) {
@@ -102,13 +102,13 @@ export default component$(() => {
 
       const result = await response.json();
       if (!response.ok || result.errors) {
-        throw new Error(result.errors?.[0]?.message || "Signup failed!");
+        throw new Error(result.errors?.[0]?.message || "Signup failed");
       }
 
-      alert("Signup successful!");
+      alert("Signup successful");
       navigate('/login');
     } catch (error) {
-      errorMessages.value.push(error.message || "Network error. Please try again!");
+      errorMessages.value.push(error.message || "Network error. Please try again");
     } finally {
       isLoading.value = false;
     }
@@ -118,7 +118,7 @@ export default component$(() => {
     <div class="flex min-h-screen overflow-hidden">
       <div class="w-1/2 flex flex-col justify-center items-center bg-white p-6 max-h-screen overflow-auto">
         <Link href="/" class="flex shrink-0 items-center cursor-pointer">
-          <img alt="My DEXTO Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
+          <img alt="Dexto Icon" src="/image/DextoLogoDark.svg" width="167" height="32" />
         </Link>
         <h1 class="text-3xl font-bold mb-6">Get Started Now</h1>
         <form class="w-full max-w-sm" preventdefault:submit onSubmit$={handleSubmit$}>
@@ -134,31 +134,23 @@ export default component$(() => {
               name.value = value;
             }} 
           />
-          <label class="block mb-2">Email address</label>
+          <label class="block mb-2">Email Address</label>
           <input 
-              type="email" 
-              class="w-full p-2 border border-gray-300 rounded mb-4" 
-              placeholder="Enter your email" 
-              onInput$={(e) => {
-                // รับค่าที่ผู้ใช้ป้อน
-                let value = e.target.value;
-
-                // ลบอักขระที่ไม่ใช่ภาษาอังกฤษ, ตัวเลข, @, หรือ .
-                value = value.replace(/[^a-zA-Z0-9@.]/g, '');
-
-                // อัปเดตค่าในช่อง input และแปลงเป็นตัวพิมพ์เล็ก
-                e.target.value = value.toLowerCase();
-                email.value = value.toLowerCase();
-              }} 
-            />
+            type="email" 
+            class="w-full p-2 border border-gray-300 rounded mb-4" 
+            placeholder="Enter your email" 
+            onInput$={(e) => {
+              email.value = (e.target as HTMLInputElement).value;
+            }} 
+          />
           <label class="block mb-2">Password</label>
           <input 
             type="password" 
             class="w-full p-2 border border-gray-300 rounded mb-4" 
             placeholder="Enter your password" 
             onInput$={(e) => {
-              // Remove spaces from input
-              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+              // Remove Thai characters from input
+              const value = e.target.value.replace(/[ก-๙]/g, '');
               e.target.value = value;
               password.value = value;
             }} 
@@ -169,8 +161,8 @@ export default component$(() => {
             class="w-full p-2 border border-gray-300 rounded mb-4" 
             placeholder="Enter your password again" 
             onInput$={(e) => {
-              // Remove spaces from input
-              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+              // Remove Thai characters from input
+              const value = e.target.value.replace(/[ก-๙]/g, '');
               e.target.value = value;
               confirmPassword.value = value;
             }} 
@@ -188,14 +180,14 @@ export default component$(() => {
 
           <div class="flex items-center mb-4">
             <input type="checkbox" class="mr-2" onChange$={(e) => agree.value = e.target.checked} />
-            <span>I agree to the <a href="#" class="text-blue-600">terms & policy</a></span>
+            <span>I agree to the <a href="#" class="text-blue-600">terms and policy</a></span>
           </div>
           <button 
             type="submit" 
             class="w-full bg-black text-white py-2 rounded flex items-center justify-center disabled:opacity-50" 
             disabled={!name.value || !email.value || !password.value || !confirmPassword.value || isLoading.value}
           >
-            {isLoading.value ? <span class="animate-spin mr-2">🔄</span> : "Sign up"}
+            {isLoading.value ? <span class="animate-spin mr-2">🔄</span> : "Sign Up"}
           </button>
         </form>
         <p class="mt-4">Have an account? <a href="/login" class="text-blue-600">Log In</a></p>
