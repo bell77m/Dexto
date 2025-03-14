@@ -141,7 +141,7 @@ export default component$(() => {
             placeholder="Enter your email" 
             onInput$={(e) => {
               // Remove spaces from input
-              const value = e.target.value.replace(/\s/g, '');
+              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
               e.target.value = value;
               email.value = value.toLowerCase();
             }} 
@@ -153,7 +153,7 @@ export default component$(() => {
             placeholder="Enter your password" 
             onInput$={(e) => {
               // Remove spaces from input
-              const value = e.target.value.replace(/\s/g, '');
+              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
               e.target.value = value;
               password.value = value;
             }} 
@@ -165,7 +165,7 @@ export default component$(() => {
             placeholder="Enter your password again" 
             onInput$={(e) => {
               // Remove spaces from input
-              const value = e.target.value.replace(/\s/g, '');
+              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
               e.target.value = value;
               confirmPassword.value = value;
             }} 
