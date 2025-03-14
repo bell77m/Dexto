@@ -380,12 +380,9 @@ export const ChatMain = component$(() => {
             ref={fileInputRef}
             value={messageText.value}
             onInput$={(e) => { 
-              const target = e.target as HTMLTextAreaElement;
+            const target = e.target as HTMLTextAreaElement;
               messageText.value = target.value; 
-              
-              // Auto-resize textarea
-              target.style.height = 'auto';
-              target.style.height = `${Math.min(Math.max(target.scrollHeight, 48), 150)}px`;
+              // Removed dynamic resizing
             }}
             class="
               flex-1 
@@ -397,7 +394,7 @@ export const ChatMain = component$(() => {
               border 
               border-gray-700 
               resize-none 
-              h-12 
+              h-12  /* Fixed height */
               max-h-[150px] 
               overflow-y-auto
             "
@@ -406,13 +403,11 @@ export const ChatMain = component$(() => {
               if (e.key === 'Enter' && !e.shiftKey) { 
                 e.preventDefault(); 
                 sendMessage(); 
-                
-                // Reset textarea to original size after sending
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = '48px';
-              }
+             }
             }}
           />
+
+
           
           <button 
             class="px-4 py-2 bg-blue-600 text-white rounded-lg" 
