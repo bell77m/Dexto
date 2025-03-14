@@ -17,7 +17,7 @@ export const Sidebar = component$(() => {
 
   const mainItems = [
     { icon: "/image/home.svg", label: "Home", href: "/home" },
-    { icon: "/image/project.svg", label: "Project", href: "/project" },
+    { icon: "/image/project.svg", label: "Project", href: "https://192.168.118.6:5173/" },
     { icon: "/image/chat.svg", label: "Chat", href: "/chat" },
     { icon: "/image/add-friend.svg", label: "Add friends", href: "/addfriend" },
     { icon: "/image/forum.svg", label: "Forum", href: "/forum" },
