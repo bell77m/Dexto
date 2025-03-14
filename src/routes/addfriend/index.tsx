@@ -44,7 +44,7 @@ export default component$(() => {
         searchResults.value = result.data.searchUsers;
       }
     } catch (error) {
-      console.error("❌ Failed to search users:", error);
+      console.error("Failed to search users:", error);
       navigate('/service-unavailable');
      } finally {
       isSearching.value = false;
@@ -70,16 +70,16 @@ export default component$(() => {
 
       const result = await response.json();
       if (result.data?.sendFriendRequest?.success) {
-        console.log(`✅ Friend request sent to user ${friendId}`);
+        console.log(`Friend request sent to user ${friendId}`);
         searchResults.value = searchResults.value.map(user =>
           user.id === friendId ? { ...user, requestSent: true } : user
         );
       } else {
-        console.error("❌ Failed to send friend request");
+        console.error("Failed to send friend request");
         navigate('/service-unavailable');
       }
     } catch (error) {
-      console.error("❌ Error sending friend request:", error);
+      console.error("Error sending friend request:", error);
       navigate('/service-unavailable');
     }
   });
