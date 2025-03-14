@@ -9,7 +9,7 @@ export default component$(() => {
   const newPostContent = useSignal("");
   const newPostTags = useSignal("");
 
-  // ✅ ฟังก์ชันเพิ่มโพสต์ รองรับ `Enter`
+  //  ฟังก์ชันเพิ่มโพสต์ รองรับ `Enter`
   const addPost = $(async () => {
   if (!newPostTitle.value.trim() || !newPostContent.value.trim()) {
     return alert("⚠️ Title and Content cannot be empty!");
@@ -21,11 +21,11 @@ export default component$(() => {
     .map(tag => tag.substring(1))
     .join(",");
 
-  // ✅ ใช้ `variables` เพื่อส่งข้อมูลขนาดใหญ่
+  // ใช้ `variables` เพื่อส่งข้อมูลขนาดใหญ่
   const variables = {
     userId: userId.value,
     title: newPostTitle.value,
-    content: newPostContent.value, // ✅ ไม่ต้องแปลง `\n`
+    content: newPostContent.value, 
     tags: formattedTags,
   };
 
@@ -40,7 +40,7 @@ export default component$(() => {
           }
         }
       `,
-      variables, // ✅ ส่งข้อมูลผ่าน variables
+      variables, // ส่งข้อมูลผ่าน variables
     }),
   });
 
@@ -52,7 +52,7 @@ export default component$(() => {
     showModal.value = false;
     location.reload();
   } else {
-    alert("❌ Failed to create post");
+    alert("Failed to create post");
   }
 });
 
