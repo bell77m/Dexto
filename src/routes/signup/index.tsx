@@ -13,7 +13,6 @@ export default component$(() => {
   const navigate = useNavigate();
   const API_URLL = import.meta.env.VITE_API_URL || API_URL;
 
-  // Convert to QRL using $
   const isValidUsername = $((username: string) => {
     const usernameRegex = /^[a-zA-Z0-9]+$/;
     return usernameRegex.test(username);
@@ -23,7 +22,7 @@ export default component$(() => {
     errorMessages.value = [];
     isLoading.value = true;
 
-    // Prevent special characters in name
+    // error signup
     if (!name.value.trim() || !await isValidUsername(name.value)) 
       errorMessages.value.push("Username must contain only letters and numbers!");
     
