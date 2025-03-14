@@ -12,7 +12,7 @@ export default component$(() => {
   const newComment = useSignal<{ [key: number]: string }>({}); // Comments
   const navigate = useNavigate();
 
-  // Function to load posts based on search query
+  // load post จาก query
   const loadPosts = $(async () => {
     isLoading.value = true;
     try {
@@ -46,7 +46,7 @@ export default component$(() => {
       });
       const result = await res.json();
 
-      // Sort posts with newest first
+      // post ใหม่สุดอยู่บน
       posts.value = (result.data?.searchPosts || []).sort(
         (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -61,7 +61,7 @@ export default component$(() => {
 
   // Function to handle search
   const handleSearch = $(async () => {
-    await loadPosts(); // Send new search query to GraphQL API
+    await loadPosts();
   });
 
   // Function to add a comment
@@ -140,11 +140,12 @@ export default component$(() => {
   };
 
   useVisibleTask$(() => {
-    loadPosts(); // Load posts when component is displayed
+    loadPosts(); 
   });
 
   return (
     <div class="flex flex-col min-h-screen">
+
       {/* Forum Header */}
       <header class="flex overflow-visible flex-col justify-center px-11 py-4 w-full bg-stone-50 max-md:px-5 max-md:max-w-full">
         <nav class="flex flex-wrap gap-10 items-center max-md:max-w-full">
@@ -154,9 +155,10 @@ export default component$(() => {
               src="/image/DextoLogoDark.svg"
               width="167"
               height="32"
-              class="w-[167px] h-[32px]" // Ensures consistency
+              class="w-[167px] h-[32px]"
             />
           </Link>
+
 
           {/* Search Bar */}
           <div class="flex flex-col grow shrink justify-center items-start self-stretch px-4 py-2 my-auto text-base text-center text-black whitespace-nowrap rounded-xl bg-slate-100 min-h-8 min-w-60 w-[582px] max-md:max-w-full">
@@ -184,6 +186,7 @@ export default component$(() => {
             </div>
           </div>
 
+
           {/* Search Button */}
           <button
             class="px-4 py-2 bg-blue-500 text-white rounded ml-2"
@@ -193,6 +196,7 @@ export default component$(() => {
           </button>
         </nav>
       </header>
+
 
       {/* Main Content */}
       <main class="p-6 bg-gray-900 text-white flex flex-col items-center flex-grow">
@@ -225,6 +229,7 @@ export default component$(() => {
                   )}
                 </div>
 
+
                 {/* Post Content */}
                 <div class="max-w break-words whitespace-pre-line overflow-wrap break-word mt-2">
                   <p class="text-left">
@@ -232,6 +237,7 @@ export default component$(() => {
                       ? post.content
                       : post.content.slice(0, 300) + "..."}
                   </p>
+
 
                   {/* Read More / Read Less Button */}
                   {post.content.length > 300 && (
@@ -251,6 +257,7 @@ export default component$(() => {
                     </span>
                   ))}
                 </div>
+
 
                 {/* Comments */}
                 <div class="mt-4 border-t pt-2">
@@ -273,6 +280,7 @@ export default component$(() => {
                                 : comment.content.slice(0, 100) + "..."}
                             </p>
 
+
                             {/* Read More / Read Less Button */}
                             {comment.content.length > 100 && (
                               <button
@@ -290,6 +298,7 @@ export default component$(() => {
                     <p class="text-left text-gray-400">No comments yet.</p>
                   )}
                 </div>
+
 
                 {/* Comment Input */}
                 <div class="mt-2 flex items-center w-full max-w space-x-2">
@@ -313,6 +322,7 @@ export default component$(() => {
             );
           })
         )}
+
       </main>
 
       {/* Footer */}
@@ -320,5 +330,6 @@ export default component$(() => {
         <p>&copy; 2024 My DEXTO. All rights reserved.</p>
       </footer>
     </div>
+    
   );
 });
