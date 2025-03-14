@@ -136,16 +136,21 @@ export default component$(() => {
           />
           <label class="block mb-2">Email address</label>
           <input 
-            type="email" 
-            class="w-full p-2 border border-gray-300 rounded mb-4" 
-            placeholder="Enter your email" 
-            onInput$={(e) => {
-              // Remove spaces from input
-              const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
-              e.target.value = value;
-              email.value = value.toLowerCase();
-            }} 
-          />
+              type="email" 
+              class="w-full p-2 border border-gray-300 rounded mb-4" 
+              placeholder="Enter your email" 
+              onInput$={(e) => {
+                // รับค่าที่ผู้ใช้ป้อน
+                let value = e.target.value;
+
+                // ลบอักขระที่ไม่ใช่ภาษาอังกฤษ, ตัวเลข, @, หรือ .
+                value = value.replace(/[^a-zA-Z0-9@.]/g, '');
+
+                // อัปเดตค่าในช่อง input และแปลงเป็นตัวพิมพ์เล็ก
+                e.target.value = value.toLowerCase();
+                email.value = value.toLowerCase();
+              }} 
+            />
           <label class="block mb-2">Password</label>
           <input 
             type="password" 
