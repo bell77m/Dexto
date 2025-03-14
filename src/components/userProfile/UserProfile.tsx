@@ -118,14 +118,6 @@ export const UserProfile = component$(() => {
           >
             Choose Avatar
           </button>
-          <div class="mx-0 my-6 h-px bg-stone-300"></div>
-          <a
-            href="https://github.com/login/oauth/authorize?client_id=yourClientID"
-            target="_blank"
-            class="p-3 text-base text-white bg-gray-800 rounded-lg border-none w-40 text-center hover:bg-gray-700"
-          >
-            Login with GitHub
-          </a>
         </div>
       </div>
 
