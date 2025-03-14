@@ -42,13 +42,13 @@ export const UserProfile = component$(() => {
     const cleanDisplayName = await sanitizeDisplayName(newDisplayName.value.trim());
 
     if (!cleanUrl || !cleanDisplayName) {
-      console.error("❌ Invalid data");
+      console.error("Invalid data");
       return;
     }
 
     // Ensure display name is not empty after sanitization
     if (cleanDisplayName.length === 0) {
-      console.error("❌ Display name cannot be empty after removing special characters");
+      console.error("Display name cannot be empty after removing special characters");
       return;
     }
 
@@ -74,18 +74,18 @@ export const UserProfile = component$(() => {
 
       const result = await response.json();
       if (result.errors) {
-        console.error("❌ GraphQL Error:", result.errors);
+        console.error(" GraphQL Error:", result.errors);
       } else if (result.data?.updateUser) {
-        console.log("✅ Profile updated successfully!");
+        console.log(" Profile updated successfully!");
         updateStore(cleanDisplayName, userId.value, cleanUrl);
         window.location.reload();
         originalDisplayName.value = cleanDisplayName;
         originalAvatar.value = cleanUrl;
       } else {
-        console.error("❌ Failed to update profile.");
+        console.error("Failed to update profile.");
       }
     } catch (error) {
-      console.error("❌ Error updating profile:", error);
+      console.error("Error updating profile:", error);
     } finally {
       setTimeout(() => {
         isSaving.value = false;
