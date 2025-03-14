@@ -9,7 +9,6 @@ export default component$(() => {
   const isLoading = useSignal(true);
   const lastNotifiedRequestIds = useSignal(new Set());
 
-  // Request notification permission
   const requestNotificationPermission = $(() => {
     if ('Notification' in window) {
       Notification.requestPermission().then(permission => {
@@ -20,26 +19,22 @@ export default component$(() => {
     }
   });
 
-  // Send browser notification for friend requests
   const sendFriendRequestNotification = $((request) => {
     if ('Notification' in window && Notification.permission === 'granted') {
-      // Only notify if this is a new request and hasn't been notified before
+
       if (!lastNotifiedRequestIds.value.has(request.id)) {
         const notification = new Notification('New Friend Request', {
           body: `${request.sender.displayName} sent you a friend request`,
           icon: request.sender.profilePictureUrl || "/image/defaultProfile.svg"
         });
 
-        // Add click event to open notifications
+  
         notification.onclick = () => {
-          // Focus the browser window
-          window.focus();
 
-          // Redirect to notifications page (assuming there's a route to notifications)
+          window.focus();
           window.location.href = '/notifications';
         };
 
-        // Update the last notified request
         lastNotifiedRequestIds.value.add(request.id);
       }
     }
@@ -71,10 +66,9 @@ export default component$(() => {
 
       const result = await response.json();
       if (result.data?.getFriendRequests) {
-        // Check if there are new friend requests
+    
         const newRequests = result.data.getFriendRequests;
-        
-        // Send notification for new requests
+     
         if (newRequests.length > 0) {
           newRequests.forEach(request => {
             sendFriendRequestNotification(request);
@@ -92,15 +86,12 @@ export default component$(() => {
     }
   });
 
-  // Periodically check for new friend requests
+
   useVisibleTask$(() => {
-    // Request notification permission on component mount
     requestNotificationPermission();
 
-    // Initial fetch
     fetchFriendRequests();
 
-    // Check for new requests every 10 seconds
     const interval = setInterval(() => {
       fetchFriendRequests();
     }, 10000);
